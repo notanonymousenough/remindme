@@ -1,0 +1,263 @@
+openapi: 3.0.3
+info:
+  title: Remind Me
+  version: 0.0.1
+paths:
+  /reminder/{reminderId}:
+    get:
+      summary: Find reminder by ID
+      description: Returns a single reminder
+      operationId: getReminderById
+      parameters:
+        - name: reminderId
+          in: path
+          description: ID of reminder to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Reminder not found
+      security:
+        - BearerAuth: []
+  /reminder:
+    put:
+      summary: Update an existing reminder
+      description: Update an existing reminder by Id
+      operationId: updateReminder
+      requestBody:
+        description: Update an existent reminder
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Reminder not found
+        '422':
+          description: Validation exception
+      security:
+        - BearerAuth: []
+    post:
+      summary: Add a new reminder
+      description: Add a new reminder
+      operationId: addReminder
+      requestBody:
+        description: Create a new reminder
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+        '400':
+          description: Invalid input
+        '422':
+          description: Validation exception
+      security:
+        - BearerAuth: []
+  /reminders/list:
+    get:
+      summary: List reminders
+      operationId: listReminders
+      parameters:
+        - name: pageNumber
+          in: query
+          description: Page number for listing
+          required: false
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          description: Number of the returning reminders per page
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reminders:
+                    type: array
+                    description: List of reminders
+                    items:
+                      $ref: '#/components/schemas/Reminder'
+                  nextPageNumber:
+                    type: integer
+                    example: 4
+        '400':
+          description: Invalid page number
+      security:
+        - BearerAuth: []
+  /reminders/listByTags:
+    get:
+      summary: List reminders by tags
+      operationId: listRemindersByTags
+      parameters:
+        - name: tags
+          in: query
+          description: Tags to filter by
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: pageNumber
+          in: query
+          description: Page number for listing
+          required: false
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          description: Number of the returning reminders per page
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reminders:
+                    type: array
+                    description: List of reminders
+                    items:
+                      $ref: '#/components/schemas/Reminder'
+                  nextPageNumber:
+                    type: integer
+                    example: 4
+        '400':
+          description: Invalid tag value
+      security:
+        - BearerAuth: []
+  /auth/telegram:
+    post:
+      summary: Authenticate via Telegram
+      operationId: authViaTelegram
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                username:
+                  type: string
+                photo_url:
+                  type: string
+                auth_date:
+                  type: integer
+                hash:
+                  type: string
+              required:
+                - id
+                - auth_date
+                - hash
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Invalid Telegram hash
+components:
+  schemas:
+    User:
+      required:
+        - id
+        - telegramId
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        telegramId:
+          type: string
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: James
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    Reminder:
+      required:
+        - title
+        - userId
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        datetime:
+          type: string
+        tag:
+          $ref: '#/components/schemas/Tag'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
