@@ -234,8 +234,11 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          format: int64
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
         name:
           type: string
     Reminder:
@@ -253,6 +256,8 @@ components:
         title:
           type: string
         datetime:
+          type: string
+        repeating:
           type: string
         tag:
           $ref: '#/components/schemas/Tag'
