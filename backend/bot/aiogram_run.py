@@ -1,12 +1,13 @@
 import asyncio
+
+from handlers.reminders import reminder_route
 from create_bot import bot, dp
-from handlers.start import start_router
-from handlers.habits import habit_router
+from handlers.start import start_route
 
 
 async def main():
-    dp.include_router(start_router)
-    dp.include_router(habit_router)
+    dp.include_router(start_route)
+    dp.include_router(reminder_route)
     await dp.start_polling(bot)
 
 
