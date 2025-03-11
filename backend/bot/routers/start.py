@@ -4,18 +4,18 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from backend.bot.keyboards import reply_kbs, inline_kbs
-from backend.bot.utils.States import States
+from backend.bot.utils.states import States
 
-start_route = Router()
+start_router = Router()
 
 
-@start_route.message(CommandStart())
+@start_router.message(CommandStart())
 async def start_menu(message: Message, state: FSMContext):
     await state.set_state(States.start_menu)
     await message.answer(text="Нажмите кнопку :)", reply_markup=reply_kbs.main_menu())
 
 
-@start_route.message(F.text == "Напоминания")
+@start_router.message(F.text == "Напоминания")
 async def reminders_select(message: Message, state: FSMContext):
     temp = "Ваши привычки: \n\n1) Отжимания (6/30) ❌\n2) Кормить кота (7/30) ✅"
 
@@ -25,6 +25,6 @@ async def reminders_select(message: Message, state: FSMContext):
     await message.answer(text="..", reply_markup=reply_kbs.reminders_menu())
 
 
-@start_route.message(StateFilter(States.start_menu))
+@start_router.message(StateFilter(States.start_menu))
 async def text_from_user(message: Message, state: FSMContext):
     await start_menu(message, state)
