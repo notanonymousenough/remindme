@@ -1,7 +1,8 @@
 body
 {
   
- max-width: 70%;
+  width: 80%;
+  max-width: 1000px;
 
 }
 
@@ -12,51 +13,76 @@ body
 .navbar-find
 {
   
-  position: relative;
+  position: absolute;
   width: 200px;
-  top: 40px; 
-  left: 340px;
+  top: 20px; 
+  left: 270px;
   border-width: 2px;
   border-color: #000000;
 }
 .item:hover
 {
-  background-color: #fff700;
-  
-  
+  background-color: #fff700;  
+}
+.crest
+{
+  position: absolute;
+  right: 10px;
+}
+.calend
+{
+ margin-right: 10px;
+}
+.delete
+{
+  margin-top: 5px;
+  margin-right: 10px;
+}
+.save
+{
+  margin-top: 5px;
+  margin-right: 10px;
+}
+.redact
+{
+  width: 60%;
+  max-width: 440px;
+  position: relative;
+  top: 100px; left: 150px;
 }
 .progress
 {
-  width: 500px;
+  width: 30%;
   position: absolute;
-  top: 60px; 
-  left: 40%;
+  top: 50px; 
+  left: 48%;
   
 }
 .fire
 {
 
   position: absolute;
-  top: 40px; left: 45%;
+  top: 15px; left: 47%;
   z-index: 100;
+  
 }
 .btn-filitr
 {
   position: relative;
-  top: -10px; 
-  left: 25%;
+  top: 80px; 
+  left: 270px;
 }
 .btn-teg
 {
   
   position: relative;
-  top: -47px; 
-  left: 40%;
+  top: 42px; 
+  left: 400px;
 }
 .btn-add
 {
   position: relative;
-  top: -84px; left: 370px;
+  top: 5px; left: 470px;
 }
 
 .my-alert 
