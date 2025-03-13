@@ -2,25 +2,59 @@ from aiogram import Router, F
 from aiogram.filters import StateFilter
 from aiogram.filters.callback_data import CallbackData
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import Message
 
+from aiogram.types import Message, CallbackQuery
 from backend.bot.keyboards import inline_kbs, reply_kbs
+
+from backend.bot.utils import get_message_reminders
 from backend.bot.utils.states import States
+
+from backend.bot.clients import client
 
 reminders_router = Router()
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu), F.data.startswith("reminder_next_"))
-async def menu_next(call: CallbackData, state: FSMContext):
-    next_count = int(call.dict()["data"].split("_")[-1])
-    temp = "Ваши привычки: \n\n3) Отжимания (6/30) ❌\n4) Кормить кота (7/30) ✅"
-    await call.message.answer(text=temp, reply_markup=inline_kbs.reminders_buttons(20, "today", next_count))
+async def menu_next(call: CallbackQuery, state: FSMContext):
+    next_coef = int(call.dict()["data"].split("_")[-1])
+    # change later: next_count will be written by state, not from call
+
+    await state.update_data(next_coef=next_coef)
+
+    data = await state.get_data()
+
+    text = get_message_reminders(data=data)
+    await call.message.edit_text(text=text,
+                                reply_markup=inline_kbs.reminders_buttons(data=data),
+                                parse_mode="MarkdownV2")
 
 
-@reminders_router.callback_query(StateFilter(States.reminder_menu))
-async def show_reminder(call: CallbackData, state: FSMContext):
-    pass
+@reminders_router.callback_query(StateFilter(States.reminder_menu), F.data.startswith("reminder_previous_"))
+async def menu_next(call: CallbackQuery, state: FSMContext):
+    next_coef = int(call.dict()["data"].split("_")[-1])
+
+    await state.update_data(next_coef=next_coef)
+
+    data = await state.get_data()
+
+    text = get_message_reminders(data=data)
+    await call.message.edit_text(text=text,
+                                reply_markup=inline_kbs.reminders_buttons(data=data),
+                                parse_mode="MarkdownV2")
+
+
+@reminders_router.callback_query(StateFilter(States.reminder_menu), F.data.startswith("reminder_filter_"))
+async def show_reminder(call: CallbackQuery, state: FSMContext):
+    new_day = call.dict()["data"].split("_")[-1]
+
+    await state.update_data(day=new_day)
+
+    data = await state.get_data()
+
+    text = get_message_reminders(data=data)
+    await call.message.edit_text(text=text,
+                                 reply_markup=inline_kbs.reminders_buttons(data=data),
+                                 parse_mode="MarkdownV2")
 
 
 @reminders_router.message(StateFilter(States.reminder_menu), F.text == "Фильтрация по тэгам")

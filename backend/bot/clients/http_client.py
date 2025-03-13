@@ -1,5 +1,6 @@
 import aiohttp
 
+
 class AsyncHttpClient:
     def __init__(self):
         self._session = None

@@ -2,26 +2,46 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, KeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from random import randint
-
-count_of_reminders = randint(2, 10)
-day = "today"
+from backend.bot.clients.remindme_api import RemindMeApiClient
 
 
-def reminders_buttons(count_of_reminders: int, day: str, next_coef = 0):
+def reminders_buttons(data: dict):
+    next_coef = data["next_coef"]
+    reminders = data["reminders"]
+
     keyboard = InlineKeyboardBuilder()
 
-    increase = 0
-    if next_coef:
-        increase += 5 * next_coef
+    count_of_reminders = len(reminders)
+    increase = 5*next_coef
 
-    for index, reminder_id in enumerate(range(1+increase, count_of_reminders + increase)):
-        keyboard.row(InlineKeyboardButton(text=str(reminder_id), callback_data=f"reminder_{str(reminder_id)}_today"))
-        if index == 4 or increase+index+1 >= count_of_reminders:
-            break
+    start_index = increase
+    end_index = min(start_index + 5, count_of_reminders)
 
-    if count_of_reminders > 5*(next_coef + 1):
+    if start_index > 1:
+        keyboard.row(InlineKeyboardButton(text="<-", callback_data=f"reminder_previous_{next_coef - 1}"))
+
+    for index in range(start_index, end_index):
+        reminder_id = reminders[index]['id']
+        keyboard.row(InlineKeyboardButton(text=str(index+1), callback_data=f"reminder_{reminder_id}_today"))
+
+    if end_index < count_of_reminders:
         keyboard.row(InlineKeyboardButton(text="->", callback_data=f"reminder_next_{next_coef + 1}"))
 
-    keyboard.adjust(6)
+    days = {
+        "сегодня": "reminder_filter_today",
+        "завтра": "reminder_filter_tomorrow",
+        "остальные дни": "reminder_filter_others"
+    }
+
+    keyboard.adjust(7)
+
+    flag = 1
+    for day in days.keys():
+        if day != data["day"]:
+            if flag:
+                flag = 0
+                keyboard.row(InlineKeyboardButton(text=day.capitalize(), callback_data=days[day]))
+            else:
+                keyboard.add(InlineKeyboardButton(text=day.capitalize(), callback_data=days[day]))
+
     return keyboard.as_markup()
