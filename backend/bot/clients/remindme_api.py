@@ -14,9 +14,9 @@ class RemindMeApiClient(AsyncHttpClient):
         }
 
     def get_reminders(self, user, day: str) -> list:  # user: User
-        if day == "сегодня":
+        if day == "today":
             date_filter = datetime.now().strftime("%d.%m.%Y")
-        elif day == "завтра":
+        elif day == "tomorrow":
             date_filter = (datetime.now() + timedelta(days=1)).strftime("%d.%m.%Y")
         else:
             date_filter = None
@@ -39,7 +39,7 @@ class RemindMeApiClient(AsyncHttpClient):
                     {
                         "id": 2,
                         "text": "не сделать что-то",
-                        "date_exp": date_filter,
+                        "date_exp": "13.03.2025",
                         "state": 0
                     },
                     {
@@ -51,37 +51,37 @@ class RemindMeApiClient(AsyncHttpClient):
                     {
                         "id": 4,
                         "text": "не сделать что-то",
-                        "date_exp": date_filter,
+                        "date_exp": "13.03.2025",
                         "state": 1
                     },
                     {
                         "id": 5,
                         "text": "не сделать что-то",
-                        "date_exp": date_filter,
+                        "date_exp": "13.03.2025",
                         "state": 1
                     },
                     {
                         "id": 6,
                         "text": "не сделать что-то",
-                        "date_exp": date_filter,
+                        "date_exp": "13.03.2025",
                         "state": 1
                     },
                     {
                         "id": 7,
                         "text": "не сделать что-то",
-                        "date_exp": date_filter,
+                        "date_exp": "13.03.2026",
                         "state": 0
                     },
                     {
                         "id": 8,
                         "text": "не сделать что-то",
-                        "date_exp": date_filter,
+                        "date_exp": "13.03.2027",
                         "state": 0
                     },
                     {
                         "id": 9,
                         "text": "не сделать что-то",
-                        "date_exp": date_filter,
+                        "date_exp": "17.03.2025",
                         "state": 0
                     },
                     {
@@ -93,19 +93,19 @@ class RemindMeApiClient(AsyncHttpClient):
                     {
                         "id": 11,
                         "text": "не сделать что-то",
-                        "date_exp": date_filter,
+                        "date_exp": "13.03.2025",
                         "state": 0
                     },
                     {
                         "id": 12,
                         "text": "предпоследний",
-                        "date_exp": date_filter,
+                        "date_exp": "14.03.2025",
                         "state": 0
                     },
                     {
                         "id": 13,
                         "text": "последний",
-                        "date_exp": date_filter,
+                        "date_exp": "14.03.2025",
                         "state": 0
                     }
                 ]

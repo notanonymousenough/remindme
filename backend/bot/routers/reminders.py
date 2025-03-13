@@ -15,7 +15,7 @@ reminders_router = Router()
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu), F.data.startswith("reminder_next_"))
-async def menu_next(call: CallbackQuery, state: FSMContext):
+async def reminders_next(call: CallbackQuery, state: FSMContext):
     next_coef = int(call.dict()["data"].split("_")[-1])
     # change later: next_count will be written by state, not from call
 
@@ -30,7 +30,7 @@ async def menu_next(call: CallbackQuery, state: FSMContext):
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu), F.data.startswith("reminder_previous_"))
-async def menu_next(call: CallbackQuery, state: FSMContext):
+async def reminders_previous(call: CallbackQuery, state: FSMContext):
     next_coef = int(call.dict()["data"].split("_")[-1])
 
     await state.update_data(next_coef=next_coef)
@@ -44,10 +44,12 @@ async def menu_next(call: CallbackQuery, state: FSMContext):
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu), F.data.startswith("reminder_filter_"))
-async def show_reminder(call: CallbackQuery, state: FSMContext):
+async def reminders_filter(call: CallbackQuery, state: FSMContext):
     new_day = call.dict()["data"].split("_")[-1]
 
     await state.update_data(day=new_day)
+    await state.update_data(reminders=client.get_reminders(day=new_day, user=None))
+    await state.update_data(next_coef=0)
 
     data = await state.get_data()
 

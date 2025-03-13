@@ -12,11 +12,18 @@ def get_message_reminders(data: dict):
     text = "📝 Напоминания \n\n"
 
     day_emoji = {
-        "сегодня": "🏞",
-        "завтра": "🌅",
-        "остальные дни": "🌄"
+        "today": "🏞",
+        "tomorrow": "🌅",
+        "others": "🌄"
     }
-    text += f"{day_emoji[day] + day.capitalize()}\n"
+
+    day_dict = {
+        "today": "Сегодня",
+        "tomorrow": "Завтра",
+        "others": "Остальные дни"
+    }
+
+    text += f"{day_emoji[day] + day_dict[day]}\n"
 
     for id, reminder in enumerate(reminders):
         if id in range(*strip):

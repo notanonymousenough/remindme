@@ -21,9 +21,9 @@ async def start_menu(message: Message, state: FSMContext):
 async def reminders(message: Message, state: FSMContext):
     await state.set_state(States.reminder_menu)  # set state for reminders menu
     await state.set_data({
-        "day": "сегодня",
+        "day": "today",
         "user_id": message.from_user.id,
-        "reminders": client.get_reminders(user=None, day="завтра"),  # туда потом передаем user_id
+        "reminders": client.get_reminders(user=None, day="today"),  # туда потом передаем user_id
         "next_coef": 0,
         "strip": [0, 5]
     })

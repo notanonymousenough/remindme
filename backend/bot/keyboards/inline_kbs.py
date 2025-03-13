@@ -27,21 +27,16 @@ def reminders_buttons(data: dict):
     if end_index < count_of_reminders:
         keyboard.row(InlineKeyboardButton(text="->", callback_data=f"reminder_next_{next_coef + 1}"))
 
-    days = {
-        "сегодня": "reminder_filter_today",
-        "завтра": "reminder_filter_tomorrow",
-        "остальные дни": "reminder_filter_others"
-    }
-
     keyboard.adjust(7)
 
-    flag = 1
-    for day in days.keys():
-        if day != data["day"]:
-            if flag:
-                flag = 0
-                keyboard.row(InlineKeyboardButton(text=day.capitalize(), callback_data=days[day]))
-            else:
-                keyboard.add(InlineKeyboardButton(text=day.capitalize(), callback_data=days[day]))
+    days = {
+        "today": "reminder_filter_today",
+        "tomorrow": "reminder_filter_tomorrow",
+        "all": "reminder_filter_others"
+    }
+
+    keyboard.row(InlineKeyboardButton(text="Сегодня", callback_data=days["today"]))
+    keyboard.add(InlineKeyboardButton(text="Завтра", callback_data=days["tomorrow"]))
+    keyboard.add(InlineKeyboardButton(text="ВСЕ", callback_data=days["all"]))
 
     return keyboard.as_markup()
