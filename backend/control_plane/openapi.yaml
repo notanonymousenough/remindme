@@ -162,6 +162,54 @@ paths:
       security:
         - BearerAuth: []
 
+  /reminders/{reminderId}/complete:
+    post:
+      summary: Отметка напоминания как выполненного
+      parameters:
+        - name: reminderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Напоминание отмечено как выполненное
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+      security:
+        - BearerAuth: []
+
+  /reminders/{reminderId}/postpone:
+    post:
+      summary: Откладывание напоминания
+      parameters:
+        - name: reminderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newTime:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Напоминание отложено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+      security:
+        - BearerAuth: []
+
   /habits:
     post:
       summary: Создание новой привычки
@@ -178,6 +226,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Habit'
+      security:
+        - BearerAuth: []
+
+    get:
+      summary: Получение списка привычек пользователя
+      responses:
+        '200':
+          description: Список привычек
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Habit'
       security:
         - BearerAuth: []
 
@@ -238,6 +300,81 @@ paths:
       security:
         - BearerAuth: []
 
+  /habits/{habitId}/progress:
+    post:
+      summary: Отметка прогресса по привычке
+      parameters:
+        - name: habitId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date
+                completed:
+                  type: boolean
+      responses:
+        '200':
+          description: Прогресс успешно отмечен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Habit'
+      security:
+        - BearerAuth: []
+
+  /habits/{habitId}/statistics:
+    get:
+      summary: Получение статистики по привычке
+      parameters:
+        - name: habitId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [week, month, year, all]
+            default: month
+      responses:
+        '200':
+          description: Статистика по привычке
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  completed:
+                    type: integer
+                  streak:
+                    type: integer
+                  progress:
+                    type: number
+                    format: float
+                  history:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                        completed:
+                          type: boolean
+      security:
+        - BearerAuth: []
 
   /tags:
     post:
@@ -281,12 +418,16 @@ paths:
           required: true
           schema:
             type: string
+        - name: replacementTagId
+          in: query
+          schema:
+            type: string
+          description: ID тега, на который нужно заменить удаляемый
       responses:
         '204':
           description: Тег успешно удален
       security:
         - BearerAuth: []
-
 
   /removed:
     get:
@@ -327,6 +468,114 @@ paths:
       security:
         - BearerAuth: []
 
+  /achievements:
+    get:
+      summary: Получение списка достижений пользователя
+      responses:
+        '200':
+          description: Список достижений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Achievement'
+      security:
+        - BearerAuth: []
+
+  /statistics:
+    get:
+      summary: Получение статистики пользователя
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [week, month, year, all]
+            default: month
+      responses:
+        '200':
+          description: Статистика пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+      security:
+        - BearerAuth: []
+
+  /calendar/integration:
+    post:
+      summary: Настройка интеграции с календарем
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                calendarType:
+                  type: string
+                  enum: [caldav]
+                integrationData:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Интеграция успешно настроена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  calendarIntegrationKey:
+                    type: string
+      security:
+        - BearerAuth: []
+
+    delete:
+      summary: Удаление интеграции с календарем
+      responses:
+        '204':
+          description: Интеграция успешно удалена
+      security:
+        - BearerAuth: []
+
+  /images:
+    get:
+      summary: Получение списка нейроизображений пользователя
+      parameters:
+        - name: habitId
+          in: query
+          schema:
+            type: string
+          description: ID привычки для фильтрации изображений
+        - name: reminderId
+          in: query
+          schema:
+            type: string
+          description: ID напоминания для фильтрации изображений
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Список нейроизображений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NeuroImage'
+      security:
+        - BearerAuth: []
+
 components:
   schemas:
     User:
@@ -340,6 +589,7 @@ components:
           type: string
         sex:
           type: string
+          enum: [male, female]
         firstName:
           type: string
         secondName:
@@ -353,6 +603,18 @@ components:
           type: string
         timezone:
           type: string
+        level:
+          type: integer
+        experience:
+          type: integer
+        streak:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        lastActive:
+          type: string
+          format: date-time
 
     Reminder:
       type: object
@@ -375,6 +637,17 @@ components:
           enum: [active, completed, forgotten]
         removed:
           type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        notificationSent:
+          type: boolean
 
     Habit:
       type: object
@@ -387,10 +660,33 @@ components:
           type: string
         period:
           type: string
+          enum: [daily, weekly, monthly, custom]
+        customPeriod:
+          type: string
+          description: Описание пользовательского периода (для period=custom)
         progress:
           type: integer
+        target:
+          type: integer
+          description: Целевое количество выполнений
+        currentStreak:
+          type: integer
+        bestStreak:
+          type: integer
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
         removed:
           type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
     Tag:
       type: object
@@ -401,8 +697,96 @@ components:
           type: string
         name:
           type: string
+        color:
+          type: string
+          description: Цвет тега в формате HEX
+        createdAt:
+          type: string
+          format: date-time
 
-    # TODO: add achievements and neuro images
+    Achievement:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        iconUrl:
+          type: string
+          description: URL изображения для ачивки
+        condition:
+          type: string
+          description: Описание условия получения
+        unlocked:
+          type: boolean
+        unlockedAt:
+          type: string
+          format: date-time
+        progress:
+          type: integer
+          description: Текущий прогресс выполнения условия (в процентах)
+        category:
+          type: string
+          enum: [reminder, habit, system]
+
+    NeuroImage:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        habitId:
+          type: string
+        reminderId:
+          type: string
+        imageUrl:
+          type: string
+        thumbnailUrl:
+          type: string
+        prompt:
+          type: string
+        status:
+          type: string
+          enum: [good, neutral, bad]
+        generatedAt:
+          type: string
+          format: date-time
+
+    Statistics:
+      type: object
+      properties:
+        userId:
+          type: string
+        remindersCompleted:
+          type: integer
+        remindersForgotten:
+          type: integer
+        habitsProgress:
+          type: object
+          additionalProperties:
+            type: integer
+        streak:
+          type: integer
+        level:
+          type: integer
+        experience:
+          type: integer
+        dailyActivity:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              completedItems:
+                type: integer
+
   securitySchemes:
     BearerAuth:
       type: http
