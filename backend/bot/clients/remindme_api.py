@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
 
 from backend.bot.clients.http_client import AsyncHttpClient
-from backend.bot.remindmeapi.models.user import User
-
 
 class RemindMeApiClient(AsyncHttpClient):
     def get_reminder(self, user):  # user: User
