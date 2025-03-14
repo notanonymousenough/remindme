@@ -5,8 +5,12 @@ import aiohttp
 import logging
 from typing import Dict, Any, Optional
 from ..config import settings
+import certifi
+import aiohttp
+import ssl
 
 logger = logging.getLogger("telegram_service")
+ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 
 class TelegramService:
@@ -44,15 +48,8 @@ class TelegramService:
             import json
             data["reply_markup"] = json.dumps(reply_markup)
 
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url, data=data) as response:
-                    if response.status == 200:
-                        return True
-                    else:
-                        response_text = await response.text()
-                        logger.error(f"Ошибка отправки сообщения в Telegram: {response.status} - {response_text}")
-                        return False
-        except Exception as e:
-            logger.error(f"Исключение при отправке сообщения в Telegram: {str(e)}")
-            return False
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, data=data, ssl=ssl_context) as response:
+                if response.status != 200:
+                    response_text = await response.text()
+                    raise ValueError(f"Ошибка отправки сообщения в Telegram: {response.status} - {response_text}")
