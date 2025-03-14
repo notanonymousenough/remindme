@@ -6,6 +6,9 @@ bash
 pip install temporalio caldav aiohttp pydantic python-dotenv icalendar
 
 # Запуск data-plane
+docker run -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=remind_me postgre
+PYTHONPATH="${PYTHONPATH}:/opt/remindme" alembic upgrade head
+temporal server start-dev -n remindme
 python -m app.data_plane.main
 Для запуска рабочих процессов из API используется подобный код:
 
