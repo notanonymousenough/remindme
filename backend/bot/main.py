@@ -1,15 +1,13 @@
 import asyncio
 import logging
 
-from aiogram import Dispatcher, Bot
+from aiogram import Dispatcher
 
+from backend.bot.app import bot
 from routers import start_router, reminders_router, habits_router
-from utils.config import get_settings
 
 
 async def main():
-    settings = get_settings()
-    bot = Bot(token=settings.BOT_TOKEN)
     dp = Dispatcher()
 
     dp.include_router(start_router)

@@ -24,6 +24,7 @@ async def return_to_menu(message: Message, state: FSMContext):
 
     text = "Перемещаемся в главное меню\.\."
 
+
     await message.answer(text=text,
                          reply_markup=reply_kbs.main_menu(),
                          parse_mode="MarkdownV2")
@@ -47,6 +48,7 @@ async def habit_edit(call: CallbackQuery, state: FSMContext):
     data = state.get_data()
 
     await call.message.answer(text="разработчик еще не сделал редактирование привычек)")
+    await bot.answer_callback_query(call.id)
 
 
 @habits_router.message(StateFilter(States.habits_menu))

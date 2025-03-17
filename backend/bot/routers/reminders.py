@@ -3,14 +3,15 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from aiogram.types import Message, CallbackQuery
+
+from backend.bot import bot
+
 from backend.bot.keyboards import inline_kbs, reply_kbs
 from backend.bot.routers import start
 
 from backend.bot.utils import get_message_reminders
 from backend.bot.utils.message_text_tools import get_tags_edit
 from backend.bot.utils.states import States
-
-from backend.bot.clients import client
 
 reminders_router = Router()
 
@@ -46,6 +47,7 @@ async def reminders_next(call: CallbackQuery, state: FSMContext):
     await call.message.edit_text(text=text,
                                  reply_markup=inline_kbs.reminders_buttons(data=data),
                                  parse_mode="MarkdownV2")
+    await bot.answer_callback_query(call.id)
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu),
@@ -60,6 +62,7 @@ async def reminders_previous(call: CallbackQuery, state: FSMContext):
     await call.message.edit_text(text=text,
                                  reply_markup=inline_kbs.reminders_buttons(data=data),
                                  parse_mode="MarkdownV2")
+    await bot.answer_callback_query(call.id)
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu),
@@ -76,6 +79,7 @@ async def reminders_day_filter(call: CallbackQuery, state: FSMContext):
     await call.message.edit_text(text=text,
                                  reply_markup=inline_kbs.reminders_buttons(data=data),
                                  parse_mode="MarkdownV2")
+    await bot.answer_callback_query(call.id)
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu),
@@ -89,6 +93,7 @@ async def reminder_tag_filter(call: CallbackQuery, state: FSMContext):
     await call.message.edit_text(text=text,
                                  reply_markup=inline_kbs.reminders_buttons(data=data),
                                  parse_mode="MarkdownV2")
+    await bot.answer_callback_query(call.id)
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu),
@@ -105,6 +110,7 @@ async def reminder_tags_select(call: CallbackQuery, state: FSMContext):
     await call.message.edit_text(text=text,
                                  reply_markup=inline_kbs.reminders_buttons(data=data),
                                  parse_mode="MarkdownV2")
+    await bot.answer_callback_query(call.id)
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu),
@@ -119,6 +125,7 @@ async def reminder_tags_select(call: CallbackQuery, state: FSMContext):
     await call.message.edit_text(text=text,
                                  reply_markup=inline_kbs.reminders_buttons(data=data),
                                  parse_mode="MarkdownV2")
+    await bot.answer_callback_query(call.id)
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu),
@@ -161,7 +168,9 @@ async def add_reminder_check_answer(call: CallbackQuery, state: FSMContext):  # 
         text = "Напоминание добавлено\!"
         await call.message.edit_text(text=text,
                                      parse_mode="MarkdownV2")
+        await bot.answer_callback_query(call.id)
     else:
         await call.message.delete()
 
     await start.reminders(message=call.message, state=state)
+    await bot.answer_callback_query(call.id)
