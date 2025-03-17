@@ -1,10 +1,12 @@
+from asyncio import sleep
+
 from aiogram import Router, F
 from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from backend.bot.keyboards import reply_kbs, inline_kbs
-from backend.bot.utils import States, get_message_reminders
+from backend.bot.utils import States, get_message_reminders, get_message_habits
 
 from backend.bot.clients import client
 
@@ -19,35 +21,55 @@ async def start_menu(message: Message, state: FSMContext):
 
 @start_router.message(F.text == "Напоминания")
 async def reminders(message: Message, state: FSMContext):
-    await state.set_state(States.reminder_menu)  # set state for reminders menu
-    await state.set_data({
-        "day": "today",
-        "user_id": message.from_user.id,
-        "reminders": client.get_reminders(user=None, day="today"),  # туда потом передаем user_id
-        "next_coef": 0,
-        "strip": [0, 5]
-    })
-    data = await state.get_data()
+    if (await state.get_state()) != States.reminder_menu:
+        await state.set_state(States.reminder_menu)  # set state for reminders menu
+        await state.set_data({
+            "day": "today",
+            "user_id": message.from_user.id,
+            "day_filter": "today",
+            "next_coef": 0,
+            "strip": [0, 5],
+            "tag_filter_click": 0,
+            "tag_filter": None,
+            "add_reminder": 0
+        })
 
+    data = await state.get_data()
     text = get_message_reminders(data=data)
+
+    await message.answer(text="Вывожу список напоминаний..", reply_markup=reply_kbs.reminders_menu())
+    await sleep(1)
 
     await message.answer(text=text,
                          reply_markup=inline_kbs.reminders_buttons(data=data),
                          parse_mode="MarkdownV2")
 
-    await message.answer(text="..", reply_markup=reply_kbs.reminders_menu())
 
 
 @start_router.message(F.text == "Привычки")
 async def habits(message: Message, state: FSMContext):
-    pass
+    await state.set_state(States.habits_menu)
+    await state.set_data({
+        "user_id": message.from_user.id,
+        "habit_add": 0
+    })
+
+    data = await state.get_data()
+    text = get_message_habits(data=data)
+
+    await message.answer(text="Вывожу список привычек..", reply_markup=reply_kbs.habits_menu())
+    await sleep(1)
+
+    await message.answer(text=text,
+                         reply_markup=inline_kbs.get_habits_buttons(data=data),
+                         parse_mode="MarkdownV2")
 
 
-@start_router.message(F.text == "")
+@start_router.message(F.text == "Прогресс")
 async def progress():
     pass
 
 
-@start_router.message()  #  StateFilter(States.start_menu)
+@start_router.message(StateFilter(States.start_menu))
 async def text_from_user(message: Message, state: FSMContext):
     await start_menu(message, state)

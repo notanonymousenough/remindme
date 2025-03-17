@@ -3,10 +3,8 @@ from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 
 def main_menu():
     menu = [
-        [KeyboardButton(text="Напоминания")],
-        [KeyboardButton(text="Привычки")],
         [KeyboardButton(text="Прогресс")],
-        [KeyboardButton(text="Тэги")]
+        [KeyboardButton(text="Напоминания"), KeyboardButton(text="Привычки")]
     ]
     return ReplyKeyboardMarkup(keyboard=menu)
 
@@ -14,7 +12,7 @@ def main_menu():
 def reminders_menu():
     menu = [
         [KeyboardButton(text="Добавить напоминание")],
-        [KeyboardButton(text="Фильтрация по тэгам")],
+        [KeyboardButton(text="Редактировать тэги")],
         [KeyboardButton(text="Назад")]
     ]
     return ReplyKeyboardMarkup(keyboard=menu)

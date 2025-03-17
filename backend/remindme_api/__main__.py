@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from uvicorn import run
 
-from backend.control_plane.config import DefaultSettings, get_settings
-from backend.control_plane.routes import list_of_routes
+from backend.remindme_api.config import DefaultSettings, get_settings
+from backend.remindme_api.routes import list_of_routes
 
 
 def bind_routes(application: FastAPI, setting: DefaultSettings) -> None:
@@ -31,10 +31,10 @@ app = get_app()
 if __name__ == "__main__":
     settings_for_application = get_settings()
     run(
-        "backend.control_plane.__main__:app",
+        "backend.remindme_api.__main__:app",
         host=settings_for_application.APP_ADDRESS,
         port=settings_for_application.APP_PORT,
         reload=True,
-        reload_dirs=["backend/control_plane", "tests"],
+        reload_dirs=["backend/remindme_api", "tests"],
         log_level="debug",
     )

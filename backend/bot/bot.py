@@ -3,7 +3,7 @@ import logging
 
 from aiogram import Dispatcher, Bot
 
-from routers import start_router, reminders_router
+from routers import start_router, reminders_router, habits_router
 from utils.config import get_settings
 
 
@@ -14,6 +14,8 @@ async def main():
 
     dp.include_router(start_router)
     dp.include_router(reminders_router)
+    dp.include_router(habits_router)
+
     await dp.start_polling(bot)
 
 
