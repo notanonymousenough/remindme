@@ -13,6 +13,8 @@ class DefaultSettings(BaseSettings):
     APP_ADDRESS: str = environ.get("APP_ADDRESS", "127.0.0.1")
     APP_PORT: int = int(environ.get("APP_PORT", 8000))
 
+    DB_ADDRESS: str = environ.get("APP_ADDRESS", "127.0.0.1")
+
     SECRET_KEY: str = environ.get("SECRET_KEY", "")
     ALGORITHM: str = environ.get("ALGORITHM", "HS256")
 

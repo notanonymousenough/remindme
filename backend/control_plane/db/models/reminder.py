@@ -22,6 +22,7 @@ class Reminder(BaseModel):
     removed = Column(Boolean, default=False)
     completed_at = Column(DateTime(timezone=True))
     notification_sent = Column(Boolean, default=False)
+    is_old = Column()
 
     # Отношения
     user = relationship("User", back_populates="reminders")
