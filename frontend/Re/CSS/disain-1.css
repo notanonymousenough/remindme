@@ -1,7 +1,7 @@
 body
 {
   width: 85%;
-  max-width: 1200px;
+  
   
 
 }
@@ -20,9 +20,14 @@ body
   border-width: 2px;
   border-color: #000000;
 }
+.item
+{
+  border-radius: 20px; 
+}
 .item:hover
 {
-  background-color: #fff700;  
+  background-color: #fff700; 
+  border-radius: 20px; 
 }
 .save-nap
 {
@@ -69,19 +74,7 @@ body
   z-index: 100;
   
 }
-.btn-filitr
-{
-  
-}
-.btn-teg
-{
-  
- 
-}
-.btn-add
-{
-  
-}
+
 
 .my-alert 
 {
@@ -103,6 +96,89 @@ body
   display: -o-flex;
   display: flex;
   flex-direction: row;
+}
+.pro
+{
+  position: relative;
+  left: 100px;
+  top: 15px;
+  font-size: 25px;
+}
+.gender
+{
+  border-color: #000000;
+}
+.gender:hover
+{
+  border-color: #000000;
+}
+.calend-btn
+{
+  max-width: 200px;
+
+}
+.trash
+{
+  margin-top: 2px;
+  max-width: 200px;
+}
+.btn-save-pro
+{
+  min-width: 100px;
+  max-width: 100px;
+}
+.achive
+{
+  
+  max-width: 400px;
+
+}
+.ava
+{
+  max-width: 100px;
+  max-height: 100px;
+  min-width: 100px;
+  min-height: 100px;
+}
+.priv
+{
+  background-color: #3c46f9;
+  text-align: center;
+  border-radius: 20px;
+  color: #fff;
+  min-width: 150px;
+  max-width: 150px;
+}
+.fon-suc
+{
+  background-color: #2fff00;
+}
+.delete-priv
+{
+  align-items: flex-end;
+}
+
+.table-priv
+{
+  
+  max-width: 500px;
+  text-align: center;
+  border-collapse: collapse;
+
+}
+.pohval
+{
+  position: relative;
+  left: 30%;
+}
+th
+{
+  border: 1px solid black;
+  width: 250px;
+  height: 50px;
+}
+.fon-fail{
+  background-color: #f20404;
 }
 .avatar
 {
