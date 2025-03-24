@@ -211,8 +211,7 @@ body
 }
 .basket
 {
-  position: relative;
-  left: 42px; top: 20px;
+  
   font-size: 30px;
 }
 .btn-basket-all-p
