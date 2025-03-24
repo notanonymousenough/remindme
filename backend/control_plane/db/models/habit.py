@@ -20,9 +20,9 @@ class Habit(BaseModel):
     removed = Column(Boolean, default=False)
 
     # Отношения
-    user = relationship("User", back_populates="habits")
-    progress_records = relationship("HabitProgress", back_populates="habit", cascade="all, delete-orphan")
-    neuro_images = relationship("NeuroImage", back_populates="habit")
+    #user = relationship("User", back_populates="habits")
+    #progress_records = relationship("HabitProgress", back_populates="habit", cascade="all, delete-orphan")
+    #neuro_images = relationship("NeuroImage", back_populates="habit")
 
     def __repr__(self):
         return f"<Habit {self.text[:20]}... ({self.id})>"
@@ -36,7 +36,7 @@ class HabitProgress(BaseModel):
     completed = Column(Boolean, default=False)
 
     # Отношения
-    habit = relationship("Habit", back_populates="progress_records")
+    # habit = relationship("Habit", back_populates="progress_records")
 
     # Ограничения
     __table_args__ = (

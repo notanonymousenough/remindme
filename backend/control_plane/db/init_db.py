@@ -1,10 +1,6 @@
 import asyncio
 import logging
-from sqlalchemy.ext.asyncio import AsyncSession
-from .engine import engine, Base, async_session
-from .models.base import AchievementCategory
-from .models.achievement import AchievementTemplate
-import uuid
+from .engine import engine, Base
 
 logger = logging.getLogger(__name__)
 

@@ -16,9 +16,9 @@ class NeuroImage(BaseModel):
     status = Column(Enum(ImageStatus))
 
     # Отношения
-    user = relationship("User", back_populates="neuro_images")
-    habit = relationship("Habit", back_populates="neuro_images")
-    reminder = relationship("Reminder", back_populates="neuro_images")
+    #user = relationship("User", back_populates="neuro_images")
+    #habit = relationship("Habit", back_populates="neuro_images")
+    #reminder = relationship("Reminder", back_populates="neuro_images")
 
     def __repr__(self):
         return f"<NeuroImage id={self.id}>"

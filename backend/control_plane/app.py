@@ -1,40 +1,13 @@
-from uvicorn.protocols.http.flow_control import service_unavailable
+import uvicorn
+from fastapi import FastAPI
 
-from backend.control_plane.config import get_settings
-from backend.control_plane.service.reminders import RemindersService
+from backend.control_plane.routes import reminder_router, auth_router
+from backend.control_plane.routes.user import user_router
 
-
-class Context:
-    services = [RemindersService]
-    reminders_service = ...
-    reminders_repository = ...
-    db = ...
-
-    # как вариант:
-    def  __init__(self):
-        self.settings = ...
-        for service in services:
-            service(repo)
+app = FastAPI()
+app.include_router(reminder_router)
+app.include_router(auth_router)
+app.include_router(user_router)
 
 
-    def get_reminders_service():
-        if get_reminders_repository():
-            ok
-        raise ValueError
-
-    def get_reminders_repository():
-        if get_db():
-            return ...
-        raise ValueError
-
-    def get_db(self):
-        if get_settings():
-
-class AbstractService:
-    def __init__(self, repository):
-        if not repository:
-            raise ValueError
-        self.repo = repository
-
-    def get_repo(self):
-        return self.repo
+uvicorn.run(app=app)

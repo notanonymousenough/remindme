@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from ..models.user import User
@@ -5,8 +8,8 @@ from .base import BaseRepository
 
 
 class UserRepository(BaseRepository[User]):
-    def __init__(self, session: AsyncSession):
-        super().__init__(session, User)
+    def __init__(self):
+        super().__init__(User)
 
     async def get_by_telegram_id(self, telegram_id: str) -> User:
         """Получение пользователя по Telegram ID"""

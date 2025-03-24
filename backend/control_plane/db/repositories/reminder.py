@@ -1,6 +1,6 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from numpy.random.mtrand import Sequence
 from sqlalchemy.future import select
-from sqlalchemy import and_, or_, func
+from sqlalchemy import and_, or_, func, insert
 from datetime import datetime, date
 from typing import List, Optional
 from uuid import UUID
@@ -10,17 +10,17 @@ from .base import BaseRepository
 
 
 class ReminderRepository(BaseRepository[Reminder]):
-    def __init__(self, session: AsyncSession):
-        super().__init__(session, Reminder)
+    def __init__(self):
+        super().__init__(Reminder)
 
-    async def get_active_by_user(self, user_id: UUID) -> List[Reminder]:
+    async def get_active_by_user(self, user_id: UUID) -> Sequence[Reminder]:
         """Получение активных напоминаний пользователя"""
         stmt = select(Reminder).where(
             and_(
                 Reminder.user_id == user_id,
                 Reminder.status == ReminderStatus.ACTIVE,
                 Reminder.removed == False
-            )
+            ).returning(Reminder)
         )
         result = await self.session.execute(stmt)
         return result.scalars().all()

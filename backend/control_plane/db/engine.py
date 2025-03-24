@@ -1,9 +1,10 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import os
 import logging
-from typing import AsyncGenerator
+
+from backend.control_plane.config import get_settings
 
 # Настройка логирования SQL запросов
 logging.basicConfig()
@@ -11,7 +12,8 @@ logger = logging.getLogger("sqlalchemy.engine")
 logger.setLevel(logging.INFO)
 
 # Получение параметров подключения из переменных окружения
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost/remind_me")
+load_dotenv()
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
 # Создание асинхронного движка SQLAlchemy
 engine = create_async_engine(
@@ -23,22 +25,13 @@ engine = create_async_engine(
     pool_recycle=int(os.environ.get("SQL_POOL_RECYCLE", "1800")),
 )
 
-# Создание сессии для работы с БД
-async_session = sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False
-)
-
 # Базовый класс для моделей SQLAlchemy
 Base = declarative_base()
 
-# Функция-генератор для внедрения зависимостей в FastAPI
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
-    async with async_session() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception as e:
-            await session.rollback()
-            raise e
+
+async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+
+
+async def get_async_session() -> AsyncSession:
+    async with async_session_maker() as async_session:  # every time we get new session
+        return async_session

@@ -1,6 +1,5 @@
 from os import environ
 
-from passlib.context import CryptContext
 from pydantic_settings import BaseSettings
 
 
@@ -25,10 +24,10 @@ class DefaultSettings(BaseSettings):
         """
         return ""
 
-
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+
 
 def get_settings():
     return DefaultSettings()

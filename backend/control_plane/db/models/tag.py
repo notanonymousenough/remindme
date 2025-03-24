@@ -12,8 +12,8 @@ class Tag(BaseModel):
     color = Column(String(7), default="#FFFFFF")
 
     # Отношения
-    user = relationship("User", back_populates="tags")
-    reminders = relationship("Reminder", secondary="reminder_tags", back_populates="tags")
+    #user = relationship("User", back_populates="tags")
+    #reminders = relationship("Reminder", secondary="reminder_tags", back_populates="tags")
 
     # Ограничения уникальности
     __table_args__ = (

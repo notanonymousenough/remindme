@@ -11,7 +11,7 @@ class User(BaseModel):
     email = Column(String(255), unique=True)
     sex = Column(Enum(SexType))
     first_name = Column(String(255))
-    second_name = Column(String(255))
+    last_name = Column(String(255))
     birth_date = Column(Date)
     telegram_id = Column(String(255), unique=True)
     calendar_integration_key = Column(String(255))
@@ -22,12 +22,12 @@ class User(BaseModel):
     last_active = Column(DateTime(timezone=True), server_default=func.now())
 
     # Определение отношений с другими моделями
-    tags = relationship("Tag", back_populates="user", cascade="all, delete-orphan")
-    reminders = relationship("Reminder", back_populates="user", cascade="all, delete-orphan")
-    habits = relationship("Habit", back_populates="user", cascade="all, delete-orphan")
-    achievements = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")
-    neuro_images = relationship("NeuroImage", back_populates="user")
-    statistics = relationship("UserStatistics", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    #tags = relationship("Tag", back_populates="user", cascade="all, delete-orphan")
+    #reminders = relationship("Reminder", back_populates="user", cascade="all, delete-orphan")
+    #habits = relationship("Habit", back_populates="user", cascade="all, delete-orphan")
+    #achievements = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")
+    #neuro_images = relationship("NeuroImage", back_populates="user")
+    # statistics = relationship("UserStatistics", back_populates="user", uselist=False, cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User {self.username} ({self.id})>"

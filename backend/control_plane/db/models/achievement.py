@@ -14,7 +14,7 @@ class AchievementTemplate(BaseModel):
     category = Column(Enum(AchievementCategory), nullable=False)
 
     # Отношения
-    user_achievements = relationship("UserAchievement", back_populates="template")
+    #user_achievements = relationship("UserAchievement", back_populates="template")
 
     def __repr__(self):
         return f"<AchievementTemplate {self.name} ({self.id})>"
@@ -30,8 +30,8 @@ class UserAchievement(BaseModel):
     progress = Column(Integer, default=0)
 
     # Отношения
-    user = relationship("User", back_populates="achievements")
-    template = relationship("AchievementTemplate", back_populates="user_achievements")
+    # user = relationship("User", back_populates="achievements")
+    # template = relationship("AchievementTemplate", back_populates="user_achievements")
 
     # Ограничения
     __table_args__ = (
