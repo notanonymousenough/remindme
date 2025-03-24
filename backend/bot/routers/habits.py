@@ -1,15 +1,13 @@
-from asyncio import sleep
-
 from aiogram import Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from aiogram.types import Message, CallbackQuery
-from backend.bot.keyboards import inline_kbs, reply_kbs
-from backend.bot.routers import start
 
-from backend.bot.utils import get_message_reminders
-from backend.bot.utils.message_text_tools import get_tags_edit
+from backend.bot import bot
+from backend.bot.keyboards import inline_kbs, reply_kbs
+from backend.bot.routers import start as start_router
+
 from backend.bot.utils.states import States
 
 from backend.bot.clients import client
@@ -62,5 +60,4 @@ async def habit_check(message: Message, state: FSMContext):
     await message.answer(text=text,
                          parse_mode="MarkdownV2")
 
-    await sleep(1)
-    await start.habits(message=message, state=state)
+    await start_router.habits(message=message, state=state)

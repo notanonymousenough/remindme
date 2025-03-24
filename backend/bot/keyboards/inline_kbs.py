@@ -5,10 +5,9 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from backend.bot.clients import client
 
 
-def get_habits_buttons(data: dict):
+def get_habits_buttons(habits):
     keyboard = InlineKeyboardBuilder()
 
-    habits = client.get_habits(data=data)
     habits_count = len(habits)
 
     for index in range(habits_count):
@@ -18,9 +17,7 @@ def get_habits_buttons(data: dict):
     return keyboard.as_markup()
 
 
-def reminders_buttons(data: dict):
-    next_coef = data["next_coef"]
-    reminders = client.get_reminders(data)
+def reminders_buttons(reminders, next_coef: int, day_filter: str, tag_filter_is_click: bool, tags):
 
     keyboard = InlineKeyboardBuilder()
 
@@ -48,23 +45,26 @@ def reminders_buttons(data: dict):
         "all": "reminder_day_filter_all"
     }
 
-    keyboard.row(InlineKeyboardButton(text=f"✅ Сегодня" if data["day"] == "today" else "Сегодня",
+    keyboard.row(InlineKeyboardButton(text=f"✅ Сегодня" if day_filter == "today" else "Сегодня",
                                       callback_data=days["today"]))
-    keyboard.add(InlineKeyboardButton(text="✅ Завтра" if data["day"] == "tomorrow" else "Завтра",
+    keyboard.add(InlineKeyboardButton(text="✅ Завтра" if day_filter == "tomorrow" else "Завтра",
                                       callback_data=days["tomorrow"]))
-    keyboard.add(InlineKeyboardButton(text="✅ ВСЕ" if data["day"] == "all" else "Остальные дни",
+    keyboard.add(InlineKeyboardButton(text="✅ ВСЕ" if day_filter == "all" else "Остальные дни",
                                       callback_data=days["all"]))
 
-    return get_tags(data, keyboard=keyboard)
+    return reminders_buttons_make_tags(
+        tag_filter_is_click = tag_filter_is_click,
+        keyboard=keyboard,
+        tags=tags
+    )
 
 
-def get_tags(data: dict, keyboard: InlineKeyboardBuilder):
-    if data["tag_filter_click"]:
+def reminders_buttons_make_tags(tag_filter_is_click: bool, keyboard: InlineKeyboardBuilder, tags):
+    if tag_filter_is_click:
         keyboard.row(InlineKeyboardButton(text="<-", callback_data=f"reminder_tag_filter_back"))
 
-        tags_emoji = client.get_tags()  # only text
-        for tag_emoji in tags_emoji:
-            keyboard.add(InlineKeyboardButton(text=tag_emoji, callback_data=f"reminder_tag_filter_{tag_emoji}"))
+        for tag in tags:
+            keyboard.add(InlineKeyboardButton(text=tags[tag]["emoji"], callback_data=f"reminder_tag_filter_{tags[tag]["emoji"]}"))
     else:
         keyboard.row(InlineKeyboardButton(text="Фильтрация по тэгам", callback_data="reminder_tag_filter"))
 
@@ -79,16 +79,10 @@ def add_reminder_check():
     return keyboard.as_markup()
 
 
-def tag_menu_get_tags(data: dict):
-    tags = client.get_tags()
+def tag_menu_get_tags(tags):
     keyboard = InlineKeyboardBuilder()
 
     for i, tag in enumerate(tags):
-        tag = {
-            "tag_text": "bla-bla",
-            "tag_id": i,
-            "tag_emoji": tag
-        }  # заглушка
+        keyboard.add(InlineKeyboardButton(text=str(i + 1), callback_data=f"tags_edit_{str(tag)}"))
 
-        keyboard.add(InlineKeyboardButton(text=str(i + 1), callback_data=str(tag["tag_id"])))
     return keyboard.as_markup()

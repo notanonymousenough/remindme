@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 
 from backend.bot.clients.http_client import AsyncHttpClient
@@ -142,13 +143,22 @@ class RemindMeApiClient(AsyncHttpClient):
         }
 
         return [
-                reminder for reminder in data["reminders"]
-                if (date_filter is None or reminder["date_exp"] == date_filter)
-                and (tag_filter is None or reminder["tag"] == tag_filter)
-            ]
+            reminder for reminder in data["reminders"]
+            if (date_filter is None or reminder["date_exp"] == date_filter)
+               and (tag_filter is None or reminder["tag"] == tag_filter)
+        ]
 
     def get_tags(self):
-        return ["☺️", "🐈", "📚", "📝", "💡"]
+        tags_example_naming = ["Ясность", "Кошки", "Знания", "Записки", "Идеи"]
+        tags_example_emoji = ["☺️", "🐈", "📚", "📝", "💡"]
+        dict_tags_example = {
+            uuid.uuid4(): {
+                "name": tag_name,
+                "emoji": tag_emoji
+            }
+            for tag_name, tag_emoji in zip(tags_example_naming, tags_example_emoji)
+        }
+        return dict_tags_example
 
     def get_habits(self, data: dict):
         return [
@@ -169,5 +179,6 @@ class RemindMeApiClient(AsyncHttpClient):
                 "progress": 6
             }
         ]
+
 
 client = RemindMeApiClient()

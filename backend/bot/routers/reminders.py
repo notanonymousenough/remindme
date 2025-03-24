@@ -5,12 +5,12 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from backend.bot import bot
+from backend.bot.clients import client
 
-from backend.bot.keyboards import inline_kbs, reply_kbs
+from backend.bot.keyboards import inline_kbs, reply_kbs, menu
 from backend.bot.routers import start
 
-from backend.bot.utils import get_message_reminders
-from backend.bot.utils.message_text_tools import get_tags_edit
+from backend.bot.utils import message_text_tools
 from backend.bot.utils.states import States
 
 reminders_router = Router()
@@ -20,11 +20,23 @@ reminders_router = Router()
                           F.text == "Редактировать тэги")
 async def tags_edit(message: Message, state: FSMContext):
     data = await state.get_data()
-    text = get_tags_edit(data=data)
+    text = message_text_tools.get_tags_edit(data=data)
+
+    tags = client.get_tags()
 
     await message.answer(text=text,
-                         reply_markup=inline_kbs.tag_menu_get_tags(data),
+                         reply_markup=inline_kbs.tag_menu_get_tags(tags=tags),
                          parse_mode="MarkdownV2")
+
+
+@reminders_router.callback_query(StateFilter(States.reminder_menu),
+                                 F.data.startswith("tags_edit_"))
+async def tags_edit_(call: CallbackQuery, state: FSMContext):  # TODO(Arsen): add edit to tags
+    data = await state.get_data()
+    text = ""
+
+    await call.answer(text=text,
+                      parse_mode="MarkdownV2")
 
 
 @reminders_router.message(StateFilter(States.reminder_menu),
@@ -42,10 +54,18 @@ async def reminders_next(call: CallbackQuery, state: FSMContext):
     await state.update_data(next_coef=next_coef)
 
     data = await state.get_data()
-    text = get_message_reminders(data=data)
+    text = message_text_tools.get_message_reminders(data=data)
+    reminders_reply = client.get_reminders(data)
+    day_filter = data["day"]
+    tag_filter_is_click = data["tag_filter_click"]
+    tags = client.get_tags()
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(data=data),
+                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                                                                           next_coef=next_coef,
+                                                                           day_filter=day_filter,
+                                                                           tag_filter_is_click=tag_filter_is_click,
+                                                                           tags=tags),
                                  parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
@@ -57,10 +77,18 @@ async def reminders_previous(call: CallbackQuery, state: FSMContext):
     await state.update_data(next_coef=next_coef)
 
     data = await state.get_data()
-    text = get_message_reminders(data=data)
+    text = message_text_tools.get_message_reminders(data=data)
+    reminders_reply = client.get_reminders(data)
+    day_filter = data["day"]
+    tag_filter_is_click = data["tag_filter_click"]
+    tags = client.get_tags()
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(data=data),
+                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                                                                           next_coef=next_coef,
+                                                                           day_filter=day_filter,
+                                                                           tag_filter_is_click=tag_filter_is_click,
+                                                                           tags=tags),
                                  parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
@@ -74,10 +102,19 @@ async def reminders_day_filter(call: CallbackQuery, state: FSMContext):
     await state.update_data(next_coef=0)
 
     data = await state.get_data()
-    text = get_message_reminders(data=data)
+    text = message_text_tools.get_message_reminders(data=data)
+    reminders_reply = client.get_reminders(data)
+    next_coef = data['next_coef']
+    day_filter = data["day"]
+    tag_filter_is_click = data["tag_filter_click"]
+    tags = client.get_tags()
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(data=data),
+                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                                                                           next_coef=next_coef,
+                                                                           day_filter=day_filter,
+                                                                           tag_filter_is_click=tag_filter_is_click,
+                                                                           tags=tags),
                                  parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
@@ -88,10 +125,19 @@ async def reminder_tag_filter(call: CallbackQuery, state: FSMContext):
     await state.update_data(tag_filter_click=1)
 
     data = await state.get_data()
-    text = get_message_reminders(data)
+    text = message_text_tools.get_message_reminders(data)
+    reminders_reply = client.get_reminders(data)
+    next_coef = data['next_coef']
+    day_filter = data["day"]
+    tag_filter_is_click = data["tag_filter_click"]
+    tags = client.get_tags()
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(data=data),
+                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                                                                           next_coef=next_coef,
+                                                                           day_filter=day_filter,
+                                                                           tag_filter_is_click=tag_filter_is_click,
+                                                                           tags=tags),
                                  parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
@@ -105,25 +151,43 @@ async def reminder_tags_select(call: CallbackQuery, state: FSMContext):
     await state.update_data(tag_filter_click=tag_filter_click)
 
     data = await state.get_data()
-    text = get_message_reminders(data)
+    text = message_text_tools.get_message_reminders(data)
+    reminders_reply = client.get_reminders(data)
+    next_coef = data['next_coef']
+    day_filter = data["day"]
+    tag_filter_is_click = data["tag_filter_click"]
+    tags = client.get_tags()
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(data=data),
+                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                                                                           next_coef=next_coef,
+                                                                           day_filter=day_filter,
+                                                                           tag_filter_is_click=tag_filter_is_click,
+                                                                           tags=tags),
                                  parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu),
                                  F.data.startswith("reminder_tag_filter_"))
-async def reminder_tags_select(call: CallbackQuery, state: FSMContext):
+async def reminder_tags_filter_select(call: CallbackQuery, state: FSMContext):
     tag_filter = call.dict()["data"].split("_")[-1]
     await state.update_data(tag_filter=tag_filter)
 
     data = await state.get_data()
-    text = get_message_reminders(data)
+    text = message_text_tools.get_message_reminders(data)
+    reminders_reply = client.get_reminders(data)
+    next_coef = data['next_coef']
+    day_filter = data["day"]
+    tag_filter_is_click = data["tag_filter_click"]
+    tags = client.get_tags()
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(data=data),
+                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                                                                           next_coef=next_coef,
+                                                                           day_filter=day_filter,
+                                                                           tag_filter_is_click=tag_filter_is_click,
+                                                                           tags=tags),
                                  parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
@@ -131,7 +195,7 @@ async def reminder_tags_select(call: CallbackQuery, state: FSMContext):
 @reminders_router.callback_query(StateFilter(States.reminder_menu),
                                  F.data.startswith("reminder_edit_"))
 async def reminder_edit(call: CallbackQuery, state: FSMContext):
-    pass
+    await bot.answer_callback_query(call.id)
 
 
 @reminders_router.message(StateFilter(States.reminder_menu),
@@ -146,19 +210,19 @@ async def add_reminder(message: Message, state: FSMContext):
 
 
 @reminders_router.message(StateFilter(States.reminder_menu))
-async def add_reminder_check(message: Message, state: FSMContext):  # ЗАГЛУШКА обработать сообщение
-    if message.text in ['Добавить напоминание', 'Назад', "Редактировать тэги"]:
+async def add_reminder_check(message: Message, state: FSMContext):  # TODO(Arsen): ЗАГЛУШКА обработать сообщение
+    if message.text in menu.MENU_MESSAGES_TEXT:
         return
 
-    reminder = message.text
-    await message.answer(text=f"{reminder}\n\nЗдесь всё верно?",
+    reminder_text = message.text
+    await message.answer(text=f"{reminder_text}\n\nЗдесь всё верно?",
                          reply_markup=inline_kbs.add_reminder_check(),
                          parse_mode="MarkdownV2")
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu),
                                  F.data.startswith("reminder_check_"))
-async def add_reminder_check_answer(call: CallbackQuery, state: FSMContext):  # ЗАГЛУШКА закинуть в апи
+async def add_reminder_check_answer(call: CallbackQuery, state: FSMContext):  # TODO(ARSEN): закинуть в апи
     await state.update_data(add_reminder=0)
 
     answer = call.dict()["data"].split("_")[-1]

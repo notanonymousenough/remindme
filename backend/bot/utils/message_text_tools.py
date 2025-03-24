@@ -62,9 +62,8 @@ def get_tags_edit(data: dict):
     text = "🔍 Ваши тэги:\n\n"
 
     tags = client.get_tags()
-    dick = ["Ясность", "Кошки", "Знания", "Записки", "Идеи"]
     for i, tag in enumerate(tags):
-        text += f"{i+1}\) {dick[i]}  {tag}\n"
+        text += f"{i+1}\) {tags[tag]["name"]}  {tags[tag]["emoji"]}\n"
 
     text += "\nВыберите тэг для редактирования:"
 
