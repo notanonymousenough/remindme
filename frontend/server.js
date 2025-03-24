@@ -31,7 +31,15 @@ app.post('/auth/telegram', async (req, res) => {
     res.status(error.response?.status || 500).json({ error: error.message });
   }
 });
-
+app.get('/', function(req, res) {
+  res.sendfile('public/pages/reminders.html');
+});
+app.get('/', function(req, res) {
+  res.sendfile('public/css/bootstrap.min.css');
+});
+app.get('/', function(req, res) {
+  res.sendfile('public/css/style.css');
+});
 // Прокси для всех остальных запросов к бэкенду
 app.use('/api', async (req, res) => {
   if (!req.session.token) {
