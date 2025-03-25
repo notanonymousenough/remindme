@@ -26,6 +26,10 @@ async def reminder_add(
     request: ReminderSchema,
     reminder_service: Annotated[RemindersService, Depends(get_reminder_service)]
 ):
+    # TODO: try to call yandex gpt client
+    # in client check global quota (maybe raise exception QuotaExceeded)
+    # catch exceptions => return stupid reminder
+    # success => return smart reminder
     reminder = await reminder_service.reminder_put(request)
     return reminder
 
