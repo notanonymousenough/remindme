@@ -15,15 +15,16 @@ class RemindersService:
 
     # Спросить про аутентификацию, как будет юзер айди передаваться и использовать его в сервисе
 
-    async def get_reminders(self, user_id: UUID) -> List[Reminder]:
+    async def get_reminders(self, user_id: UUID) -> List[ReminderSchema]:
         reminder_models = await self.repo.get_active_by_user(user_id)
         result = []
         for reminder_model in reminder_models:
-            result.append(Reminder.model_validate(reminder_model))
+            result.append(ReminderSchema.model_validate(reminder_model))
 
         return result
 
     async def reminder_update(self, reminder_id: UUID, **kwargs) -> Reminder:
+        # todo: оперируем схемами
         return await self.repo.update(reminder_id, **kwargs)
 
     async def reminder_delete(self, reminder_id: UUID):
