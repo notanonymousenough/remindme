@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
  
-  <link rel="stylesheet" href="D:\remindme\frontend\public\css\bootstrap.min.css">
-  <link rel="stylesheet" href="D:\remindme\frontend\public\css\styles.css">
-  <link rel="icon" href="D:\remindme\frontend\public\assets\icons\icon.png" type="image/x-icon">
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../assets/icons/icon.png" type="image/x-icon">
 
   <title>RemindMe</title>
 </head> 
@@ -25,21 +25,21 @@
 		<nav class="navbar navbar-default  " role="navigation">
 			<div class="brand-name-wrapper">
         <div class="avatar">
-          <img  src="D:\remindme\frontend\public\assets\icons\avatar.jpg" alt="" class="round" width="40" height="40">
-          <a class="navbar-brand" href="profile.html" >
+          <img  src="../assets/icons/avatar.jpg" alt="" class="round" width="40" height="40">
+          <a class="navbar-brand" href="../pages/profile.html" >
             <b> Лагорный</b>
           </a>
         </div>
       </div>
       <div class="side-menu-container  ">
 				<ul class="nav navbar-nav ">
-          <li><a class="nav-link text-dark item" href="reminders.html">
+          <li><a class="nav-link text-dark item" href="../pages/reminders.html">
             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"  fill="currentColor" class="bi bi-lightbulb" viewBox="0 0 16 16">
             <path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1z"/>
             </svg>
             Напоминания</a>
           </li>
-          <li><a class="nav-link text-dark item" href="habits.html">
+          <li><a class="nav-link text-dark item" href="../pages/habits.html">
             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16">
             <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
             </svg> 
@@ -76,21 +76,25 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-1 col-sm-2"></div>
-      <div class="col-3 col-sm-3 priv">
+      <div class="col-2 col-sm-3"></div>
+      <div class="col-10 col-sm-3">
         <h7>30 Отжиманий</h7>
       </div>
-      <div class="col-1"></div>
-      <div class="col-3 col-sm-2 m-2">
-        <button type="button" class="btn btn-warning btn-sm "  >Выполнить</button>
+      
+      <div class="col-6 col-sm-3 col-lg-1 btn-delete-h">
+        <form>
+          <button type="button" class="btn btn-warning btn-sm "  >Выполнить</button>
+        </form>
       </div>
-      <div class="col-1 col-sm-1 m-2 delete-priv">
-        <button type="button" class="btn btn-sm btn-danger "  >Удалить</button>
+      <div class="col-4 col-sm-1 col-lg-1 btn-delete-h">
+        <form>
+          <button type="button" class="btn btn-sm btn-danger "   >Удалить</button>
+        </form>
       </div>
     </div>
     <p></p>
     <div class="row">
-      <div class="col-3"></div>
+      <div class="col-2 col-sm-3"></div>
       <table class="tabel col-8 table-bordered table-priv">
         <thead>
           <tr>
@@ -99,56 +103,56 @@
         </thead>
         <tbody>
           <tr>
-            <th class="bg-success"scope="col" >1</th>
-            <th class="bg-success"scope="col">2</th>
-            <th class="bg-success"scope="col">3</th>
-            <th class="bg-success"scope="col">4</th>
-            <th class="bg-success"scope="col">5</th>
-            <th class="bg-danger"scope="col">6</th>
-            <th class="bg-success"scope="col">7</th>
+            <td class="bg-success"scope="col" >1</td>
+            <td class="bg-success"scope="col">2</td>
+            <td class="bg-success"scope="col">3</td>
+            <td class="bg-success"scope="col">4</td>
+            <td class="bg-success"scope="col">5</td>
+            <td class="bg-danger"scope="col">6</td>
+            <td class="bg-success"scope="col">7</td>
           </tr>
           <tr>
-            <th class="bg-success"scope="col">8</th>
-            <th class="bg-success"scope="col">9</th>
-            <th scope="col">10</th>
-            <th scope="col">11</th>
-            <th scope="col">12</th>
-            <th scope="col">13</th>
-            <th scope="col">14</th>
+            <td class="bg-success"scope="col">8</td>
+            <td class="bg-success"scope="col">9</td>
+            <td scope="col">10</td>
+            <td scope="col">11</tv>
+            <td scope="col">12</td>
+            <td scope="col">13</td>
+            <td scope="col">14</td>
           </tr>
           <tr>
-            <th scope="col">15</th>
-            <th scope="col">16</th>
-            <th scope="col">17</th>
-            <th scope="col">18</th>
-            <th scope="col">19</th>
-            <th scope="col">20</th>
-            <th scope="col">21</th>
+            <td scope="col">15</td>
+            <td scope="col">16</td>
+            <td scope="col">17</td>
+            <td scope="col">18</td>
+            <td scope="col">19</td>
+            <td scope="col">20</td>
+            <td scope="col">21</td>
           </tr>
           <tr>
-            <th scope="col">22</th>
-            <th scope="col">23</th>
-            <th scope="col">24</th>
-            <th scope="col">25</th>
-            <th scope="col">26</th>
-            <th scope="col">27</th>
-            <th scope="col">28</th>
+            <td scope="col">22</td>
+            <td scope="col">23</td>
+            <td scope="col">24</td>
+            <td scope="col">25</td>
+            <td scope="col">26</td>
+            <td scope="col">27</td>
+            <td scope="col">28</td>
           </tr>
           <tr>
-            <th scope="col">29</th>
-            <th scope="col">30</th>
-            <th scope="col">31</th>
-            <th scope="col"></th>
-            <th scope="col"></th>
-            <th scope="col"></th>
-            <th scope="col"></th>
+            <td scope="col">29</td>
+            <td scope="col">30</td>
+            <td scope="col">31</td>
+            <td scope="col"></td>
+            <td scope="col"></td>
+            <td scope="col"></td>
+            <td scope="col"></td>
           </tr>
         </tbody>
       </table>
       <div class="col-1"></div>
     </div>
     <div class="row">
-      <div class="col-3"></div>
+      <div class="col-2 col-sm-3"></div>
       <div class="col-5">
         3 дня подряд
         <p>Молодец!!! &#128077</p>
@@ -156,10 +160,10 @@
     </div>
   </div>   
 
-  <script src="D:\remindme\frontend\public\js\lib_\bootstrap.bundle.min.js"></script>
+  <script src="../js/lib_/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <script src="D:\remindme\frontend\public\js\components\navbar.js"></script>
+  <script src="../js/components/navbar.js"></script>
  
 </body>  
 </html>

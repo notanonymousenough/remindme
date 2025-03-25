@@ -31,15 +31,24 @@ app.post('/auth/telegram', async (req, res) => {
     res.status(error.response?.status || 500).json({ error: error.message });
   }
 });
+
 app.get('/', function(req, res) {
   res.sendfile('public/pages/reminders.html');
 });
 app.get('/', function(req, res) {
-  res.sendfile('public/css/bootstrap.min.css');
+  res.sendfile('public/pages/edit_reminders.html');
 });
 app.get('/', function(req, res) {
-  res.sendfile('public/css/style.css');
+  res.sendfile('public/pages/habits.html');
 });
+app.get('/', function(req, res) {
+  res.sendfile('public/pages/trash.html');
+});
+app.get('/', function(req, res) {
+  res.sendfile('public/pages/profile.html');
+});
+
+
 // Прокси для всех остальных запросов к бэкенду
 app.use('/api', async (req, res) => {
   if (!req.session.token) {
