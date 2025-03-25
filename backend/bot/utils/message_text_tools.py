@@ -8,13 +8,9 @@ def get_message_reminder(data: dict):
     pass
 
 
-def get_message_reminders(data: dict):
-    reminders = sorted(client.get_reminders(data), key=lambda x: x["time_exp"])
+def get_message_reminders(reminders, next_coef: int, strip: dict, day: str, tag_filter):
 
-    next_coef = data["next_coef"]
-
-    strip = [index + 5 * next_coef for index in data['strip']]
-    day = data["day"]
+    strip = [index + 5 * next_coef for index in strip]
 
     text = "📝 *Напоминания* \n\n"
 
@@ -30,7 +26,7 @@ def get_message_reminders(data: dict):
         "all": "Все напоминания"
     }
 
-    text += f"*{day_emoji[day]} {day_dict[day]}{"  ("+data["tag_filter"]+")" if data["tag_filter"] != None else ":"}*\n"
+    text += f"*{day_emoji[day]} {day_dict[day]}{"  ("+tag_filter+")" if tag_filter != None else ":"}*\n"
 
     added_lines_count = 0
     for id, reminder in enumerate(reminders):
@@ -42,9 +38,9 @@ def get_message_reminders(data: dict):
             added_lines_count += 1
     if not added_lines_count:
         text = ''.join(text.split("\n")[:-2]) + f"\n\n{day_emoji[day]} "
-        if data["tag_filter"]:
-            text += f"*Задач ({data["tag_filter"]}) нет.*\n"
-        elif data["day_filter"] != "all":
+        if tag_filter:
+            text += f"*Задач ({tag_filter}) нет.*\n"
+        elif tag_filter != "all":
             text += "*В этот день нет задач, можете отдыхать.*\n"
         else:
             text += f"*На {day_dict[day]} напоминаний нет.*\n"

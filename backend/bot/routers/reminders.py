@@ -7,7 +7,7 @@ from aiogram.types import Message, CallbackQuery
 from backend.bot import bot
 from backend.bot.clients import client
 
-from backend.bot.keyboards import inline_kbs, reply_kbs, menu
+from backend.bot.keyboards import inline_kbs, reply_kbs
 from backend.bot.routers import start
 
 from backend.bot.utils import message_text_tools
@@ -54,14 +54,23 @@ async def reminders_next(call: CallbackQuery, state: FSMContext):
     await state.update_data(next_coef=next_coef)
 
     data = await state.get_data()
-    text = message_text_tools.get_message_reminders(data=data)
-    reminders_reply = client.get_reminders(data)
+    strip = data['strip']
     day_filter = data["day"]
+    tag_filter = data["tag_filter"]
     tag_filter_is_click = data["tag_filter_click"]
+    day = data["day"]
+    reminders = sorted(client.get_reminders(day, tag_filter), key=lambda x: x["time_exp"])
     tags = client.get_tags()
+    text = message_text_tools.get_message_reminders(
+        reminders=reminders,
+        next_coef=next_coef,
+        strip=strip,
+        day=day_filter,
+        tag_filter=tag_filter
+    )
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
                                                                            next_coef=next_coef,
                                                                            day_filter=day_filter,
                                                                            tag_filter_is_click=tag_filter_is_click,
@@ -77,14 +86,23 @@ async def reminders_previous(call: CallbackQuery, state: FSMContext):
     await state.update_data(next_coef=next_coef)
 
     data = await state.get_data()
-    text = message_text_tools.get_message_reminders(data=data)
-    reminders_reply = client.get_reminders(data)
     day_filter = data["day"]
     tag_filter_is_click = data["tag_filter_click"]
+    strip = data["strip"]
+    tag_filter = data["tag_filter"]
     tags = client.get_tags()
+    day = data["day"]
+    reminders = sorted(client.get_reminders(day, tag_filter), key=lambda x: x["time_exp"])
+    text = message_text_tools.get_message_reminders(
+        reminders=reminders,
+        next_coef=next_coef,
+        strip=strip,
+        day=day_filter,
+        tag_filter=tag_filter
+    )
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
                                                                            next_coef=next_coef,
                                                                            day_filter=day_filter,
                                                                            tag_filter_is_click=tag_filter_is_click,
@@ -102,15 +120,24 @@ async def reminders_day_filter(call: CallbackQuery, state: FSMContext):
     await state.update_data(next_coef=0)
 
     data = await state.get_data()
-    text = message_text_tools.get_message_reminders(data=data)
-    reminders_reply = client.get_reminders(data)
     next_coef = data['next_coef']
     day_filter = data["day"]
     tag_filter_is_click = data["tag_filter_click"]
+    strip = data['strip']
+    tag_filter = data["tag_filter"]
     tags = client.get_tags()
+    day = data["day"]
+    reminders = sorted(client.get_reminders(day, tag_filter), key=lambda x: x["time_exp"])
+    text = message_text_tools.get_message_reminders(
+        reminders=reminders,
+        next_coef=next_coef,
+        strip=strip,
+        day=day_filter,
+        tag_filter=tag_filter
+    )
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
                                                                            next_coef=next_coef,
                                                                            day_filter=day_filter,
                                                                            tag_filter_is_click=tag_filter_is_click,
@@ -125,15 +152,24 @@ async def reminder_tag_filter(call: CallbackQuery, state: FSMContext):
     await state.update_data(tag_filter_click=1)
 
     data = await state.get_data()
-    text = message_text_tools.get_message_reminders(data)
-    reminders_reply = client.get_reminders(data)
     next_coef = data['next_coef']
     day_filter = data["day"]
     tag_filter_is_click = data["tag_filter_click"]
+    strip = data["strip"]
+    tag_filter = data["tag_filter"]
     tags = client.get_tags()
+    day = data["day"]
+    reminders = sorted(client.get_reminders(day, tag_filter), key=lambda x: x["time_exp"])
+    text = message_text_tools.get_message_reminders(
+        reminders=reminders,
+        next_coef=next_coef,
+        strip=strip,
+        day=day_filter,
+        tag_filter=tag_filter
+    )
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
                                                                            next_coef=next_coef,
                                                                            day_filter=day_filter,
                                                                            tag_filter_is_click=tag_filter_is_click,
@@ -151,15 +187,23 @@ async def reminder_tags_select(call: CallbackQuery, state: FSMContext):
     await state.update_data(tag_filter_click=tag_filter_click)
 
     data = await state.get_data()
-    text = message_text_tools.get_message_reminders(data)
-    reminders_reply = client.get_reminders(data)
     next_coef = data['next_coef']
     day_filter = data["day"]
     tag_filter_is_click = data["tag_filter_click"]
     tags = client.get_tags()
+    strip = data["strip"]
+    day = data["day"]
+    reminders = sorted(client.get_reminders(day, tag_filter), key=lambda x: x["time_exp"])
+    text = message_text_tools.get_message_reminders(
+        reminders=reminders,
+        next_coef=next_coef,
+        strip=strip,
+        day=day_filter,
+        tag_filter=tag_filter
+    )
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
                                                                            next_coef=next_coef,
                                                                            day_filter=day_filter,
                                                                            tag_filter_is_click=tag_filter_is_click,
@@ -175,15 +219,23 @@ async def reminder_tags_filter_select(call: CallbackQuery, state: FSMContext):
     await state.update_data(tag_filter=tag_filter)
 
     data = await state.get_data()
-    text = message_text_tools.get_message_reminders(data)
-    reminders_reply = client.get_reminders(data)
     next_coef = data['next_coef']
     day_filter = data["day"]
     tag_filter_is_click = data["tag_filter_click"]
     tags = client.get_tags()
+    day = data["day"]
+    strip = data["strip"]
+    reminders = sorted(client.get_reminders(day, tag_filter), key=lambda x: x["time_exp"])
+    text = message_text_tools.get_message_reminders(
+        reminders=reminders,
+        next_coef=next_coef,
+        strip=strip,
+        day=day_filter,
+        tag_filter=tag_filter
+    )
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
                                                                            next_coef=next_coef,
                                                                            day_filter=day_filter,
                                                                            tag_filter_is_click=tag_filter_is_click,
@@ -211,7 +263,7 @@ async def add_reminder(message: Message, state: FSMContext):
 
 @reminders_router.message(StateFilter(States.reminder_menu))
 async def add_reminder_check(message: Message, state: FSMContext):  # TODO(Arsen): ЗАГЛУШКА обработать сообщение
-    if message.text in menu.MENU_MESSAGES_TEXT:
+    if message.text in reply_kbs.MENU_MESSAGES_TEXT:
         return
 
     reminder_text = message.text

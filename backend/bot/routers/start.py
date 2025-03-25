@@ -36,16 +36,25 @@ async def reminders(message: Message, state: FSMContext):
         })
 
     data = await state.get_data()
-    text = message_text_tools.get_message_reminders(data=data)
-    reminders_reply = client.get_reminders(data)
     day_filter = data["day"]
     next_coef = data['next_coef']
     tag_filter_is_click = data["tag_filter_click"]
     tags = client.get_tags()
+    day = data["day"]
+    tag_filter = data["tag_filter"]
+    strip = data["strip"]
+    reminders = sorted(client.get_reminders(day, tag_filter), key=lambda x: x["time_exp"])
+    text = message_text_tools.get_message_reminders(
+        reminders=reminders,
+        next_coef=next_coef,
+        strip=strip,
+        day=day,
+        tag_filter=tag_filter
+    )
 
     await message.answer(text="Вывожу список напоминаний..", reply_markup=reply_kbs.reminders_menu())
     await message.answer(text=text,
-                         reply_markup=inline_kbs.reminders_buttons(reminders=reminders_reply,
+                         reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
                                                                    next_coef=next_coef,
                                                                    day_filter=day_filter,
                                                                    tag_filter_is_click=tag_filter_is_click,

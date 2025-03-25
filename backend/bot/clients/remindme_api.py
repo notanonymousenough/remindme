@@ -13,9 +13,7 @@ class RemindMeApiClient(AsyncHttpClient):
             "date_exp": "15.05.2025"
         }
 
-    def get_reminders(self, data) -> list:  # user: User
-        day = data["day"]
-        tag_filter = data["tag_filter"]
+    def get_reminders(self, day: str, tag_filter) -> list:  # user: User
 
         if day == "today":
             date_filter = datetime.now().strftime("%d.%m.%Y")
