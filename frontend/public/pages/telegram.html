@@ -2,11 +2,12 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
- 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="stylesheet" href="../css/bootstrap.min.css">
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="icon" href="../assets/icons/icon.png" type="image/x-icon">
-
+  
   <title>RemindMe</title>
 </head> 
 <body>
@@ -21,7 +22,7 @@
     </div>
   </nav>
 
-  <div class="msb   " id="msb" >
+  <div class="msb" id="msb" >
 		<nav class="navbar navbar-default  " role="navigation">
 			<div class="brand-name-wrapper">
         <div class="avatar">
@@ -62,43 +63,31 @@
   </div>
 
   <div class="mcw">
-    <div class="row">
-      <div class="col-1 col-md-3"></div>
-      <div class="col-10  col-md-6">
-        <div class="card redact" >
-          <div class="card-header">
-            #Дом 
-            <button type="button" class="btn-close crest "  aria-label="Закрыть"></button>
-          </div>
-          <div class="card-body">
-            <form>
-              <input class="form-control card-title" value="Сходить за хлебом" >
-            </form>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <form class="col-7 col-sm-5 col-md-6 col-lg-5">
-                <input class="calend" type="datetime-local" />
-              </form>
-              <form class="col-6 col-sm-5 col-md-5 col-lg-3 delete">
-                <a href="../pages/reminders.html" class="btn btn-danger ">Удалить</a>
-              </form>
-              <form class="col-5 col-sm-10 col-md-4 col-lg-3 save">
-                <a href="../pages/reminders.html" class="btn btn-primary  ">Сохранить</a>
-              </form>
-              <div class="col-1"></div>
+   <!-- <div class="row teleg">
+        <div class="col-2 col-md-4"></div>
+            <div class="col-10 col-md-4">
+                <a class="btn btn-primary"  href="https://web.telegram.org/k/">Написать в Телеграм</a>
             </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-1 col-md-3 " ></div>
+        <div class="col-2 col-md-4"></div>
+    </div> -->
+    <div class="row teleg">
+        <div class="col-2 col-md-3"></div>
+            <div class="col-10 col-md-6">
+                <h1>Авторизация через Telegram</h1>
+                <p>Чтобы авторизоваться, нажмите на ссылку ниже:</p>
+                <a href="https://telegram.me/your_bot_name?start=auth" target="_blank">Авторизация в Telegram</a>
+            </div>
+        <div class="col-2 col-md-3"></div>
     </div>
-  </div>   
+    
+  </div> 
+   
 
   <script src="../js/lib_/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="../js/components/navbar.js"></script>
+  
 
 </body>  
 </html>

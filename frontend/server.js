@@ -47,7 +47,9 @@ app.get('/', function(req, res) {
 app.get('/', function(req, res) {
   res.sendfile('public/pages/profile.html');
 });
-
+app.get('/', function(req, res) {
+  res.sendfile('public/pages/telegram.html');
+});
 
 // Прокси для всех остальных запросов к бэкенду
 app.use('/api', async (req, res) => {
