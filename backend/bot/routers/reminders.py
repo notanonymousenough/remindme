@@ -20,9 +20,9 @@ reminders_router = Router()
                           F.text == "Редактировать тэги")
 async def tags_edit(message: Message, state: FSMContext):
     data = await state.get_data()
-    text = message_text_tools.get_tags_edit(data=data)
 
     tags = client.get_tags()
+    text = message_text_tools.get_tags_edit(tags=tags)
 
     await message.answer(text=text,
                          reply_markup=inline_kbs.tag_menu_get_tags(tags=tags),
@@ -263,7 +263,7 @@ async def add_reminder(message: Message, state: FSMContext):
 
 @reminders_router.message(StateFilter(States.reminder_menu))
 async def add_reminder_check(message: Message, state: FSMContext):  # TODO(Arsen): ЗАГЛУШКА обработать сообщение
-    if message.text in reply_kbs.MENU_MESSAGES_TEXT:
+    if message.text in reply_kbs.REMINDERS_MENU_TEXTS:
         return
 
     reminder_text = message.text

@@ -1,7 +1,7 @@
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 
 
-MENU_MESSAGES_TEXT = ['Добавить напоминание', "Редактировать тэги", 'Назад']
+REMINDERS_MENU_TEXTS = ['Добавить напоминание', "Редактировать тэги", 'Назад']
 
 
 def main_menu():
@@ -14,7 +14,7 @@ def main_menu():
 
 def reminders_menu():
     menu = [
-        [KeyboardButton(text=text_message)] for text_message in MENU_MESSAGES_TEXT
+        [KeyboardButton(text=text_message)] for text_message in REMINDERS_MENU_TEXTS
     ]
     return ReplyKeyboardMarkup(keyboard=menu)
 

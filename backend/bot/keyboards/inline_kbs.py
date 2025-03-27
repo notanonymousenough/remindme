@@ -1,8 +1,5 @@
-from aiogram.filters.callback_data import CallbackData
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, KeyboardButton
+from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-
-from backend.bot.clients import client
 
 
 def get_habits_buttons(habits):
@@ -39,18 +36,12 @@ def reminders_buttons(reminders, next_coef: int, day_filter: str, tag_filter_is_
 
     keyboard.adjust(7)
 
-    days = {
-        "today": "reminder_day_filter_today",
-        "tomorrow": "reminder_day_filter_tomorrow",
-        "all": "reminder_day_filter_all"
-    }
-
     keyboard.row(InlineKeyboardButton(text=f"✅ Сегодня" if day_filter == "today" else "Сегодня",
-                                      callback_data=days["today"]))
+                                      callback_data="reminder_day_filter_today"))
     keyboard.add(InlineKeyboardButton(text="✅ Завтра" if day_filter == "tomorrow" else "Завтра",
-                                      callback_data=days["tomorrow"]))
+                                      callback_data="reminder_day_filter_tomorrow"))
     keyboard.add(InlineKeyboardButton(text="✅ ВСЕ" if day_filter == "all" else "Остальные дни",
-                                      callback_data=days["all"]))
+                                      callback_data="reminder_day_filter_all"))
 
     return reminders_buttons_make_tags(
         tag_filter_is_click = tag_filter_is_click,

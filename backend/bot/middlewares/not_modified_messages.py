@@ -4,8 +4,6 @@ from aiogram import BaseMiddleware, Bot
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import TelegramObject, CallbackQuery
 
-from backend.bot import bot
-
 
 class IgnoreMessageNotModifiedMiddleware(BaseMiddleware):
     async def __call__(

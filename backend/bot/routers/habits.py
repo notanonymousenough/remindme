@@ -10,8 +10,6 @@ from backend.bot.routers import start as start_router
 
 from backend.bot.utils.states import States
 
-from backend.bot.clients import client
-
 habits_router = Router()
 
 

@@ -1,7 +1,5 @@
-from asyncio import sleep
-
 from aiogram import Router, F
-from aiogram.filters import CommandStart, Command, StateFilter
+from aiogram.filters import CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
@@ -72,8 +70,8 @@ async def habits(message: Message, state: FSMContext):
     })
 
     data = await state.get_data()
-    text = get_message_habits(data=data)
     habits = client.get_habits(data=data)
+    text = get_message_habits(habits=habits)
 
     await message.answer(text="Вывожу список привычек..", reply_markup=reply_kbs.habits_menu())
     await message.answer(text=text,

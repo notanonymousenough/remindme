@@ -1,15 +1,11 @@
-from collections.abc import Coroutine
 from datetime import datetime
 
-from backend.bot.clients.remindme_api import client
 
-
-def get_message_reminder(data: dict):
+def get_message_reminder(reminder):
     pass
 
 
 def get_message_reminders(reminders, next_coef: int, strip: dict, day: str, tag_filter):
-
     strip = [index + 5 * next_coef for index in strip]
 
     text = "📝 *Напоминания* \n\n"
@@ -26,7 +22,7 @@ def get_message_reminders(reminders, next_coef: int, strip: dict, day: str, tag_
         "all": "Все напоминания"
     }
 
-    text += f"*{day_emoji[day]} {day_dict[day]}{"  ("+tag_filter+")" if tag_filter != None else ":"}*\n"
+    text += f"*{day_emoji[day]} {day_dict[day]}{"  (" + tag_filter + ")" if tag_filter != None else ":"}*\n"
 
     added_lines_count = 0
     for id, reminder in enumerate(reminders):
@@ -54,21 +50,18 @@ def get_message_reminders(reminders, next_coef: int, strip: dict, day: str, tag_
             replace("-", "\-").replace("!", "\!")).replace("(", "\(")
 
 
-def get_tags_edit(data: dict):
+def get_tags_edit(tags):
     text = "🔍 Ваши тэги:\n\n"
 
-    tags = client.get_tags()
     for i, tag in enumerate(tags):
-        text += f"{i+1}\) {tags[tag]["name"]}  {tags[tag]["emoji"]}\n"
+        text += f"{i + 1}\) {tags[tag]["name"]}  {tags[tag]["emoji"]}\n"
 
     text += "\nВыберите тэг для редактирования:"
 
     return text
 
 
-def get_message_habits(data: dict):
-    habits = client.get_habits(data)
-
+def get_message_habits(habits):
     today = datetime.now()
     current_month = today.strftime("%B")
     months_ru = {
@@ -91,7 +84,7 @@ def get_message_habits(data: dict):
         text += "✅ " if habit["status"] else "❌ "
 
         text_progress = f"{months_ru[current_month]}" if habit["period"] == "month" else "неделю"
-        text += f"{index+1}) {habit["habit_text"]} ({habit["progress"]} раз за {text_progress})\n"
+        text += f"{index + 1}) {habit["habit_text"]} ({habit["progress"]} раз за {text_progress})\n"
 
     text += "\nВыберите привычку для редактирования:"
     return (text.replace(")", "\)").replace(".", "\n").
