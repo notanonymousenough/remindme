@@ -32,22 +32,25 @@ app.post('/auth/telegram', async (req, res) => {
   }
 });
 
-app.get('/', function(req, res) {
+app.get('/', (req, res) => {
+  res.redirect('/reminders');
+});
+app.get('/reminders', function(req, res) {
   res.sendfile('public/pages/reminders.html');
 });
-app.get('/', function(req, res) {
+app.get('/edit', function(req, res) {
   res.sendfile('public/pages/edit_reminders.html');
 });
-app.get('/', function(req, res) {
+app.get('/habits', function(req, res) {
   res.sendfile('public/pages/habits.html');
 });
-app.get('/', function(req, res) {
+app.get('/trash', function(req, res) {
   res.sendfile('public/pages/trash.html');
 });
-app.get('/', function(req, res) {
-  res.sendfile('public/pages/profile.html');
+app.get('/user', function(req, res) {
+  res.sendfile('public/pages/user.html');
 });
-app.get('/', function(req, res) {
+app.get('/telegram', function(req, res) {
   res.sendfile('public/pages/telegram.html');
 });
 
