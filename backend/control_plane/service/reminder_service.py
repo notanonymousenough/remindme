@@ -26,6 +26,7 @@ class RemindersService:
         return result
 
     async def reminder_update(self, reminder_id: UUID, **kwargs) -> Reminder:
+        # todo: оперируем схемами
         return await self.repo.update_model(reminder_id, **kwargs)
 
     async def reminder_delete(self, reminder_id: UUID):
