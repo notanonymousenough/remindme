@@ -32,6 +32,28 @@ app.post('/auth/telegram', async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.redirect('/reminders');
+});
+app.get('/reminders', function(req, res) {
+  res.sendfile('public/pages/reminders.html');
+});
+app.get('/edit', function(req, res) {
+  res.sendfile('public/pages/edit_reminders.html');
+});
+app.get('/habits', function(req, res) {
+  res.sendfile('public/pages/habits.html');
+});
+app.get('/trash', function(req, res) {
+  res.sendfile('public/pages/trash.html');
+});
+app.get('/user', function(req, res) {
+  res.sendfile('public/pages/user.html');
+});
+app.get('/telegram', function(req, res) {
+  res.sendfile('public/pages/telegram.html');
+});
+
 // Прокси для всех остальных запросов к бэкенду
 app.use('/api', async (req, res) => {
   if (!req.session.token) {
