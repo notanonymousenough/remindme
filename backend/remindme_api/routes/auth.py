@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from backend.control_plane.db import get_session
+from backend.remindme_api.db import get_session
 
 
 api_router = APIRouter(
