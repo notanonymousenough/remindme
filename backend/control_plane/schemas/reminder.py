@@ -19,7 +19,7 @@ class ReminderSchema(BaseModel):
     notification_sent: Optional[bool] = Field(None, description="Признак отправки уведомления")
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ReminderSchemaToEdit(BaseModel):

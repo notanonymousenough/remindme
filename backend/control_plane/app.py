@@ -9,5 +9,4 @@ app.include_router(reminder_router)
 app.include_router(auth_router)
 app.include_router(user_router)
 
-
 uvicorn.run(app=app)

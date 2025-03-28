@@ -27,9 +27,9 @@ class Reminder(BaseModel):
     notification_sent = Column(Boolean, default=False)
 
     # Отношения
-    # user = relationship("User", back_populates="reminders")
-    # tags = relationship("Tag", secondary=reminder_tags, back_populates="reminders")
-    # neuro_images = relationship("NeuroImage", back_populates="reminder")
+    user = relationship("User", back_populates="reminders")
+    tags = relationship("Tag", secondary=reminder_tags, back_populates="reminders")
+    neuro_images = relationship("NeuroImage", back_populates="reminder")
 
     def __repr__(self):
         return f"<Reminder {self.text[:20]}... ({self.id})>"

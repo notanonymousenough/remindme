@@ -41,7 +41,7 @@ class HabitRepository(BaseRepository[Habit]):
 
     async def update_progress(self, habit_id: UUID, progress: int) -> Optional[Habit]:
         """Обновление прогресса привычки"""
-        return await self.update(habit_id, progress=progress)
+        return await self.update_model(habit_id, progress=progress)
 
     async def update_streaks(self, habit_id: UUID, current_streak: int, best_streak: Optional[int] = None) -> Optional[
         Habit]:
@@ -49,15 +49,15 @@ class HabitRepository(BaseRepository[Habit]):
         updates = {"current_streak": current_streak}
         if best_streak is not None:
             updates["best_streak"] = best_streak
-        return await self.update(habit_id, **updates)
+        return await self.update_model(habit_id, **updates)
 
     async def soft_delete(self, habit_id: UUID) -> Optional[Habit]:
         """Мягкое удаление привычки"""
-        return await self.update(habit_id, removed=True)
+        return await self.update_model(habit_id, removed=True)
 
     async def restore(self, habit_id: UUID) -> Optional[Habit]:
         """Восстановление удаленной привычки"""
-        return await self.update(habit_id, removed=False)
+        return await self.update_model(habit_id, removed=False)
 
     async def get_removed_by_user(self, user_id: UUID) -> List[Habit]:
         """Получение удаленных привычек пользователя"""
@@ -119,7 +119,7 @@ class HabitProgressRepository(BaseRepository[HabitProgress]):
 
         if progress:
             # Обновляем существующую запись
-            return await self.update(progress.id, completed=completed)
+            return await self.update_model(progress.id, completed=completed)
         else:
             # Создаем новую запись
             return await self.create(
@@ -227,7 +227,7 @@ class HabitProgressRepository(BaseRepository[HabitProgress]):
 
     async def count_completed_days(self, habit_id: UUID, start_date: date, end_date: date) -> int:
         """Подсчет количества дней с выполненной привычкой за период"""
-        stmt = select(func.count()).select_from(HabitProgress).where(
+        stmt = select(func.count_models()).select_from(HabitProgress).where(
             and_(
                 HabitProgress.habit_id == habit_id,
                 HabitProgress.date >= start_date,

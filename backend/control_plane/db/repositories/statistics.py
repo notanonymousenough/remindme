@@ -36,7 +36,7 @@ class UserStatisticsRepository(BaseRepository[UserStatistics]):
         """Увеличение счетчика выполненных напоминаний"""
         stats = await self.ensure_statistics(user_id)
 
-        return await self.update(
+        return await self.update_model(
             stats.user_id,
             reminders_completed=stats.reminders_completed + count,
             last_calculated_at=func.now()
@@ -46,7 +46,7 @@ class UserStatisticsRepository(BaseRepository[UserStatistics]):
         """Увеличение счетчика забытых напоминаний"""
         stats = await self.ensure_statistics(user_id)
 
-        return await self.update(
+        return await self.update_model(
             stats.user_id,
             reminders_forgotten=stats.reminders_forgotten + count,
             last_calculated_at=func.now()
@@ -138,7 +138,7 @@ class DailyActivityRepository(BaseRepository[DailyActivity]):
         """Увеличение счетчика выполненных элементов за день"""
         activity = await self.ensure_activity(user_id, target_date)
 
-        return await self.update(
+        return await self.update_model(
             activity.id,
             completed_items=activity.completed_items + count
         )

@@ -26,7 +26,7 @@ async def reminder_add(
     request: ReminderSchema,
     reminder_service: Annotated[RemindersService, Depends(get_reminder_service)]
 ):
-    reminder = await reminder_service.reminder_put(request)
+    reminder = await reminder_service.reminder_create(request)
     return reminder
 
 

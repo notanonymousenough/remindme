@@ -3,6 +3,7 @@ from datetime import date, datetime
 from enum import Enum as PyEnum
 from uuid import UUID
 
+from bson import timestamp
 from pydantic import BaseModel, Field
 
 
@@ -30,7 +31,28 @@ class UserSchema(BaseModel):
     level: int = Field(1, description="level user")
     experience: int = Field(0, description="exp user")
     streak: int = Field(0, description="streak user")
-    last_active: Optional[datetime] = Field(None, description="Временная метка последнего действия пользователя в системе.")
+    last_active: Optional[datetime] = Field(None,
+                                            description="Временная метка последнего действия пользователя в системе.")
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+class UserAddShema(BaseModel):
+    id: Optional[UUID] = Field(None, description="Уникальный идентификатор пользователя в системе.")
+    username: str = Field(..., description="Имя пользователя (логин) для идентификации.")
+    telegram_id: str = Field(None, description="Телеграм айди")
+    timezone: str = Field("UTC", description="Часовой пояс пользователя для локализации времени.")
+    level: int = Field(1, description="level user")
+    experience: int = Field(0, description="exp user")
+    streak: int = Field(0, description="streak user")
+
+
+class UserTelegramDataSchema(BaseModel):
+    telegram_id: int
+    first_name: str
+    last_name: str
+    username: str
+    photo_url: str
+    auth_date: datetime
+    hash: str

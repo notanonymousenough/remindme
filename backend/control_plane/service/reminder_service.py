@@ -3,7 +3,9 @@ from typing import List
 from uuid import UUID
 
 from fastapi.params import Depends
+import jwt
 
+from backend.control_plane.config import get_settings
 from backend.control_plane.db.models import Reminder
 from backend.control_plane.db.repositories.reminder import ReminderRepository
 from backend.control_plane.schemas.reminder import ReminderSchema
@@ -15,8 +17,8 @@ class RemindersService:
 
     # Спросить про аутентификацию, как будет юзер айди передаваться и использовать его в сервисе
 
-    async def get_reminders(self, user_id: UUID) -> List[Reminder]:
-        reminder_models = await self.repo.get_active_by_user(user_id)
+    async def get_reminders(self) -> List[Reminder]:
+        reminder_models = await self.repo.get_active_by_user()
         result = []
         for reminder_model in reminder_models:
             result.append(Reminder.model_validate(reminder_model))
@@ -24,16 +26,18 @@ class RemindersService:
         return result
 
     async def reminder_update(self, reminder_id: UUID, **kwargs) -> Reminder:
-        return await self.repo.update(reminder_id, **kwargs)
+        return await self.repo.update_model(reminder_id, **kwargs)
 
     async def reminder_delete(self, reminder_id: UUID):
-        return await self.repo.delete(reminder_id)
+        return await self.repo.delete_model(reminder_id)
 
-    async def reminder_put(self, request: ReminderSchema):
+    async def reminder_create(self, request: ReminderSchema, token: str = Depends(get_settings().OAUTH2_SCHEME)):
+        user_id = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+        request.user_id = user_id
         return await self.repo.create(**vars(request))
 
     async def reminder_get_all(self):
-        return await self.repo.get_all()
+        return await self.repo.get_models()
 
     async def mark_as_complete(self, reminder_id: UUID):
         return await self.repo.mark_as_completed(reminder_id)

@@ -18,7 +18,7 @@ async def add_user(
         request: UserSchema,
         user_service: Annotated[UserService, Depends(get_user_service)]
 ):
-    return await user_service.repo.create(**vars(request))
+    # return await user_service.repo.create(**vars(request))
 
 
 @user_router.get("/")
