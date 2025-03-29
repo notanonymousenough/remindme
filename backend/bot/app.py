@@ -1,5 +1,7 @@
 from aiogram import Bot
 
-from backend.config import get_settings
+from utils import get_settings
 
-bot = Bot(token=get_settings().BOT_TOKEN)
+
+settings = get_settings()
+bot = Bot(token=settings.BOT_TOKEN)

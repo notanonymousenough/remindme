@@ -3,6 +3,8 @@ import logging
 from typing import Sequence
 from uuid import UUID
 
+from numpy.random.mtrand import Sequence
+
 from backend.control_plane.ai_clients import default_llm_ai_provider
 from backend.control_plane.ai_clients.prompts import RequestType
 from backend.control_plane.db.models import ReminderStatus
@@ -10,6 +12,8 @@ from backend.control_plane.db.repositories.reminder import ReminderRepository
 from backend.control_plane.db.repositories.user import UserRepository
 from backend.control_plane.exceptions.quota import QuotaExceededException
 from backend.control_plane.schemas import ReminderSchema
+from backend.control_plane.schemas.requests.reminder import ReminderEditRequest, \
+    ReminderCompleteRequest, ReminderEditTimeRequest, ReminderPostRequest
 from backend.control_plane.schemas.requests.reminder import ReminderToEditRequestSchema, \
     ReminderMarkAsCompleteRequestSchema, ReminderToEditTimeRequestSchema, ReminderAddSchemaRequest
 from backend.control_plane.service.quota_service import get_quota_service
@@ -26,9 +30,12 @@ class RemindersService:
         self.quota_service = get_quota_service()
         self.ai_provider = default_llm_ai_provider
 
-    async def reminder_get(self, reminder_id: UUID):
-        return await self.repo.get_by_model_id(model_id=reminder_id)
+    async def reminder_get(self, reminder_id: UUID) -> ReminderSchema:
+        response = await self.repo.get_by_model_id(model_id=reminder_id)
+        return ReminderSchema.model_validate(response)
 
+    async def reminder_update(self, reminder: ReminderEditRequest) -> ReminderSchema:
+        return await self.repo.reminder_update(reminder=reminder)
     async def reminder_update(self, reminder: ReminderToEditRequestSchema) -> ReminderSchema:
         request = reminder.model_dump(exclude_unset=True, exclude_none=True)
         return await self.repo.reminder_update(request=request)
@@ -95,12 +102,14 @@ class RemindersService:
         response = await self.repo.get_models(user_id=user_id, status=ReminderStatus.ACTIVE, removed=False)
         return [ReminderSchema.model_validate(reminder_response) for reminder_response in response]
 
-    async def mark_as_complete(self, reminder: ReminderMarkAsCompleteRequestSchema) -> ReminderSchema:
+    async def mark_as_complete(self, reminder: ReminderCompleteRequest) -> ReminderSchema:
+        # TODO model dump in repo
         reminder = reminder.model_dump(exclude_unset=True, exclude_none=True)  # delete None fields
         response = await self.repo.update_model(model_id=reminder["id"], **reminder)
         return ReminderSchema.model_validate(response)
 
-    async def postpone(self, reminder: ReminderToEditTimeRequestSchema) -> ReminderSchema:
+    async def postpone(self, reminder: ReminderEditTimeRequest) -> ReminderSchema:
+        # TODO model dump in repo
         reminder = reminder.model_dump(exclude_unset=True, exclude_none=True)  # delete None fields
         response = await self.repo.update_model(model_id=reminder["id"], **reminder)
         return ReminderSchema.model_validate(response)

@@ -6,6 +6,7 @@ from sqlalchemy.future import select
 
 from ..engine import get_async_session
 from ..models.user import User
+from ...schemas.auth import UserTelegramDataSchema
 from .base import BaseRepository
 from ...schemas.user import UserSchema, UserTelegramDataSchema
 
@@ -49,3 +50,14 @@ class UserRepository(BaseRepository[User]):
             await session.commit()
             await session.refresh(db_user)
             return UserSchema.model_validate(db_user)
+
+    async def delete_user(self, user_id: UUID) -> bool:
+        async with await get_async_session() as session:
+            try:
+                user = await session.get(User, user_id)
+                await session.delete(user)
+                await session.commit()
+                return True
+            except:
+                await session.rollback()
+                return False

@@ -1,6 +1,6 @@
-import uuid
 from typing import List
 
+import uuid
 from sqlalchemy import Column, Text, DateTime, Boolean, ForeignKey, Enum, Table, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship

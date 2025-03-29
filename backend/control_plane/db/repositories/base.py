@@ -1,9 +1,11 @@
-from typing import TypeVar, Generic, Type, Optional, Sequence, List
+from typing import TypeVar, Generic, Type, Optional, Sequence
+from uuid import UUID
 
+from fastapi import HTTPException
+from sqlalchemy import update, delete, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import update, delete, func, and_
-from uuid import UUID
+
 from ..engine import get_async_session
 from ..models import BaseModel
 
@@ -21,7 +23,7 @@ class BaseRepository(Generic[T]):
 
     async def create(self, user_id: UUID, session=None, **kwargs) -> T:
         if not session:
-            async with get_async_session() as session:
+            async with await get_async_session() as session:
                 return await self._create(user_id, session, **kwargs)
         else:
             return await self._create(user_id, session, **kwargs)
@@ -34,7 +36,7 @@ class BaseRepository(Generic[T]):
         return obj
 
     async def get_by_model_id(self, model_id: UUID) -> Optional[T]:
-        async with get_async_session() as session:
+        async with await get_async_session() as session:
             stmt = select(self.model).where(
                 and_(
                     getattr(self.model, "id") == model_id
@@ -43,42 +45,36 @@ class BaseRepository(Generic[T]):
             result = await session.execute(stmt)
             return result.scalars().one_or_none()
 
-    async def get_models(self, user_id: UUID, **kwargs) -> Sequence[T]:
-        async with get_async_session() as session:
-            stmt = select(self.model).where(
+    async def get_models(self, user_id: UUID, session=None, **kwargs) -> Sequence[T]:
+        if not session:
+            async with await get_async_session() as session:
+                return await self._get_models(user_id, session, **kwargs)
+        else:
+            return await self._get_models(user_id, session, **kwargs)
+
+    async def _get_models(self, user_id: UUID, session, **kwargs) -> Sequence[T]:
+        stmt = select(self.model).where(
+            and_(
+                getattr(self.model, "user_id") == user_id
+            )
+        )
+        for key, value in kwargs.items():
+            stmt = stmt.where(
                 and_(
-                    getattr(self.model, "user_id") == user_id
+                    getattr(self.model, key) == value
                 )
             )
-            for key, value in kwargs.items():
-                stmt = stmt.where(
-                    and_(
-                        getattr(self.model, key) == value
-                    )
-                )
-            result = await session.execute(stmt)
-            return result.scalars().all()
-
-    async def get_all_models(self, **kwargs) -> Sequence[T]:
-        async with get_async_session() as session:
-            stmt = select(self.model)
-            for key, value in kwargs.items():
-                stmt = stmt.where(
-                    and_(
-                        getattr(self.model, key) == value
-                    )
-                )
-            result = await session.execute(stmt)
-            return result.scalars().all()
+        result = await session.execute(stmt)
+        return result.scalars().all()
 
     async def update_model(self, model_id: UUID, session=None, **kwargs) -> Optional[T]:
         if not session:
-            async with get_async_session() as session:
+            async with await get_async_session() as session:
                 return await self.__update_model(model_id, session, **kwargs)
         else:
             return await self.__update_model(model_id, session, **kwargs)
 
-    async def __update_model(self, model_id: UUID, session, **kwargs):
+    async def __update_model(self, model_id: UUID, session, **kwargs) -> Optional[T]:
         stmt = update(self.model).where(
             and_(
                 getattr(self.model, "id") == model_id
@@ -89,31 +85,22 @@ class BaseRepository(Generic[T]):
         return result.scalars().first()
 
     async def delete_model(self, user_id: UUID, model_id: UUID) -> bool:
-        async with get_async_session() as session:
-            count_models = await self.count_models(user_id=user_id)
-            stmt = delete(self.model).where(
-                and_(
-                    getattr(self.model, "id") == model_id
-                )
-            )
-            await session.execute(stmt)
-            await session.commit()
-            return True if count_models - await self.count_models(user_id=user_id) else False
-
-    async def delete_models(self, model_ids: List[UUID]) -> bool:
-        async with get_async_session() as session:
-            for model_id in model_ids:
+        async with await get_async_session() as session:
+            try:
+                count_models = await self.count_models(user_id=user_id)
                 stmt = delete(self.model).where(
                     and_(
                         getattr(self.model, "id") == model_id
                     )
                 )
                 await session.execute(stmt)
-            await session.commit()
-            return True
+                await session.commit()
+                return True if count_models - await self.count_models(user_id=user_id) else False
+            except Exception as ex:
+                raise HTTPException(404, detail=f"Exception: {ex}")
 
     async def count_models(self, user_id: UUID, **kwargs) -> int:
-        async with get_async_session() as session:
+        async with await get_async_session() as session:
             stmt = select(func.count()).select_from(self.model).where(
                 and_(
                     getattr(self.model, "user_id") == user_id

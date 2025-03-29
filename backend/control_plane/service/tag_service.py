@@ -1,4 +1,4 @@
-from typing import Sequence, Any, Union
+from typing import Sequence, Any, Union, List
 from uuid import UUID
 
 from backend.control_plane.db.repositories.tag import TagRepository
@@ -33,8 +33,11 @@ class TagService:
     async def delete_tag(self, user_id: UUID, tag_id: UUID) -> bool:
         return await self.repo.delete_model(user_id=user_id, model_id=tag_id)
 
-    async def delete_tag_from_reminder(self, tag_id: UUID, reminder_id: UUID):
-        return await self.repo.delete_tag_from_reminder(tag_id=tag_id, reminder_id=reminder_id)
+    async def delete_tags_from_reminder(self, tag_ids_to_delete: List[UUID], reminder_id: UUID):
+        return await self.repo.delete_tags_from_reminder(tag_ids_to_delete=tag_ids_to_delete, reminder_id=reminder_id)
+
+    async def add_links(self, reminder_id: UUID, tag_ids):
+        return await self.repo.add_tags_to_reminder(tag_ids, reminder_id)
 
     async def get_links_tags_id_from_reminder_id(self, reminder_id: UUID) -> Sequence[UUID]:
         return await self.repo.get_links_tags_id_from_reminder_id(reminder_id=reminder_id)

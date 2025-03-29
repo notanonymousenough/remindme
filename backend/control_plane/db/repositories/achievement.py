@@ -1,3 +1,4 @@
+from .base import BaseRepository
 """
 Репозиторий для работы с достижениями
 """
@@ -9,7 +10,6 @@ from sqlalchemy.future import select
 
 from ..engine import get_async_session
 from ..models.achievement import AchievementTemplate, UserAchievement
-from .base import BaseRepository
 
 
 class AchievementTemplateRepository(BaseRepository[AchievementTemplate]):

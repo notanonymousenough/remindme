@@ -9,15 +9,14 @@ from sqlalchemy.orm import relationship
 from .base import BaseModel, HabitInterval
 
 
-
 class Habit(BaseModel):
     __tablename__ = "habits"
 
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     text = Column(Text, nullable=False)
-    interval = Column(Enum(HabitInterval), nullable=False)
-    custom_interval = Column(Text)
-    current_streak = Column(Integer, default=0)
+    interval = Column(Enum(HabitPeriod), nullable=False)  # можно выполнить раз в *interval*
+    custom_interval = Column(Text, nullable=True)  # после MVP можно поменять на Integer - количество дней/недель и тд
+    # progress column is removed - now derived from HabitProgress
     best_streak = Column(Integer, default=0)
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime, nullable=True)

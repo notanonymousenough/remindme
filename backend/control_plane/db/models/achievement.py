@@ -21,7 +21,7 @@ class AchievementTemplate(BaseModel):
 
 
 class UserAchievement(BaseModel):
-    __tablename__ = "user_achievements"
+    __tablename__ =  "user_achievements"
 
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     template_id = Column(UUID(as_uuid=True), ForeignKey("achievement_templates.id"), nullable=False)

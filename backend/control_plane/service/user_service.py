@@ -3,7 +3,9 @@ from uuid import UUID
 from fastapi import HTTPException
 
 from backend.control_plane.db.repositories.user import UserRepository
-from backend.control_plane.schemas.user import UserTelegramDataSchema, UserSchema
+from backend.control_plane.schemas.requests.user import UserUpdateRequest
+from backend.control_plane.schemas.user import UserSchema
+from backend.control_plane.schemas.auth import UserTelegramDataSchema
 
 
 class UserService:
@@ -14,8 +16,12 @@ class UserService:
         response = await self.repo.get_by_model_id(user_id)
         return UserSchema.model_validate(response)
 
-    async def update_user(self, request: UserSchema) -> UserSchema:
-        user = request.model_dump(exclude_unset=True)
+    async def delete_user(self, user_id: UUID) -> bool:
+        return await self.repo.delete_user(user_id=user_id)
+
+    async def update_user(self, request: UserUpdateRequest) -> UserSchema:
+        # TODO model dump in repo
+        user = request.model_dump(exclude_none=True, exclude_unset=True)
         user_id = user.pop('id')
         return await self.repo.update_user(user_id=user_id, user=user)
 
@@ -25,7 +31,7 @@ class UserService:
             return None
         return UserSchema.model_validate(user)
 
-    async def create_user_from_telegram_data(self, user_tg: UserTelegramDataSchema) -> UserSchema:
+    async def check_user(self, user_tg: UserTelegramDataSchema) -> UserSchema:
         """
         User is created if doesn't exist based on telegram_id.
         If exists check whether there are modified values.
@@ -38,7 +44,8 @@ class UserService:
         return await self.update_user_from_telegram_data(user_to_update)
 
     async def update_user_from_telegram_data(self, user_to_update: UserSchema) -> UserSchema:
-        user = user_to_update.model_dump(exclude_unset=True)
+        # TODO model dump in repo
+        user = user_to_update.model_dump(exclude_none=True, exclude_unset=True)
         user_id = user.pop('id')
         return UserSchema.model_validate(await self.repo.update_user(user_id, user))
 

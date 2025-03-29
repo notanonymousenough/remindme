@@ -1,12 +1,15 @@
 import hmac
 from http.client import HTTPException
 from typing import Annotated
+from uuid import UUID
 
 from fastapi.params import Depends
 import jwt
 
 from backend.config import get_settings
 from backend.control_plane.schemas.user import UserSchema, UserTelegramDataSchema
+from backend.control_plane.config import get_settings
+from backend.control_plane.schemas.auth import UserTelegramDataSchema
 from backend.control_plane.service.user_service import get_user_service, UserService
 
 settings = get_settings()
@@ -28,7 +31,7 @@ async def get_authorized_user(
     except jwt.InvalidTokenError:
         raise HTTPException(401, "Invalid JWT Token")
 
-    user_id = payload.get("user_id")
+    user_id = UUID(payload.get("user_id"))
     if not user_id:
         raise HTTPException(401, "Can't get user_id from payload")
 
