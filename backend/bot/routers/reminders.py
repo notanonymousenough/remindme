@@ -279,7 +279,7 @@ async def add_reminder_check_answer(call: CallbackQuery, state: FSMContext):  # 
 
     answer = call.dict()["data"].split("_")[-1]
     if answer == "OK":
-        # add to remindme_api
+        # add to control_plane
 
         text = "Напоминание добавлено\!"
         await call.message.edit_text(text=text,

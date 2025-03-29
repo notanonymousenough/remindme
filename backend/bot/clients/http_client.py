@@ -3,7 +3,7 @@ import aiohttp
 
 class AsyncHttpClient:
     def __init__(self):
-        self._session = None
+        self._session = aiohttp.ClientSession()
 
     async def _create_session(self, base_url=""):
         self._session = aiohttp.ClientSession(base_url=base_url)

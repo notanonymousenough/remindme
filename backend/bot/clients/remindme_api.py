@@ -1,10 +1,30 @@
 import uuid
 from datetime import datetime, timedelta
 
+import jwt
+
 from backend.bot.clients.http_client import AsyncHttpClient
+from backend.control_plane.config import get_settings
+from backend.control_plane.routes.auth import auth_telegram
 
 
 class RemindMeApiClient(AsyncHttpClient):
+    async def get_access_token(self, user_telegram_id: int, hash):
+        endpoint = get_settings().GET_ACCESS_TOKEN_ENDPOINT
+
+        request_data = {
+            "telegram_id": user_telegram_id,
+            "hash": control_plane..utils.generate_hash()
+        }
+        token_dict = await self._session.post(
+            url=endpoint,
+            data=request_data
+        )
+        return token_dict['access_token']
+
+
+
+
     def get_reminder(self, user):  # user: User
         # database controller..
         return {
