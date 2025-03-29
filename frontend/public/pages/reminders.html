@@ -204,7 +204,6 @@
                 data.forEach(reminder => {
                     const div = document.createElement('div');
                     div.className = 'alert alert-white my-alert m-3 ';
-                    div.onClick="location.href='/edit?id=" + `${reminder.id}` + "'"
                     div.role="alert"
                     div.addEventListener('click', () => {
                       location.href = '/edit?id=' + reminder.id; 
@@ -225,7 +224,6 @@
                                 </form>
                               </div> 
                             </div>
-                          
                     `;
                     remindersContainer.appendChild(div);
                 });
