@@ -32,7 +32,7 @@ def has_correct_hash(request: Request) -> bool:
     return hmac.compare_digest(computed_hash.hexdigest(), expected_hash)
 
 
-@auth_router.get("/auth_telegram")
+@auth_router.get("/telegram")
 async def auth_telegram(
         request: Request,
         user_service: Annotated[UserService, Depends(get_user_service)],
@@ -43,10 +43,10 @@ async def auth_telegram(
         last_name: str = Query(),
         auth_date: datetime = Query(),
         hash: str = Query()
-) -> RedirectResponse:
+) -> dict:
     async with await get_async_session() as session:
         if not has_correct_hash(request):
-            raise HTTPException(401, detail="Authentication failed")
+            raise HTTPException(401, detail="Invalid Telegram hash")
 
         await user_service.create_or_update_user(
             UserTelegramDataSchema(
@@ -60,8 +60,15 @@ async def auth_telegram(
             ),
         )
         await session.commit()
+        await session.flush()
 
-        token = jwt.encode({"user_id": telegram_id}, get_settings().SECRET_KEY, algorithm="HS256")
+        user_id = user_service.get_user_by_telegram_id(telegram_id=telegram_id)  # get user_id from telegram_id
+        token = jwt.encode(
+            {"user_id": user_id},
+            get_settings().SECRET_KEY,
+            algorithm="HS256"
+        )  # encode user_id to jwt_token
+
         response = RedirectResponse("/")
         response.set_cookie(key=get_settings().AUTH_COOKIE_NAME, value=token)
-        return response  # return {"access_token": "..."}
+        return {"access_token": token}

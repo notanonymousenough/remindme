@@ -1,9 +1,7 @@
-from datetime import datetime
-from typing import TypeVar, Generic, Type, List, Optional, Any, Dict, Union
+from typing import TypeVar, Generic, Type, Optional
 
 import jwt
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.future import select
 from sqlalchemy import update, delete, func, and_, all_
 from uuid import UUID

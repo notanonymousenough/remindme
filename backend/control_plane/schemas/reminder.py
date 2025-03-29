@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-from datetime import date, datetime
+from datetime import datetime
 from typing import Optional, List
 
 
@@ -20,34 +20,3 @@ class ReminderSchema(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-class ReminderSchemaToEdit(BaseModel):
-    id: UUID = Field(..., description="reminder ID")
-    text: str = Field(None, description="Новый текст напоминания")
-    time: datetime = Field(None, description="Новое время напоминания")
-    tags: Optional[List[str]] = Field(None, description="Список тегов")
-    updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
-
-
-class ReminderSchemaToEditTime(BaseModel):
-    id: UUID = Field(..., description="reminder ID")
-    time: datetime = Field(..., description="Новое время напоминания")
-    updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
-
-
-class ReminderSchemaToComplete(BaseModel):
-    id: UUID = Field(..., description="reminder ID")
-    time: datetime = Field(..., description="Новое время напоминания")
-    updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
-
-
-class ReminderMarkAsCompleteSchema(BaseModel):
-    id: UUID = Field(..., description="reminder ID")
-    status: Optional[str] = Field(None, description="Статус напоминания")
-    updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
-    completed_at: Optional[datetime] = Field(datetime.now(), description="Время выполнения")
-
-
-class ReminderToDeleteSchema:
-    id: UUID = Field(..., description="reminder ID to delete")

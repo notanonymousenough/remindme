@@ -1,6 +1,4 @@
-from uuid import UUID
-
-from sqlalchemy import select, update
+from sqlalchemy import update, and_
 
 from backend.control_plane.db.engine import get_async_session
 from backend.control_plane.db.models import User
@@ -18,10 +16,7 @@ class UserService:
     async def get_user_by_telegram_id(self, telegram_id: int) -> User | None:
         return await self.repo.get_user_by_telegram_id(telegram_id)
 
-    async def create_or_update_user(
-            self,
-            user_data: UserTelegramDataSchema,
-    ) -> None:
+    async def create_or_update_user(self, user_data: UserTelegramDataSchema) -> None:
         """
         User is created if doesn't exist based on telegram_id.
         If exists check whether there are modified values.
@@ -31,7 +26,8 @@ class UserService:
             user = _user_service.get_user_by_telegram_id(user_data.telegram_id)
             if user is None:
                 session.add(User(**user_data.model_dump()))
-                return
+                return  # if user exist -> return
+
             db_values = user.__dict__
             if values_to_update := {
                 key: value
@@ -40,9 +36,13 @@ class UserService:
             }:
                 await session.execute(
                     update(User)
-                    .where(User.telegram_id == user_data.telegram_id)
+                    .where(
+                        and_(
+                            User.telegram_id == user_data.telegram_id
+                        )
+                    )
                     .values(values_to_update)
-                )
+                )  # if user not exist -> update user
 
 
 _user_service = UserService()

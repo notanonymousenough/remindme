@@ -1,7 +1,6 @@
 import jwt
 from fastapi import Depends
-from sqlalchemy import func, and_
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import and_
 from sqlalchemy.future import select
 
 from ..engine import get_async_session
