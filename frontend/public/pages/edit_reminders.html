@@ -26,7 +26,7 @@
       <div class="brand-name-wrapper">
         <div class="avatar">
           <img  src="../assets/icons/avatar.jpg" alt="" class="round" width="40" height="40">
-          <a class="navbar-brand" href="../pages/user.html" >
+          <a class="navbar-brand" href="/user" >
             <b> Лагорный</b>
           </a>
         </div>
@@ -34,19 +34,19 @@
       <div class="side-menu-container  ">
         <ul class="nav navbar-nav ">
           <li>
-            <a class="nav-link text-dark item" href="../pages/reminders.html">
+            <a class="nav-link text-dark item" href="/reminders">
               <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"  fill="currentColor" class="bi bi-lightbulb" viewBox="0 0 16 16"><path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1z"/></svg>
               Напоминания
             </a>
           </li>
           <li>
-            <a class="nav-link text-dark item" href="../pages/habits.html">
+            <a class="nav-link text-dark item" href="/habits">
               <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16"><path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/></svg> 
               Привычки
             </a>
           </li>
           <li>
-            <a class="nav-link text-dark item" href="../pages/telegram.html">
+            <a class="nav-link text-dark item" href="/telegram">
               <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-telegram" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/></svg>
               Телеграм-бот
             </a>
@@ -63,43 +63,100 @@
   </div>
 
   <div class="mcw">
-    <div class="row">
-      <div class="col-1 col-md-3"></div>
-      <div class="col-10  col-md-6">
-        <div class="card redact" >
-          <form action="">
-            <div class="card-header">
-              #Дом 
-              <button type="button" class="btn-close crest "  aria-label="Закрыть"></button>
-            </div>
-            <div class="card-body">
-              <input class="form-control card-title" value="Сходить за хлебом" >
-            </div>
-            <div class="card-body">
-              <div class="row">
-                <div class="col-7 col-sm-5 col-md-6 col-lg-5">
-                  <input class="calend form-control" type="datetime-local" />
-                </div>
-                <div class="col-6 col-sm-5 col-md-5 col-lg-3 delete">
-                  <a href="../pages/reminders.html" class="btn btn-danger ">Удалить</a>
-                </div>
-                <div class="col-5 col-sm-10 col-md-4 col-lg-3 save">
-                  <a href="../pages/reminders.html" class="btn btn-primary  ">Сохранить</a>
-                </div>
-                <div class="col-1"></div>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-      <div class="col-1 col-md-3 " ></div>
+    
+  
+
+    <div class="container mt-5">
+      <div id="edit"></div>
     </div>
-  </div>   
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const reminderId = urlParams.get('id');
+
+    fetch('/api/reminders/')
+        .then(response => response.json())
+        .then(data => {
+            const reminder = data.find(item => item.id === reminderId);
+            if (reminder) {
+                document.getElementById('edit').innerHTML = `
+                  <div class="row">
+                    <div class="col-1 col-md-2"></div>
+                    <div class="col-10  col-md-8">
+                      <div class="card redact" >
+                        <form action="">
+                          <div class="card-header">
+                            #${reminder.tags.join(', ')} 
+                            <button type="button" class="btn-close crest " onclick="history.back()"  aria-label="Закрыть"></button>
+                          </div>
+                          <div class="card-body">
+                            <input class="form-control card-title" value="${reminder.text}" >
+                          </div>
+                          <div class="card-body">
+                            <div class="row">
+                              <div class="col-12">
+                               <input class="calend form-control" type="datetime-local" value="${new Date(reminder.time).toISOString().slice(0, 16)}" />
+                              </div>
+                              <div class="col-6 col-sm-7 col-md-7 col-lg-7 delete">
+                                <a href="/reminders" class="btn btn-danger ">Удалить</a>
+                              </div>
+                              <div class="col-5 col-sm-3 col-md-3 col-lg-3 save">
+                                <a href="/reminders" class="btn btn-primary  ">Сохранить</a>
+                              </div>
+                              <div class="col-1"></div>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                    <div class="col-1 col-md-2 " ></div>
+                  </div>
+                `;
+            } else {
+                document.getElementById('edit').innerHTML = '<p>Напоминание не найдено.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка получения данных:', error);
+            document.getElementById('edit').innerHTML = '<p>Произошла ошибка при загрузке данных.</p>';
+        });
+</script>
 
   <script src="../js/lib/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="../js/components/navbar.js"></script>
-
+  <script>
+    fetch('/api/reminders/')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Сетевой ответ не в порядке');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const remindersContainer = document.getElementById('edit');
+                data.forEach(reminder => {
+                    const div = document.createElement('div');
+                const reminderId = req.query.id;
+                const reminder = reminders.find(r => r.id === reminderId);
+    
+    if (reminder) {
+        res.send(`
+            <h1>Редактировать Напоминание</h1>
+            <p><strong>Текст:</strong> ${reminder.text}</p>
+            <p><strong>Время:</strong> ${new Date(reminder.time).toLocaleString()}</p>
+            <p><strong>Теги:</strong> #${reminder.tags.join(', ')}</p>
+            <p><strong>Статус:</strong> ${reminder.status}</p>
+            <!-- Здесь можно добавить возможность редактирования -->
+            <button onclick="history.back()">Назад</button>
+              `);
+          } else {
+              res.status(404).send('Напоминание не найдено');
+          }
+        })
+      })
+  </script>
 </body>  
 </html>
