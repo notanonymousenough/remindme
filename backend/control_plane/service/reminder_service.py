@@ -1,50 +1,43 @@
 from datetime import datetime
-from typing import List
+from typing import List, Any, Coroutine
 from uuid import UUID
 
 from fastapi.params import Depends
 import jwt
+from mypyc.ir.ops import Sequence
+from numpy.random.mtrand import Sequence
 
 from backend.control_plane.config import get_settings
 from backend.control_plane.db.models import Reminder
 from backend.control_plane.db.repositories.reminder import ReminderRepository
-from backend.control_plane.schemas.reminder import ReminderSchema
+from backend.control_plane.schemas.reminder import ReminderSchema, ReminderSchemaToEdit, ReminderSchemaToEditTime, \
+    ReminderMarkAsCompleteSchema, ReminderToDeleteSchema
 
 
 class RemindersService:
     def __init__(self):
         self.repo = ReminderRepository()
 
-    # Спросить про аутентификацию, как будет юзер айди передаваться и использовать его в сервисе
+    async def get_reminders(self) -> Sequence[Reminder]:
+        return await self.repo.get_active_reminders()
 
-    async def get_reminders(self) -> List[Reminder]:
-        reminder_models = await self.repo.get_active_by_user()
-        result = []
-        for reminder_model in reminder_models:
-            result.append(Reminder.model_validate(reminder_model))
+    async def reminder_update(self, reminder: ReminderSchemaToEdit) -> Reminder:
+        return await self.repo.update_model(model_id=reminder.id, **vars(reminder))
 
-        return result
+    async def reminder_delete(self, reminder: ReminderToDeleteSchema) -> bool:
+        return await self.repo.delete_model(model_id=reminder.id)
 
-    async def reminder_update(self, reminder_id: UUID, **kwargs) -> Reminder:
-        # todo: оперируем схемами
-        return await self.repo.update_model(reminder_id, **kwargs)
-
-    async def reminder_delete(self, reminder_id: UUID):
-        return await self.repo.delete_model(reminder_id)
-
-    async def reminder_create(self, request: ReminderSchema, token: str = Depends(get_settings().OAUTH2_SCHEME)):
-        user_id = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
-        request.user_id = user_id
+    async def reminder_create(self, request: ReminderSchema) -> Reminder:
         return await self.repo.create(**vars(request))
 
-    async def reminder_get_all(self):
+    async def reminder_get_all(self) -> Sequence[Reminder]:
         return await self.repo.get_models()
 
-    async def mark_as_complete(self, reminder_id: UUID):
-        return await self.repo.mark_as_completed(reminder_id)
+    async def mark_as_complete(self, reminder: ReminderMarkAsCompleteSchema) -> Reminder:
+        return await self.repo.mark_as_completed(reminder=reminder)
 
-    async def postpone(self, reminder_id: UUID, new_time: datetime):
-        return await self.repo.postpone(reminder_id=reminder_id, new_time=new_time)
+    async def postpone(self, reminder: ReminderSchemaToEditTime) -> Reminder:
+        return await self.repo.postpone(reminder=reminder)
 
 
 _reminders_service = RemindersService()

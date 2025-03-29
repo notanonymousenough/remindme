@@ -23,7 +23,8 @@ class BaseRepository(Generic[T]):
 
     async def create(self, token: str = Depends(get_settings().OAUTH2_SCHEME), **kwargs) -> T:
         async with await get_async_session() as session:
-            user_id = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+            decoded_jwt = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+            user_id = decoded_jwt.get("user_id")
 
             obj = self.model(**kwargs)
             obj.user_id = user_id
@@ -35,33 +36,46 @@ class BaseRepository(Generic[T]):
 
     async def get_by_model_id(self, model_id: UUID, token: str = Depends(get_settings().OAUTH2_SCHEME)) -> Optional[T]:
         async with await get_async_session() as session:
-            user_id = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+            decoded_jwt = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+            user_id = decoded_jwt.get("user_id")
 
             stmt = select(self.model).where(
                 and_(
-                    self.model.user_id == user_id,
-                    self.model.id == model_id
+                    getattr(self.model, "user_id") == user_id,
+                    getattr(self.model, "id") == model_id
                 ).returning(self.model)
             )
             result = await session.execute(stmt)
             return result.scalars().one_or_none()
 
-    async def get_models(self, token: str = Depends(get_settings().OAUTH2_SCHEME)) -> Optional[T]:
+    async def get_models(self, token: str = Depends(get_settings().OAUTH2_SCHEME), **kwargs) -> Optional[T]:
         async with await get_async_session() as session:
-            user_id = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+            decoded_jwt = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+            user_id = decoded_jwt.get("user_id")
 
-            stmt = select(self.model).where(self.model.user_id == user_id).returning(self.model)
+            stmt = select(self.model).where(
+                and_(
+                    getattr(self.model, "user_id") == user_id
+                )
+            )
+            for key, value in kwargs.items():
+                stmt = stmt.where(
+                    and_(
+                        getattr(self.model, key) == value
+                    )
+                )
             result = await session.execute(stmt)
             return result.scalars().all()
 
     async def update_model(self, model_id: UUID, token: str = Depends(get_settings().OAUTH2_SCHEME), **kwargs) -> Optional[T]:
         async with await get_async_session() as session:
-            user_id = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+            decoded_jwt = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+            user_id = decoded_jwt.get("user_id")
 
             stmt = update(self.model).where(
                 and_(
-                    self.model.user_id == user_id,
-                    self.model.id == model_id
+                    getattr(self.model, "user_id") == user_id,
+                    getattr(self.model, "id") == model_id
                 )
             ).values(**kwargs).returning(self.model)
             result = await session.execute(stmt)
@@ -70,12 +84,13 @@ class BaseRepository(Generic[T]):
 
     async def delete_model(self, model_id: UUID, token: str = Depends(get_settings().OAUTH2_SCHEME)) -> bool:
         async with await get_async_session() as session:
-            user_id = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+            decoded_jwt = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+            user_id = decoded_jwt.get("user_id")
 
             stmt = delete(self.model).where(
                 and_(
-                    self.model.user_id == user_id,
-                    self.model.id == model_id
+                    getattr(self.model, "user_id") == user_id,
+                    getattr(self.model, "id") == model_id
                 )
             )
             result = await session.execute(stmt)
@@ -84,15 +99,20 @@ class BaseRepository(Generic[T]):
 
     async def count_models(self, token: str = Depends(get_settings().OAUTH2_SCHEME), **kwargs) -> int:
         async with await get_async_session() as session:
-            user_id = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+            decoded_jwt = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+            user_id = decoded_jwt.get("user_id")
 
             stmt = select(func.count()).select_from(self.model).where(
                 and_(
-                    self.model.user_id == user_id
+                    getattr(self.model, "user_id") == user_id
                 )
             )
             for key, value in kwargs.items():
                 if value is not None:
-                    stmt = stmt.where(getattr(self.model, key) == value)
+                    stmt = stmt.where(
+                        and_(
+                            getattr(self.model, key) == value
+                        )
+                    )
             result = await session.execute(stmt)
             return result.scalar_one()

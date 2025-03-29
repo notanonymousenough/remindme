@@ -48,7 +48,7 @@ async def reminder_edit(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
         reminder_id: UUID = Path(..., title="The ID of the reminder to edit")
 ):
-    reminder = await reminder_service.reminder_update(reminder_id, **vars(request))
+    reminder = await reminder_service.reminder_update(reminder_id, request)
     return reminder
 
 

@@ -7,10 +7,10 @@ from typing import Optional, List
 
 class ReminderSchema(BaseModel):
     id: Optional[UUID] = Field(None, description="ID напоминания")
-    user_id: UUID = Field(..., description="ID пользователя, создавшего напоминание")
+    user_id: UUID = Field(None, description="ID пользователя, создавшего напоминание")
     text: str = Field(..., description="Текст напоминания")
     time: datetime = Field(..., description="Время напоминания")
-    #tags: Optional[List[str]] = Field(None, description="Список тегов")
+    tags: Optional[List[str]] = Field(None, description="Список тегов")
     status: Optional[str] = Field(None, description="Статус напоминания")
     removed: Optional[bool] = Field(None, description="Признак удаления напоминания")
     created_at: Optional[datetime] = Field(datetime.now(), description="Время создания")
@@ -23,13 +23,31 @@ class ReminderSchema(BaseModel):
 
 
 class ReminderSchemaToEdit(BaseModel):
-    user_id: Optional[UUID] = Field(..., description="ID пользователя")
-    text: str = Field(..., description="Новый текст напоминания")
-    time: datetime = Field(..., description="Новое время напоминания")
-    # tags: Optional[List[str]] = Field(None, description="Список тегов")
+    id: UUID = Field(..., description="reminder ID")
+    text: str = Field(None, description="Новый текст напоминания")
+    time: datetime = Field(None, description="Новое время напоминания")
+    tags: Optional[List[str]] = Field(None, description="Список тегов")
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
 
 
-class ReminderSchemaTime(BaseModel):
-    user_id: Optional[UUID] = Field(..., description="ID пользователя")
+class ReminderSchemaToEditTime(BaseModel):
+    id: UUID = Field(..., description="reminder ID")
     time: datetime = Field(..., description="Новое время напоминания")
+    updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
+
+
+class ReminderSchemaToComplete(BaseModel):
+    id: UUID = Field(..., description="reminder ID")
+    time: datetime = Field(..., description="Новое время напоминания")
+    updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
+
+
+class ReminderMarkAsCompleteSchema(BaseModel):
+    id: UUID = Field(..., description="reminder ID")
+    status: Optional[str] = Field(None, description="Статус напоминания")
+    updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
+    completed_at: Optional[datetime] = Field(datetime.now(), description="Время выполнения")
+
+
+class ReminderToDeleteSchema:
+    id: UUID = Field(..., description="reminder ID to delete")

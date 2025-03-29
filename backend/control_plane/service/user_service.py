@@ -12,8 +12,8 @@ class UserService:
     def __init__(self):
         self.repo = UserRepository()
 
-    async def get_user_by_user_id(self, user_id: UUID) -> User | None:
-        # return await self.repo.get(user_id)  # TODO(Arsen)
+    async def get_user(self) -> User | None:
+        return await self.repo.get_user()  # TODO(Arsen)
 
     async def get_user_by_telegram_id(self, telegram_id: int) -> User | None:
         return await self.repo.get_user_by_telegram_id(telegram_id)
