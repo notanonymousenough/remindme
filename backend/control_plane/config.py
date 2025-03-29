@@ -29,6 +29,8 @@ class DefaultSettings(BaseSettings):
     SECRET_KEY: str = environ.get("SECRET_KEY", "")
     ALGORITHM: str = environ.get("ALGORITHM", "HS256")
 
+    GET_ACCESS_TOKEN_ENDPOINT = "/auth/telegram"
+
     AUTH_COOKIE_NAME: str = "auth"
 
     POSTGRES_USER: str = environ.get("POSTGRES_USER")  # TELEGRAM SETTINGS

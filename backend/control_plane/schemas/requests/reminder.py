@@ -5,6 +5,8 @@ from uuid import UUID
 from fastapi.params import Path
 from pydantic import BaseModel, Field
 
+from backend.control_plane.db.models import ReminderStatus
+
 
 class ReminderToEditRequestSchema(BaseModel):
     id: UUID = Path(..., description="reminder ID")
@@ -20,15 +22,9 @@ class ReminderToEditTimeRequestSchema(BaseModel):
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
 
 
-class ReminderToCompleteRequestSchema(BaseModel):
-    id: UUID = Path(..., description="reminder ID")
-    time: datetime = Field(..., description="Новое время напоминания")
-    updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
-
-
 class ReminderMarkAsCompleteRequestSchema(BaseModel):
     id: UUID = Path(..., description="reminder ID")
-    status: Optional[str] = Field(None, description="Статус напоминания")
+    status: Optional[str] = Field(ReminderStatus.COMPLETED, description="Статус напоминания")
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
     completed_at: Optional[datetime] = Field(datetime.now(), description="Время выполнения")
 

@@ -36,13 +36,13 @@ def has_correct_hash(request: Request) -> bool:
 async def auth_telegram(
         request: Request,
         user_service: Annotated[UserService, Depends(get_user_service)],
-        telegram_id: int = Query(alias="id"),
-        first_name: str = Query(),
-        username: str = Query(),
-        photo_url: str = Query(),
-        last_name: str = Query(),
-        auth_date: datetime = Query(),
-        hash: str = Query()
+        telegram_id: int = Query(None, alias="id"),
+        first_name: str = Query(default=None),
+        username: str = Query(default=None),
+        photo_url: str = Query(default=None),
+        last_name: str = Query(default=None),
+        auth_date: datetime = Query(default=None),
+        hash: str = Query(default=None)  # TODO(Arsen): use AuthScheme
 ) -> dict:
     async with await get_async_session() as session:
         if not has_correct_hash(request):
@@ -72,3 +72,5 @@ async def auth_telegram(
         response = RedirectResponse("/")
         response.set_cookie(key=get_settings().AUTH_COOKIE_NAME, value=token)
         return {"access_token": token}
+
+

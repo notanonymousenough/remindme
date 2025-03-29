@@ -4,9 +4,10 @@ from aiohttp.web_response import Response
 from fastapi import APIRouter, Depends
 
 from backend.control_plane.db.init_db import create_tables, drop_tables
+from backend.control_plane.schemas.requests.reminder import ReminderMarkAsCompleteRequestSchema
 from backend.control_plane.service.reminder_service import get_reminder_service, RemindersService
 from backend.control_plane.schemas import ReminderToDeleteRequestSchema, \
-    ReminderToCompleteRequestSchema, ReminderToEditTimeRequestSchema, ReminderToEditRequestSchema, ReminderSchema
+    ReminderToEditTimeRequestSchema, ReminderToEditRequestSchema, ReminderSchema
 
 reminder_router = APIRouter(
     prefix="/reminder",
@@ -118,7 +119,7 @@ async def reminder_delete(
 )
 async def reminder_to_complete(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderToCompleteRequestSchema = Depends()
+        request: ReminderMarkAsCompleteRequestSchema = Depends()
 ) -> ReminderSchema:
     reminder = await reminder_service.mark_as_complete(reminder=request)
     return reminder

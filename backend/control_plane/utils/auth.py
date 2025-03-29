@@ -29,3 +29,7 @@ async def get_current_user(
     if not (user := await user_service.get_user_by_user_id(user_id)):
         raise auth_exception
     return user
+
+
+async def generate_hash(user_):
+    pass
