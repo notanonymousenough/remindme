@@ -24,12 +24,12 @@ app.use(session({
 // Прокси для аутентификации через Telegram
 app.get('/api/auth/telegram', async (req, res) => {
   try {
-    const response = await axios.post(`${BACKEND_URL}/api/auth/telegram`, req.query);
-    console.log(response);
-    req.session.token = response.data.token; // Сохраняем токен в сессии
+    const response = await axios.post(`${BACKEND_URL}/api/auth/telegram`, req.body);
+    req.session.token = response.data.access_token; // Сохраняем токен в сессии
     res.redirect('/reminders');
   } catch (error) {
     res.status(error.response?.status || 500).json({ error: error.message });
+    console.log("UPS")
   }
 });
 
@@ -54,26 +54,12 @@ app.get('/user', function(req, res) {
 app.get('/telegram', function(req, res) {
   res.sendfile('public/pages/telegram.html');
 });
-/*app.get('/authed', async(req, res) => {
-  try {
-    console.log(req.query);
-    const response = await axios.post(`${BACKEND_URL}/api/auth/telegram`, req.query);
-    console.log(response);
-    req.session.token = response.data.token; // Сохраняем токен в сессии
-    res.json({ token: response.data.token });
-  } catch (error) {
-     res.status(error.response?.status || 500).json({ error: error.message });
-  }
-});*/
-
-
-
 
 // Прокси для всех остальных запросов к бэкенду
 app.use('/api', async (req, res) => {
-  if (!req.session.token) {
+ if (!req.session.token) {
     return res.status(401).json({ error: 'Unauthorized' });
-  }
+ }
 
   try {
     const config = {
@@ -84,8 +70,6 @@ app.use('/api', async (req, res) => {
       },
       data: req.body
     };
-    console.log(req.session.token)
-
     const response = await axios(config);
     res.json(response.data);
   } catch (error) {
