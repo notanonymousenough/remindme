@@ -4,8 +4,10 @@ const axios = require('axios');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
+
 const app = express();
-const PORT = 80;
+require('dotenv').config();
+const PORT = process.env.PORT;
 const BACKEND_URL = 'http://158.160.114.109:8000'; // URL вашего бэкенда
 
 app.use(cors({
@@ -22,6 +24,8 @@ app.use(session({
 }));
 
 // Прокси для аутентификации через Telegram
+
+
 app.get('/api/auth/telegram', async (req, res) => {
   try {
     const response = await axios.post(`${BACKEND_URL}/api/auth/telegram`, req.body);
@@ -29,9 +33,21 @@ app.get('/api/auth/telegram', async (req, res) => {
     res.redirect('/reminders');
   } catch (error) {
     res.status(error.response?.status || 500).json({ error: error.message });
-    console.log("UPS")
   }
 });
+const checkToken = (req, res, next) => {
+  if (req.path.startsWith('/css/') || req.path.startsWith('/js/') || req.path.startsWith('/assets/')) {
+    return next();
+  }
+  if (!req.session.token) { // Проверяем, сохранён ли токен в сессии
+    if (req.path !== '/telegram') { // Если мы не на странице /telegram
+      return res.redirect('/telegram'); // Перенаправляем на /telegram
+    }
+  }
+  next(); // Если токен есть или мы на /telegram, продолжаем обработку
+};
+
+app.use(checkToken);
 
 app.get('/', (req, res) => {
   res.redirect('/reminders');
@@ -72,6 +88,7 @@ app.use('/api', async (req, res) => {
     };
     const response = await axios(config);
     res.json(response.data);
+    
   } catch (error) {
     res.status(error.response?.status || 500).json({ error: error.message });
   }
