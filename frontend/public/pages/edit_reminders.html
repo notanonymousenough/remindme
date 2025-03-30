@@ -63,9 +63,6 @@
   </div>
 
   <div class="mcw">
-    
-  
-
     <div class="container mt-5">
       <div id="edit"></div>
     </div>
@@ -121,42 +118,12 @@
             console.error('Ошибка получения данных:', error);
             document.getElementById('edit').innerHTML = '<p>Произошла ошибка при загрузке данных.</p>';
         });
-</script>
+  </script>
 
   <script src="../js/lib/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="../js/components/navbar.js"></script>
-  <script>
-    fetch('/api/reminders/')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Сетевой ответ не в порядке');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const remindersContainer = document.getElementById('edit');
-                data.forEach(reminder => {
-                    const div = document.createElement('div');
-                const reminderId = req.query.id;
-                const reminder = reminders.find(r => r.id === reminderId);
-    
-    if (reminder) {
-        res.send(`
-            <h1>Редактировать Напоминание</h1>
-            <p><strong>Текст:</strong> ${reminder.text}</p>
-            <p><strong>Время:</strong> ${new Date(reminder.time).toLocaleString()}</p>
-            <p><strong>Теги:</strong> #${reminder.tags.join(', ')}</p>
-            <p><strong>Статус:</strong> ${reminder.status}</p>
-            <!-- Здесь можно добавить возможность редактирования -->
-            <button onclick="history.back()">Назад</button>
-              `);
-          } else {
-              res.status(404).send('Напоминание не найдено');
-          }
-        })
-      })
-  </script>
+ 
 </body>  
 </html>
