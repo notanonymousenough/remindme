@@ -1,5 +1,5 @@
-from backend.control_plane.routes.auth import api_router as auth_router
-from backend.control_plane.routes.reminder import api_router as reminder_router
+from backend.control_plane.routes.auth import auth_router
+from backend.control_plane.routes.reminder import reminder_router
 
 
 list_of_routes = [

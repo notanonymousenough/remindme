@@ -776,16 +776,6 @@ components:
           type: integer
         experience:
           type: integer
-        dailyActivity:
-          type: array
-          items:
-            type: object
-            properties:
-              date:
-                type: string
-                format: date
-              completedItems:
-                type: integer
 
   securitySchemes:
     BearerAuth:

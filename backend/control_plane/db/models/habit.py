@@ -36,7 +36,7 @@ class HabitProgress(BaseModel):
     completed = Column(Boolean, default=False)
 
     # Отношения
-    # habit = relationship("Habit", back_populates="progress_records")
+    habit = relationship("Habit", back_populates="progress_records")
 
     # Ограничения
     __table_args__ = (

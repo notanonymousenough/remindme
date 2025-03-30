@@ -3,11 +3,12 @@ from typing import Annotated, Sequence
 from aiohttp.web_response import Response
 from fastapi import APIRouter, Depends
 
-from backend.control_plane.db.init_db import create_tables, drop_tables
+from backend.control_plane.config import get_settings
 from backend.control_plane.schemas.requests.reminder import ReminderMarkAsCompleteRequestSchema
 from backend.control_plane.service.reminder_service import get_reminder_service, RemindersService
 from backend.control_plane.schemas import ReminderToDeleteRequestSchema, \
     ReminderToEditTimeRequestSchema, ReminderToEditRequestSchema, ReminderSchema
+from backend.control_plane.utils.auth import get_user_id_from_access_token
 
 reminder_router = APIRouter(
     prefix="/reminder",
@@ -15,35 +16,25 @@ reminder_router = APIRouter(
 )
 
 
-@reminder_router.get("/drop")  # временно
-async def drop_tables_():
-    await drop_tables()
-    await create_tables()
-    return "tables dropped"
-
-
 @reminder_router.post(
     path="/",
     responses={
         201: {
-            "description": "Напоминание успешно создано",
-            "content": {
-                "application/json": {
-                    "schema": ReminderSchema.model_json_schema()
-                }
-            }
+            "description": "Напоминание успешно создано"
         }
     }
 )
 async def reminder_add(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderSchema = Depends()
+        request: ReminderSchema = Depends(),
+        token: str = Depends(get_settings().OAUTH2_SCHEME)
 ) -> ReminderSchema:
     # TODO: try to call yandex gpt client
     # in client check global quota (maybe raise exception QuotaExceeded)
     # catch exceptions => return stupid reminder
     # success => return smart reminder
-    reminder = await reminder_service.reminder_create(request)
+    user_id = get_user_id_from_access_token(token)
+    reminder = await reminder_service.reminder_create(user_id=user_id, request=request)
     return reminder
 
 
@@ -51,19 +42,16 @@ async def reminder_add(
     path="/",
     responses={
         200: {
-            "description": "Список напоминаний",
-            "content": {
-                "application/json": {
-                    "schema": Sequence[ReminderSchema.model_json_schema()]
-                }
-            }
+            "description": "Список напоминаний"
         }
     }
 )
-async def reminders_get_all(
-        reminder_service: Annotated[RemindersService, Depends(get_reminder_service)]
+async def reminders_get_active(
+        reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
+        token: str = Depends(get_settings().OAUTH2_SCHEME),
 ) -> Sequence[ReminderSchema]:
-    reminders = await reminder_service.reminder_get_all()
+    user_id = get_user_id_from_access_token(token)
+    reminders = await reminder_service.reminder_get_all_active(user_id=user_id)
     return reminders
 
 
@@ -71,20 +59,18 @@ async def reminders_get_all(
     path="/{reminder_id}",
     responses={
         200: {
-            "description": "Напоминание успешно обновлено",
-            "content": {
-                "application/json": {
-                    "schema": ReminderSchema.model_json_schema()
-                }
-            }
+            "description": "Напоминание успешно обновлено"
         }
     }
 )
 async def reminder_edit(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderToEditRequestSchema = Depends()
+        request: ReminderToEditRequestSchema = Depends(),
+        token: str = Depends(get_settings().OAUTH2_SCHEME),
 ) -> ReminderSchema:
-    reminder = await reminder_service.reminder_update(reminder=request)
+    user_id = get_user_id_from_access_token(token)
+
+    reminder = await reminder_service.reminder_update(user_id=user_id, reminder=request)
     return reminder
 
 
@@ -98,9 +84,12 @@ async def reminder_edit(
 )
 async def reminder_delete(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderToDeleteRequestSchema = Depends()
-) -> Response:
-    await reminder_service.reminder_delete(reminder=request)
+        request: ReminderToDeleteRequestSchema = Depends(),
+        token: str = Depends(get_settings().OAUTH2_SCHEME)
+):
+    user_id = get_user_id_from_access_token(token)
+
+    await reminder_service.reminder_delete(user_id=user_id, reminder=request)
     return Response(status=204)
 
 
@@ -108,20 +97,17 @@ async def reminder_delete(
     path="/{reminder_id}/complete",
     responses={
         200: {
-            "description": "Напоминание отмечено как выполненное",
-            "content": {
-                "application/json": {
-                    "schema": ReminderSchema.model_json_schema()
-                }
-            }
+            "description": "Напоминание отмечено как выполненное"
         }
     }
 )
 async def reminder_to_complete(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderMarkAsCompleteRequestSchema = Depends()
+        request: ReminderMarkAsCompleteRequestSchema = Depends(),
+        token: str = Depends(get_settings().OAUTH2_SCHEME)
 ) -> ReminderSchema:
-    reminder = await reminder_service.mark_as_complete(reminder=request)
+    user_id = get_user_id_from_access_token(token)
+    reminder = await reminder_service.mark_as_complete(user_id=user_id, reminder=request)
     return reminder
 
 
@@ -129,18 +115,15 @@ async def reminder_to_complete(
     path="/{reminder_id}/postpone",
     responses={
         200: {
-            "description": "Напоминание отложено",
-            "content": {
-                "application/json": {
-                    "schema": ReminderSchema.model_json_schema()
-                }
-            }
+            "description": "Напоминание отложено"
         }
     }
 )
 async def reminder_postpone(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderToEditTimeRequestSchema = Depends()
+        request: ReminderToEditTimeRequestSchema = Depends(),
+        token: str = Depends(get_settings().OAUTH2_SCHEME)
 ) -> ReminderSchema:
-    reminder = await reminder_service.postpone(reminder=request)
+    user_id = get_user_id_from_access_token(token)
+    reminder = await reminder_service.postpone(user_id=user_id, reminder=request)
     return reminder

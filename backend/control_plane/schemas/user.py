@@ -3,7 +3,6 @@ from datetime import date, datetime
 from enum import Enum as PyEnum
 from uuid import UUID
 
-from bson import timestamp
 from pydantic import BaseModel, Field
 
 
@@ -26,7 +25,7 @@ class UserSchema(BaseModel):
     last_name: Optional[str] = Field(None, description="Фамилия пользователя.")
     birth_date: Optional[date] = Field(None, description="Дата рождения пользователя.")
     telegram_id: str = Field(None, description="Телеграм айди")
-    calendar_integration_key: str = Field(None, description="Calendar integration key")
+    calendar_integration_key: Optional[str] = Field(None, description="Calendar integration key")
     timezone: str = Field("UTC", description="Часовой пояс пользователя для локализации времени.")
     level: int = Field(1, description="level user")
     experience: int = Field(0, description="exp user")
@@ -49,7 +48,7 @@ class UserAddShema(BaseModel):
 
 
 class UserTelegramDataSchema(BaseModel):
-    telegram_id: int
+    telegram_id: str
     first_name: str
     last_name: str
     username: str

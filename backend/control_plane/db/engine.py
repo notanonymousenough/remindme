@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 import os
 import logging
 
@@ -13,7 +12,7 @@ logger.setLevel(logging.INFO)
 
 # Получение параметров подключения из переменных окружения
 load_dotenv()
-DATABASE_URL = os.environ.get("DATABASE_URL", "")
+DATABASE_URL = get_settings().DATABASE_URI
 
 # Создание асинхронного движка SQLAlchemy
 engine = create_async_engine(
@@ -24,10 +23,6 @@ engine = create_async_engine(
     pool_timeout=int(os.environ.get("SQL_POOL_TIMEOUT", "30")),
     pool_recycle=int(os.environ.get("SQL_POOL_RECYCLE", "1800")),
 )
-
-# Базовый класс для моделей SQLAlchemy
-Base = declarative_base()
-
 
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 

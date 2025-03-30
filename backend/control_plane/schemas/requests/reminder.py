@@ -29,5 +29,5 @@ class ReminderMarkAsCompleteRequestSchema(BaseModel):
     completed_at: Optional[datetime] = Field(datetime.now(), description="Время выполнения")
 
 
-class ReminderToDeleteRequestSchema:
+class ReminderToDeleteRequestSchema(BaseModel):
     id: UUID = Path(..., description="reminder ID to delete")

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import jwt
 from fastapi import Depends
 from sqlalchemy import and_
@@ -13,11 +15,8 @@ class UserRepository(BaseRepository[User]):
     def __init__(self):
         super().__init__(User)
 
-    async def get_user(self, token: str = Depends(get_settings().OAUTH2_SCHEME)) -> User:
+    async def get_user(self, user_id: UUID) -> User | None:
         async with await get_async_session() as session:
-            decoded_jwt = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
-            user_id = decoded_jwt.get("user_id")
-
             state = select(self.model).where(
                 and_(
                     getattr(self.model, "id") == user_id
@@ -28,7 +27,7 @@ class UserRepository(BaseRepository[User]):
             await session.flush()
             return result.scalars().one()
 
-    async def get_user_by_telegram_id(self, telegram_id) -> User | None:
+    async def get_user_by_telegram_id(self, telegram_id: str) -> User | None:
         async with await get_async_session() as session:
             state = select(self.model).where(
                 and_(

@@ -16,61 +16,40 @@ from backend.control_plane.service.user_service import get_user_service, UserSer
 
 auth_router = APIRouter(
     prefix="/auth",
-    tags=["User"],
+    tags=["Auth"],
 )
 
 settings = get_settings()
 
 
-def has_correct_hash(request: Request) -> bool:
+def has_correct_hash(request: UserTelegramDataSchema) -> bool:
     """More on this here: https://core.telegram.org/widgets/login#checking-authorization"""
-    params = request.query_params._dict
+    params = request.model_dump()
     expected_hash = params.pop("hash")
+
     sorted_params = sorted(f"{x}={y}" for x, y in params.items())
     data_check_bytes = "\n".join(sorted_params).encode()
     computed_hash = hmac.new(settings.bot_token_hash_bytes, data_check_bytes, "sha256")
+    print(computed_hash.hexdigest())
     return hmac.compare_digest(computed_hash.hexdigest(), expected_hash)
 
 
-@auth_router.get("/telegram")
+@auth_router.post("/telegram")
 async def auth_telegram(
-        request: Request,
-        user_service: Annotated[UserService, Depends(get_user_service)],
-        telegram_id: int = Query(None, alias="id"),
-        first_name: str = Query(default=None),
-        username: str = Query(default=None),
-        photo_url: str = Query(default=None),
-        last_name: str = Query(default=None),
-        auth_date: datetime = Query(default=None),
-        hash: str = Query(default=None)  # TODO(Arsen): use AuthScheme
+        request: UserTelegramDataSchema,
+        user_service: Annotated[UserService, Depends(get_user_service)]
 ) -> dict:
     async with await get_async_session() as session:
         if not has_correct_hash(request):
             raise HTTPException(401, detail="Invalid Telegram hash")
 
-        await user_service.create_or_update_user(
-            UserTelegramDataSchema(
-                telegram_id=telegram_id,
-                username=username,
-                first_name=first_name,
-                last_name=last_name,
-                photo_url=photo_url,
-                auth_date=auth_date,
-                hash=hash
-            ),
-        )
-        await session.commit()
-        await session.flush()
+        await user_service.create_or_update_user(request)
 
-        user_id = user_service.get_user_by_telegram_id(telegram_id=telegram_id)  # get user_id from telegram_id
+        user = await user_service.get_user_by_telegram_id(telegram_id=request.telegram_id)  # get user_id from telegram_id
         token = jwt.encode(
-            {"user_id": user_id},
+            {"user_id": str(user.id)},
             get_settings().SECRET_KEY,
             algorithm="HS256"
         )  # encode user_id to jwt_token
 
-        response = RedirectResponse("/")
-        response.set_cookie(key=get_settings().AUTH_COOKIE_NAME, value=token)
         return {"access_token": token}
-
-

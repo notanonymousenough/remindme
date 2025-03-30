@@ -31,5 +31,11 @@ async def get_current_user(
     return user
 
 
+def get_user_id_from_access_token(token):
+    decoded_jwt = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+    user_id = decoded_jwt.get("user_id")
+    return user_id
+
+
 async def generate_hash(user_):
     pass
