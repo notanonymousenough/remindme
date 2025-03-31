@@ -34,8 +34,8 @@ class UserService:
                 user_data = {key:value for key, value in user_data.model_dump().items()
                              if key not in ["photo_url", "auth_date", "hash"]}
                 session.add(User(**user_data))
-                await session.flush()
                 await session.commit()
+                await session.flush()
 
                 return UserSchema.model_validate(user_data)
 

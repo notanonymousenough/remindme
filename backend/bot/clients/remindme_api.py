@@ -5,7 +5,6 @@ import jwt
 
 from backend.bot.clients.http_client import AsyncHttpClient
 from backend.control_plane.config import get_settings
-from backend.control_plane.routes.auth import auth_telegram
 
 
 class RemindMeApiClient(AsyncHttpClient):

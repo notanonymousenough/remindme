@@ -1,13 +1,14 @@
-from datetime import datetime
-from typing import Annotated
+from datetime import datetime, timedelta
+from typing import Annotated, Any, Coroutine
 
 import jwt
 import hmac
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Cookie
 from fastapi.params import Depends
 from fastapi.requests import Request
 from fastapi.responses import RedirectResponse
+from starlette.responses import RedirectResponse
 
 from backend.control_plane.config import get_settings
 from backend.control_plane.db.engine import get_async_session
@@ -38,18 +39,21 @@ def has_correct_hash(request: UserTelegramDataSchema) -> bool:
 async def auth_telegram(
         request: UserTelegramDataSchema,
         user_service: Annotated[UserService, Depends(get_user_service)]
-) -> dict:
+):
     async with await get_async_session() as session:
-        if not has_correct_hash(request):
+        if get_settings().DEBUG or not has_correct_hash(request):
             raise HTTPException(401, detail="Invalid Telegram hash")
 
         await user_service.create_or_update_user(request)
+        user = await user_service.get_user_by_telegram_id(telegram_id=request.telegram_id)  # get user from telegram_id
 
-        user = await user_service.get_user_by_telegram_id(telegram_id=request.telegram_id)  # get user_id from telegram_id
-        token = jwt.encode(
-            {"user_id": str(user.id)},
+        jwt_token = jwt.encode(
+            {
+                "exp": datetime.now() + timedelta(hours=3),
+                "user_id": str(user.id)
+            },
             get_settings().SECRET_KEY,
             algorithm="HS256"
-        )  # encode user_id to jwt_token
+        )  # TODO(): вынести в отдельную функцюи в utils/auth
 
-        return {"access_token": token}
+        return {"access_token": jwt_token, "token_type": "bearer"}

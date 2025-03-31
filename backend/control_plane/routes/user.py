@@ -1,7 +1,12 @@
-from typing import Annotated
+from typing import Annotated, Optional, Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.dependencies.models import SecurityRequirement
+from fastapi.params import Cookie
+from starlette import status
+from starlette.requests import Request
 
+from jose import JWTError, jwt
 from backend.control_plane.config import get_settings
 from backend.control_plane.schemas.user import UserSchema
 from backend.control_plane.service.user_service import UserService, get_user_service
@@ -25,8 +30,11 @@ async def add_user(
 
 @user_router.get("/")
 async def get_user(
-        user_service: Annotated[UserService, Depends(get_user_service)],
-        token: str = Depends(get_settings().OAUTH2_SCHEME)
+        # _: Request,
+        # user_service: Annotated[UserService, Depends(get_user_service)],
+        token: str = Depends(get_settings().OAUTH2_SCHEME),
+        # user: UserSchema = Depends(get_authorized_user)
 ):
+    print(token)
     user_id = get_user_id_from_access_token(token)
     return await user_service.get_user(user_id=user_id)

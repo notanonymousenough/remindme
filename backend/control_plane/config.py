@@ -31,21 +31,26 @@ class DefaultSettings(BaseSettings):
 
     GET_ACCESS_TOKEN_ENDPOINT: str = "/auth/telegram"
 
-    AUTH_COOKIE_NAME: str = "auth"
-
     POSTGRES_USER: str = environ.get("POSTGRES_USER", 'postgres')
     POSTGRES_PASSWORD: str = environ.get("POSTGRES_PASSWORD", 'postgres')
     POSTGRES_ADDRESS: str = environ.get("POSTGRES_ADDRESS", '127.0.0.1')
     POSTGRES_PORT: int = int(environ.get("POSTGRES_PORT", '5432'))
     POSTGRES_DB: str = environ.get("POSTGRES_DB", '')
 
+    DEBUG: bool = False
+
     BOT_TOKEN: str = environ.get("BOT_TOKEN", "")
 
     PWD_CONTEXT: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    OAUTH2_SCHEME: OAuth2 = OAuth2(
-        scheme_name="UserTelegramDataSchema",
-        flows=OAuthFlows(password=OAuthFlowPassword(tokenUrl=f"{APP_ADDRESS}:{APP_PORT}{PATH_PREFIX}/auth/telegram")),
+    OAUTH2_SCHEME: OAuth2PasswordBearer = OAuth2PasswordBearer(
+        scheme_name="TelegramAccessToken",
+        tokenUrl=f"{APP_ADDRESS}:{APP_PORT}{PATH_PREFIX}/auth/telegram"
     )
+
+    #OAUTH2_SCHEME: OAuth2 = OAuth2(
+    #    scheme_name="UserTelegramDataSchema",
+    #    flows=OAuthFlows(password=OAuthFlowPassword(tokenUrl=f"{APP_ADDRESS}:{APP_PORT}{PATH_PREFIX}/auth/telegram")),
+    #)
 
     @computed_field  # type: ignore
     @property

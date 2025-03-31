@@ -18,8 +18,11 @@ async def get_current_user(
         user_service: Annotated[UserService, Depends(get_user_service())]
 ) -> UserSchema:
     auth_exception = HTTPException(401, "Authentication is required")
-    if not (token := request.cookies.get(settings.AUTH_COOKIE_NAME)):
+
+    token = request.cookies.get(settings.AUTH_COOKIE_NAME)
+    if not token:
         raise auth_exception
+
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
     except jwt.InvalidTokenError:
