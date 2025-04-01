@@ -49,6 +49,7 @@ const checkToken = (req, res, next) => {
 
 app.use(checkToken);
 
+
 app.get('/', (req, res) => {
   res.redirect('/reminders');
 });
@@ -82,6 +83,7 @@ app.post('/api/reminders', async (req, res) => {
     const config = {
       method: 'POST',
       url: `${BACKEND_URL}/api/reminders`, // URL бэкенда для сохранения напоминаний
+      //url:`localhost:80/temp`,
       headers: {
         'Authorization': `Bearer ${req.session.token}`,
         'Content-Type': 'application/json'
@@ -96,6 +98,31 @@ app.post('/api/reminders', async (req, res) => {
   }
 });
 
+//Изменение маршрута на v1
+app.use('/api/reminders', async (req, res) => {
+  if (!req.session.token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const url = `${BACKEND_URL}/v1/reminders`;
+  console.log(`Redirecting request from ${req.originalUrl} to ${url}`);
+  try {
+    const config = {
+      method: req.method,
+      url: url, // Измените URL на BACKEND_URL/v1/reminders
+      headers: {
+        'Authorization': `Bearer ${req.session.token}`,
+        'Content-Type': req.method === 'POST' ? 'application/json' : undefined
+      },
+      data: req.method === 'POST' ? req.body : undefined // Отправляем данные только для POST-запроса
+    }
+    const response = await axios(config);
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res.status(error.response?.status || 500).json({ error: error.message });
+  }
+});
+
 // Прокси для всех остальных запросов к бэкенду
 app.use('/api', async (req, res) => {
  if (!req.session.token) {
@@ -103,6 +130,7 @@ app.use('/api', async (req, res) => {
  }
 
   try {
+    
     const config = {
       method: req.method,
       url: `${BACKEND_URL}${req.originalUrl}`,
@@ -113,7 +141,6 @@ app.use('/api', async (req, res) => {
     };
     const response = await axios(config);
     res.json(response.data);
-    
   } catch (error) {
     res.status(error.response?.status || 500).json({ error: error.message });
   }

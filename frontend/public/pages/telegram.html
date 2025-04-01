@@ -12,7 +12,7 @@
 </head> 
 <body>
 
-  <nav class="mnb navbar navbar-default navbar-fixed-top btn-menu " >
+  <nav class="mnb navbar navbar-default navbar-fixed-top btn-menu " style="display: none;" >
     <div class="container-fluid">
       <div class="navbar-header ">
         <button type="button" id="msbo"   class="navbar-toggler collapsed btn-box"  data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" >
@@ -22,13 +22,13 @@
     </div>
   </nav>
  
-  <div class="msb   " id="msb" >
+  <div class="msb   " id="msb" style="display: none;" >
     <nav class="navbar navbar-default  " role="navigation">
       <div class="brand-name-wrapper">
         <div class="avatar">
           <img  src="../assets/icons/avatar.jpg" alt="" class="round" width="40" height="40">
           <a class="navbar-brand" href="/user" >
-            <b> Лагорный</b>
+            <b> Профиль</b>
           </a>
         </div>
       </div>
@@ -74,7 +74,26 @@
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="../js/components/navbar.js"></script>
-  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = getCookie('token'); // Предположим, что токен хранится в cookie
+        const protectedElements = document.querySelectorAll('.protected');
+
+        if (token) {
+            // Если токен получен, показываем защищенные элементы
+            protectedElements.forEach(element => element.style.display = 'block');
+        } else {
+            // Если токена нет, скрываем защищенные элементы
+            protectedElements.forEach(element => element.style.display = 'none');
+        }
+    });
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+</script>
 
 </body>  
 </html>
