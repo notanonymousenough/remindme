@@ -69,28 +69,28 @@
       <div class="navbar navbar-light  d-inline-flex col-8 col-sm-3 col-lg-3" >
         <div class="container-fluid ">
           <form class="d-flex">
-            <input class="form-control me-2 navbar-find" type="search" data-bs-toggle="dropdown" placeholder="Добавить напоминание" aria-label="Поиск">
+            <input class="form-control me-2 navbar-find" type="search" id="reminderInput" data-bs-toggle="dropdown" placeholder="Добавить напоминание" aria-label="Поиск">
             <ul class="dropdown-menu drop-menu">
               <div class="form-check">
-                <input class="form-check-input m-1" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-                <label class="form-check-label" for="flexRadioDefault1">
-                  Работа &#128188
+                <input class="form-check-input m-1" type="radio" name="tag" id="tagWork" value="Работа">
+                <label class="form-check-label" for="tagWork">
+                  Работа &#128188;
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input m-1" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
-                <label class="form-check-label" for="flexRadioDefault2">
-                  Учёба &#9997
+                <input class="form-check-input m-1" type="radio" name="tag" id="tagStudy" value="Учёба" checked>
+                <label class="form-check-label" for="tagStudy">
+                  Учёба &#9997;
                 </label>
-              </div>   
+              </div>
               <div class="form-check">
-                <input class="form-check-input m-1" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
-                <label class="form-check-label" for="flexRadioDefault2">
-                  Дом &#128106
+                <input class="form-check-input m-1" type="radio" name="tag" id="tagHome" value="Дом">
+                <label class="form-check-label" for="tagHome">
+                  Дом &#128106;
                 </label>
-              </div> 
-              <input class="calend form-control m-3" type="datetime-local">
-              <button href="#" class="btn btn-primary m-1 ">Сохранить</button>
+              </div>
+              <input class="calend form-control m-3" id="timeInput" type="datetime-local">
+              <button id="saveButton" class="btn btn-primary m-1 ">Сохранить</button>
             </ul>
           </form>
         </div>
@@ -257,6 +257,42 @@
               }
             }
   </script>
+  <script>
+    document.getElementById('saveButton').addEventListener('click', async function() {
+        var input = document.getElementById('reminderInput');
+        var timeInput = document.getElementById('timeInput');
+
+        var reminderText = input.value.trim();
+        var timeText = timeInput.value;
+
+        var selectedTag = document.querySelector('input[name="tag"]:checked').value;
+    
+        if (reminderText && timeText) {
+          const response = await fetch('/api/reminders', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ 
+                  text: reminderText,
+                  tags: selectedTag,  // Используем выбранный тэг
+                  time: timeText
+              })
+          });
+    
+            if (response.ok) {
+                loadReminders(); // Обновляем список напоминаний
+                input.value = '';
+                timeInput.value = ''; // Очищаем поле ввода
+            } else {
+                alert('Ошибка при сохранении напоминания: ' + response.statusText);
+            }
+        } else {
+            alert('Пожалуйста, введите текст напоминания.');
+        }
+    });
+    </script>
+
   
 </body>  
 </html>
