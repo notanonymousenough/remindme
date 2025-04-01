@@ -47,11 +47,6 @@ class DefaultSettings(BaseSettings):
         tokenUrl=f"{APP_ADDRESS}:{APP_PORT}{PATH_PREFIX}/auth/telegram"
     )
 
-    #OAUTH2_SCHEME: OAuth2 = OAuth2(
-    #    scheme_name="UserTelegramDataSchema",
-    #    flows=OAuthFlows(password=OAuthFlowPassword(tokenUrl=f"{APP_ADDRESS}:{APP_PORT}{PATH_PREFIX}/auth/telegram")),
-    #)
-
     @computed_field  # type: ignore
     @property
     def bot_token_hash_bytes(self) -> bytes:

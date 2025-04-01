@@ -1,8 +1,6 @@
 from http.client import HTTPException
 from typing import Annotated
 
-from fastapi.requests import Request
-
 from fastapi.params import Depends
 import jwt
 
@@ -13,31 +11,24 @@ from backend.control_plane.service.user_service import get_user_service, UserSer
 settings = get_settings()
 
 
-async def get_current_user(
-        request: Request,
-        user_service: Annotated[UserService, Depends(get_user_service())]
+async def get_authorized_user(
+        user_service: Annotated[UserService, Depends(get_user_service())],
+        token: str = Depends(get_settings().OAUTH2_SCHEME)
 ) -> UserSchema:
-    auth_exception = HTTPException(401, "Authentication is required")
-
-    token = request.cookies.get(settings.AUTH_COOKIE_NAME)
-    if not token:
-        raise auth_exception
-
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
     except jwt.InvalidTokenError:
-        raise auth_exception
-    if not (user_id := payload.get_by_model_id("user_id")):
-        raise auth_exception
-    if not (user := await user_service.get_user_by_user_id(user_id)):
-        raise auth_exception
+        raise HTTPException(401, "Invalid jwt token")
+
+    user_id = payload.get_by_model_id("user_id")
+    if not user_id:
+        raise HTTPException(401, "Can't get user_id from payload")
+
+    user = await user_service.get_user(user_id)
+    if not user:
+        raise HTTPException(401, "user in None")
+
     return user
-
-
-def get_user_id_from_access_token(token):
-    decoded_jwt = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
-    user_id = decoded_jwt.get("user_id")
-    return user_id
 
 
 async def generate_hash(user_):
