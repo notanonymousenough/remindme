@@ -28,7 +28,7 @@
         <div class="avatar">
           <img  src="../assets/icons/avatar.jpg" alt="" class="round" width="40" height="40">
           <a class="navbar-brand" href="/user" >
-            <b> Лагорный</b>
+            <b> Профиль</b>
           </a>
         </div>
       </div>
@@ -192,7 +192,7 @@
   <script src="../js/components/navbar.js"></script>
   <script src="../js/pages/reminders.js"></script>
   <script>
-        fetch('/api/reminders/')
+        fetch('/api/reminders')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Сетевой ответ не в порядке');
@@ -265,7 +265,7 @@
         var reminderText = input.value.trim();
         var timeText = timeInput.value;
 
-        var selectedTag = document.querySelector('input[name="tag"]:checked').value;
+        var selectedTag = Array.from(document.querySelectorAll('input[name="tag"]:checked')).map(tag => tag.value);
     
         if (reminderText && timeText) {
           const response = await fetch('/api/reminders', {
@@ -276,7 +276,8 @@
               body: JSON.stringify({ 
                   text: reminderText,
                   tags: selectedTag,  // Используем выбранный тэг
-                  time: timeText
+                  time: timeText,
+                  status: "active"
               })
           });
     
