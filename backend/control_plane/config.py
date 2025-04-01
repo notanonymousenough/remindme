@@ -1,14 +1,11 @@
 import hashlib
 from os import environ
 
-from fastapi.openapi.models import OAuthFlowClientCredentials, OAuthFlows, OAuthFlowPassword
-from fastapi.security import OAuth2PasswordBearer, OAuth2, OAuth2AuthorizationCodeBearer
+from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import computed_field, ConfigDict
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
-
-from backend.control_plane.schemas.user import UserTelegramDataSchema
 
 load_dotenv()  # Загружает переменные окружения из файла .env в os.environ
 
@@ -29,7 +26,7 @@ class DefaultSettings(BaseSettings):
     SECRET_KEY: str = environ.get("SECRET_KEY", "")
     ALGORITHM: str = environ.get("ALGORITHM", "HS256")
 
-    GET_ACCESS_TOKEN_ENDPOINT: str = "/auth/telegram"
+    GET_ACCESS_TOKEN_ENDPOINT: str = "http://" + APP_ADDRESS + ":" + str(APP_PORT) + "/auth/telegram"
 
     POSTGRES_USER: str = environ.get("POSTGRES_USER", 'postgres')
     POSTGRES_PASSWORD: str = environ.get("POSTGRES_PASSWORD", 'postgres')

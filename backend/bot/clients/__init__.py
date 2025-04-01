@@ -1,5 +1,5 @@
-from .remindme_api import client
+from .remindme_api import get_client
 
 __all__ = [
-    "client"
+    "get_client"
 ]

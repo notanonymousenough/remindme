@@ -49,9 +49,9 @@ class UserAddShema(BaseModel):
 
 class UserTelegramDataSchema(BaseModel):
     telegram_id: str
-    first_name: str
-    last_name: str
+    first_name: Optional[str] = Field(None, description="first name")
+    last_name: Optional[str] = Field(None, description="last name")
     username: str
-    photo_url: str
+    photo_url: Optional[str] = Field(None, description="photo url")
     auth_date: datetime
     hash: str

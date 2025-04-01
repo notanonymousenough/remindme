@@ -1,31 +1,39 @@
 import uuid
 from datetime import datetime, timedelta
 
-import jwt
-
 from backend.bot.clients.http_client import AsyncHttpClient
 from backend.control_plane.config import get_settings
+from backend.control_plane.schemas.user import UserTelegramDataSchema
+from backend.control_plane.utils import auth
 
 
 class RemindMeApiClient(AsyncHttpClient):
-    async def get_access_token(self, user_telegram_id: int, hash):
+    async def get_access_token(self, data):
         endpoint = get_settings().GET_ACCESS_TOKEN_ENDPOINT
 
-        request_data = {
-            "telegram_id": user_telegram_id,
-            "hash": control_plane..utils.generate_hash()
+        request_data = {  # from scheme/telegram_scheme
+            "telegram_id": str(data["telegram_id"]),
+            "first_name": data["first_name"],
+            "last_name": data["last_name"],
+            "username": data["username"],
+            "photo_url": None,
+            "auth_date": datetime.now(),
+            "hash": auth.generate_hash(data)
         }
-        token_dict = await self._session.post(
+        request = UserTelegramDataSchema(**request_data)
+
+        response = await self._session.post(
             url=endpoint,
-            data=request_data
+            data=request
         )
+        if response.status != 200:
+            print("api response error")
+
+        print(await response.json())
         return token_dict['access_token']
 
-
-
-
     def get_reminder(self, user):  # user: User
-        # database controller..
+        endpoint = ""
         return {
             "id": 0,
             "text": "Помыть кота",
@@ -33,7 +41,6 @@ class RemindMeApiClient(AsyncHttpClient):
         }
 
     def get_reminders(self, day: str, tag_filter) -> list:  # user: User
-
         if day == "today":
             date_filter = datetime.now().strftime("%d.%m.%Y")
         elif day == "tomorrow":
@@ -198,4 +205,5 @@ class RemindMeApiClient(AsyncHttpClient):
         ]
 
 
-client = RemindMeApiClient()
+async def get_client():
+    return RemindMeApiClient()

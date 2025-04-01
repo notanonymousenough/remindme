@@ -6,10 +6,10 @@ from aiogram.types import Message
 from backend.bot.keyboards import reply_kbs, inline_kbs
 from backend.bot.utils import States, get_message_habits, message_text_tools
 
-from backend.bot.clients import client
+from backend.bot.clients import get_client
 
 start_router = Router()
-
+client = get_client()
 
 @start_router.message(CommandStart())
 async def start_menu(message: Message, state: FSMContext):

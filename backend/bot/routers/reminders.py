@@ -5,7 +5,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from backend.bot import bot
-from backend.bot.clients import client
+from backend.bot.clients import get_client
+from backend.bot.clients.remindme_api import RemindMeApiClient
 
 from backend.bot.keyboards import inline_kbs, reply_kbs
 from backend.bot.routers import start
@@ -15,6 +16,8 @@ from backend.bot.utils.states import States
 
 reminders_router = Router()
 
+
+client = get_client()
 
 @reminders_router.message(StateFilter(States.reminder_menu),
                           F.text == "Редактировать тэги")
