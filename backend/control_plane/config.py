@@ -20,7 +20,7 @@ class DefaultSettings(BaseSettings):
     )
 
     PATH_PREFIX: str = environ.get("PATH_PREFIX", "")
-    APP_ADDRESS: str = environ.get("APP_ADDRESS", "127.0.0.1")
+    APP_ADDRESS: str = environ.get("APP_ADDRESS", "0.0.0.0")
     APP_PORT: int = int(environ.get("APP_PORT", 8000))
 
     SECRET_KEY: str = environ.get("SECRET_KEY", "")

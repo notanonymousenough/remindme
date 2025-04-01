@@ -1,0 +1,168 @@
+services:
+  # Redis для кеширования
+  redis:
+    image: redis:7.2-alpine
+    restart: always
+    volumes:
+      - ../data/redis:/data
+    networks:
+      - remind-me-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  # PostgreSQL для хранения данных
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - ../data/postgres:/var/lib/postgresql/data
+      - ./init-temporal-db.sh:/docker-entrypoint-initdb.d/init-temporal-db.sh
+    networks:
+      - remind-me-network
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Temporal сервер - упрощенная версия для локальной разработки
+  temporal:
+    image: temporalio/auto-setup:1.22.4
+    restart: always
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PWD=${DB_PASSWORD}
+      - POSTGRES_DB=temporal
+      - POSTGRES_SEEDS=postgres
+      - BIND_ON_IP=0.0.0.0
+      - TEMPORAL_BROADCAST_ADDRESS=0.0.0.0
+      - NUM_HISTORY_SHARDS=1
+      - SERVICES=frontend:history:matching:worker
+      - DEFAULT_NAMESPACE=remind-me
+      - DEFAULT_NAMESPACE_RETENTION=7d
+    ports:
+      - "7233:7233"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - remind-me-network
+    healthcheck:
+      test: ["CMD", "tctl", "--address", "127.0.0.1:7233", "cluster", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
+
+  # API (Control Plane)
+  control-plane:
+    build:
+      context: ../backend/control_plane
+      dockerfile: Dockerfile
+    restart: always
+    env_file: ../.env
+    volumes:
+      - ../logs:/app/logs
+      - ../backend:/app/backend
+      - ../backend/alembic.ini:/app/alembic.ini
+      - ../backend/alembic:/app/alembic
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - remind-me-network
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "cd /app && alembic upgrade head && python -m backend.control_plane"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # Бот Telegram - запускаем после control-plane
+  bot:
+    build:
+      context: ../backend/bot
+      dockerfile: Dockerfile
+    restart: always
+    env_file: ../.env
+    volumes:
+      - ../logs:/app/logs
+      - ../backend:/app/backend
+    environment:
+      - PYTHONPATH=/app:${PYTHONPATH}
+    depends_on:
+      control-plane:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - remind-me-network
+
+  # Фоновые задачи (Data Plane) - запускаем после control-plane
+  data-plane:
+    build:
+      context: ../backend/data_plane
+      dockerfile: Dockerfile
+    restart: always
+    env_file: ../.env
+    volumes:
+      - ../logs:/app/logs
+      - ../backend:/app/backend
+    environment:
+      - PYTHONPATH=/app:${PYTHONPATH}
+    depends_on:
+      control-plane:
+        condition: service_healthy
+      temporal:
+        condition: service_healthy
+    networks:
+      - remind-me-network
+
+  # Фронтенд (Express) - запускаем после control-plane
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    restart: always
+    env_file: ../.env
+    depends_on:
+      control-plane:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    networks:
+      - remind-me-network
+
+  # Temporal Web UI
+  temporal-web:
+    image: temporalio/ui:2.21.3
+    restart: always
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+    depends_on:
+      temporal:
+        condition: service_healthy
+    ports:
+      - "8088:8080"
+    networks:
+      - remind-me-network
+
+networks:
+  remind-me-network:
+    driver: bridge

@@ -9,7 +9,7 @@ from backend.control_plane.utils import auth
 
 class RemindMeApiClient(AsyncHttpClient):
     async def get_access_token(self, data):
-        endpoint = get_settings().GET_ACCESS_TOKEN_ENDPOINT
+        endpoint = "http://control-plane:8000/auth/telegram"
 
         request_data = {  # from scheme/telegram_scheme
             "telegram_id": str(data["telegram_id"]),
