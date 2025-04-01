@@ -1,13 +1,10 @@
 from typing import TypeVar, Generic, Type, Optional, Sequence
 
-import jwt
-from fastapi import Depends
 from sqlalchemy.future import select
-from sqlalchemy import update, delete, func, and_, all_
+from sqlalchemy import update, delete, func, and_
 from uuid import UUID
 from ..engine import get_async_session
 from ..models import BaseModel
-from ...config import get_settings
 
 T = TypeVar('T', bound=BaseModel)
 
@@ -66,7 +63,7 @@ class BaseRepository(Generic[T]):
                 )
             ).values(**kwargs).returning(self.model)
             result = await session.execute(stmt)
-            await session.flush()
+            await session.commit()
             return result.scalars().first()
 
     async def delete_model(self, user_id: UUID, model_id: UUID) -> bool:

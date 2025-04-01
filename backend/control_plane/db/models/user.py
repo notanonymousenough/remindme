@@ -7,7 +7,7 @@ from .base import BaseModel, SexType
 class User(BaseModel):
     __tablename__ = "users"
 
-    username = Column(String(255), unique=True)
+    username = Column(String(255), unique=True)  # TODO(Denis) make False for .yaml
     email = Column(String(255), unique=True)
     sex = Column(Enum(SexType))
     first_name = Column(String(255))

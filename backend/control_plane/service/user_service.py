@@ -21,11 +21,10 @@ class UserService:
         user = await self.repo.get_user_by_telegram_id(telegram_id)
         if user is None:
             raise HTTPException(404, "User by telegram id not found")
-
         return UserSchema.model_validate(user)
 
     async def create_or_update_user_from_telegram_data(self, user: UserTelegramDataSchema) -> UserSchema:
-        return await self.repo.create_or_update_user(user=user)
+        return await self.repo.create_or_update_user_from_telegram_data(user=user)
 
 
 _user_service = UserService()

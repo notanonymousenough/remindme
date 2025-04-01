@@ -12,12 +12,12 @@ user_router = APIRouter(
 )
 
 
-@user_router.post("/")  # Зачем эта ручка вообще? :)
+"""@user_router.post("/")  # Зачем эта ручка вообще? :)
 async def add_user(
         user_service: Annotated[UserService, Depends(get_user_service)],
         user: UserSchema = Depends(get_authorized_user)
 ):
-    pass
+    return"""
 
 
 @user_router.get("/")

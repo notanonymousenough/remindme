@@ -40,20 +40,19 @@ async def auth_telegram(
         request: UserTelegramDataSchema,
         user_service: Annotated[UserService, Depends(get_user_service)]
 ):
-    async with await get_async_session() as session:
-        if get_settings().DEBUG or not has_correct_hash(request):
-            raise HTTPException(401, detail="Invalid Telegram hash")
+    if not get_settings().DEBUG and not has_correct_hash(request):
+        raise HTTPException(401, detail="Invalid Telegram hash")
 
-        await user_service.create_or_update_user_from_telegram_data(request)
-        user = await user_service.get_user_by_telegram_id(telegram_id=request.telegram_id)  # get user from telegram_id
+    request = UserTelegramDataSchema.model_validate(request)
+    user = await user_service.create_or_update_user_from_telegram_data(request)
 
-        jwt_token = jwt.encode(
-            {
-                "exp": datetime.now() + timedelta(hours=3),
-                "user_id": str(user.id)
-            },
-            get_settings().SECRET_KEY,
-            algorithm="HS256"
-        )  # TODO(): вынести в отдельную функцюи в utils/auth
+    jwt_token = jwt.encode(
+        {
+            "exp": datetime.now() + timedelta(hours=3),
+            "user_id": str(user.id)
+        },
+        get_settings().SECRET_KEY,
+        algorithm="HS256"
+    )
 
-        return {"access_token": jwt_token, "token_type": "bearer"}
+    return {"access_token": jwt_token, "token_type": "bearer"}

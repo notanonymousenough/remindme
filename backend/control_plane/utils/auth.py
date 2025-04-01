@@ -12,7 +12,7 @@ settings = get_settings()
 
 
 async def get_authorized_user(
-        user_service: Annotated[UserService, Depends(get_user_service())],
+        user_service: Annotated[UserService, Depends(get_user_service)],
         token: str = Depends(get_settings().OAUTH2_SCHEME)
 ) -> UserSchema:
     try:
@@ -20,7 +20,7 @@ async def get_authorized_user(
     except jwt.InvalidTokenError:
         raise HTTPException(401, "Invalid jwt token")
 
-    user_id = payload.get_by_model_id("user_id")
+    user_id = payload.get("user_id")
     if not user_id:
         raise HTTPException(401, "Can't get user_id from payload")
 

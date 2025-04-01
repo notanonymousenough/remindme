@@ -37,7 +37,7 @@ class DefaultSettings(BaseSettings):
     POSTGRES_PORT: int = int(environ.get("POSTGRES_PORT", '5432'))
     POSTGRES_DB: str = environ.get("POSTGRES_DB", '')
 
-    DEBUG: bool = False
+    DEBUG: bool = True
 
     BOT_TOKEN: str = environ.get("BOT_TOKEN", "")
 

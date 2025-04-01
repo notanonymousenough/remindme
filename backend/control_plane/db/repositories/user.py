@@ -16,7 +16,7 @@ class UserRepository(BaseRepository[User]):
 
     async def get_user(self, user_id: UUID) -> UserSchema | None:
         async with await get_async_session() as session:
-            result = session.get(User, user_id)
+            result = await session.get(User, user_id)
             if result is None:
                 return None
             return UserSchema.model_validate(result)
@@ -50,7 +50,7 @@ class UserRepository(BaseRepository[User]):
             await session.refresh(db_user)
             return UserSchema.model_validate(db_user)
 
-    async def create_or_update_user(self, user: UserTelegramDataSchema) -> UserSchema:
+    async def create_or_update_user_from_telegram_data(self, user: UserTelegramDataSchema) -> UserSchema:
         """
         User is created if doesn't exist based on telegram_id.
         If exists check whether there are modified values.
@@ -60,6 +60,6 @@ class UserRepository(BaseRepository[User]):
         user = user.model_dump(exclude=telegram_data_only)
 
         if not await self.get_user_by_telegram_id(user["telegram_id"]):  # If user doesn't exist
-            return await self.create_user(UserSchema(**user))
+            return await self.create_user(UserSchema.model_validate(user))
 
-        return UserSchema.model_validate(await self.update_user(user))
+        return UserSchema.model_validate(await self.update_user(UserSchema.model_validate(user)))
