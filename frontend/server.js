@@ -7,7 +7,7 @@ const cors = require('cors');
 
 const app = express();
 require('dotenv').config();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 80;
 const BACKEND_URL = 'http://158.160.114.109:8000'; // URL вашего бэкенда
 
 app.use(cors({
@@ -69,6 +69,31 @@ app.get('/user', function(req, res) {
 });
 app.get('/telegram', function(req, res) {
   res.sendfile('public/pages/telegram.html');
+});
+
+app.post('/api/reminders', async (req, res) => {
+  if (!req.session.token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const reminderData = req.body; // Ожидаем, что в теле запроса будут данные напоминания
+    console.log(req.body);
+    const config = {
+      method: 'POST',
+      url: `${BACKEND_URL}/api/reminders`, // URL бэкенда для сохранения напоминаний
+      headers: {
+        'Authorization': `Bearer ${req.session.token}`,
+        'Content-Type': 'application/json'
+      },
+      data: reminderData
+    };
+    const response = await axios(config);
+    res.status(response.status).json(response.data);
+    
+  } catch (error) {
+    res.status(error.response?.status || 500).json({ error: error.message });
+  }
 });
 
 // Прокси для всех остальных запросов к бэкенду
