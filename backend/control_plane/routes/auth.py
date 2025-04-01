@@ -27,6 +27,7 @@ async def auth_telegram(
         raise HTTPException(401, detail="Invalid Telegram hash")
 
     request = UserTelegramDataSchema.model_validate(request)
+    print(request)
     user = await user_service.create_or_update_user_from_telegram_data(request)
 
     jwt_token = jwt.encode(

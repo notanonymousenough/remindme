@@ -27,10 +27,10 @@ class RemindMeApiClient(AsyncHttpClient):
             json=request_data
         )
         if response.status != 200:
-            print("api response error:", await response.json())
+            print("api response error:", (await response.json()))
             return
 
-        return response.json()['access_token']
+        return (await response.json())['access_token']
 
     def get_reminder(self, user):  # user: User
         endpoint = ""

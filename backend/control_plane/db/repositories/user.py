@@ -40,7 +40,7 @@ class UserRepository(BaseRepository[User]):
 
     async def update_user(self, user: UserSchema) -> UserSchema:
         async with await get_async_session() as session:
-            if not (db_user := session.get(User, user.id)):
+            if not (db_user := await session.get(User, user.id)):
                 raise HTTPException(404, "User not found")
 
             for key, value in user.model_dump(exclude_unset=True).items():
@@ -59,7 +59,7 @@ class UserRepository(BaseRepository[User]):
         telegram_data_only = {"photo_url", "auth_date", "hash"}
         user = user.model_dump(exclude=telegram_data_only)
 
-        if not await self.get_user_by_telegram_id(user["telegram_id"]):  # If user doesn't exist
+        if not (user_to_update := await self.get_user_by_telegram_id(user["telegram_id"])):  # If user doesn't exist
             return await self.create_user(UserSchema.model_validate(user))
 
-        return UserSchema.model_validate(await self.update_user(UserSchema.model_validate(user)))
+        return UserSchema.model_validate(await self.update_user(UserSchema.model_validate(user_to_update)))
