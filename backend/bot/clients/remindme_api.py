@@ -17,20 +17,20 @@ class RemindMeApiClient(AsyncHttpClient):
             "last_name": data["last_name"],
             "username": data["username"],
             "photo_url": None,
-            "auth_date": datetime.now(),
+            "auth_date": str(datetime.now()),
             "hash": auth.generate_hash(data)
         }
-        request = UserTelegramDataSchema(**request_data)
+        # request = UserTelegramDataSchema(**request_data)
 
         response = await self._session.post(
             url=endpoint,
-            data=request
+            json=request_data
         )
         if response.status != 200:
-            print("api response error")
+            print("api response error:", await response.json())
+            return
 
-        print(await response.json())
-        return token_dict['access_token']
+        return response.json()['access_token']
 
     def get_reminder(self, user):  # user: User
         endpoint = ""
