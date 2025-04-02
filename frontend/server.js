@@ -9,6 +9,7 @@ const app = express();
 require('dotenv').config();
 const PORT = process.env.PORT || 80;
 const BACKEND_URL = 'http://158.160.114.109:8000'; // URL вашего бэкенда
+//const BACKEND_URL = 'http://localhost:8000'
 
 app.use(cors({
   origin: 'http://localhost', // Укажите домен вашего фронтенда
@@ -74,15 +75,18 @@ app.get('/telegram', function(req, res) {
 
 const reminders = [];
 
-/*app.post('/api/reminders', async (req, res) => {
+
+
+app.post('/api/reminders', async (req, res) => {
   if (!req.session.token) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
+    
     const reminderData = req.body; // Ожидаем, что в теле запроса будут данные напоминания
     console.log(req.body);
-    reminders.push(reminderData);
+   // reminders.push(reminderData);
     const config = {
       method: 'POST',
       url: `${BACKEND_URL}/api/reminders`, // URL бэкенда для сохранения напоминаний
@@ -92,14 +96,16 @@ const reminders = [];
       },
       data: reminderData
     };
-    
-    const response = await axios(config);
-    //res.status(response.status).json(response.data);
+
+    const response = await axios.post('http://localhost:8000/v1/reminders', reminderData);
+    //console.log(response);
+   //const response = await axios(config);
+    res.status(response.status).json(response.data);
     
   } catch (error) {
     res.status(error.response?.status || 500).json({ error: error.message });
   }
-});*/
+});
 
 //Изменение маршрута на v1
 /*app.use('/api/reminders', async (req, res) => {
@@ -159,7 +165,7 @@ app.use('/api/*', async (req, res) => {
   try {
     //res.json(reminders);
     // Заменяем /api на /v1 в URL
-    //const newUrl = `${BACKEND_URL}/v1${req.originalUrl.replace('/api', '')}`;
+    /*const newUrl = `${BACKEND_URL}/v1${req.originalUrl.replace('/api', '')}`;
    // const reminderData = req.body;
 
     const config = {
@@ -174,9 +180,11 @@ app.use('/api/*', async (req, res) => {
   // Добавляем новое напоминание в локальное хранилище
       
       data: req.method === 'POST' ? req.body : undefined
-    };
+    };*/
+   // const reminderData = req.body;
     //reminders.push(reminderData)
-    const response = await axios(config);
+    //const response = await axios(config);
+    const response = await axios.get('http://localhost:8000/v1/reminders');
     //console.log(req.method);
     //console.log(req.body);
     res.status(response.status).json(response.data);
@@ -207,6 +215,8 @@ app.post('/temp', (req, res) => {
 app.get('/temp', (req, res) => {
   res.json(reminders);
 });*/
+
+
 
 
 // Отдача статических файлов

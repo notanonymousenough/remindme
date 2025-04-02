@@ -8,40 +8,8 @@ const cors = require('cors');
 
 const app = express();
 
-app.get('/v1/auth/telegram', async (req, res) => {
-   try {
-       const response = await axios.post(`${BACKEND_URL}/v1/auth/telegram`, req.body);
-       req.session.token = response.data.access_token; // Сохраняем токен в сессии
-       res.redirect('/reminders');
-     } catch (error) {
-       res.status(error.response?.status || 500).json({ error: error.message });
-     }
-   });
-
-   app.get('/', (req, res) => {
-    res.redirect('/reminders');
-  });
-  app.get('/reminders', function(req, res) {
-    res.sendfile('public/pages/reminders.html');
-  });
-  app.get('/edit', function(req, res) {
-    res.sendfile('public/pages/edit_reminders.html');
-  });
-  app.get('/habits', function(req, res) {
-    res.sendfile('public/pages/habits.html');
-  });
-  app.get('/trash', function(req, res) {
-    res.sendfile('public/pages/trash.html');
-  });
-  app.get('/user', function(req, res) {
-    res.sendfile('public/pages/user.html');
-  });
-  app.get('/telegram', function(req, res) {
-    res.sendfile('public/pages/telegram.html');
-  });
-
-
 app.post('/v1/reminders', (req, res) => {
+    console.log("Сработало!")
     res.json({
         "id": "r0k1l2m3n4",
         "userId": "usr_67890",

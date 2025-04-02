@@ -90,7 +90,7 @@
                 </label>
               </div>
               <input class="calend form-control m-3" id="timeInput" type="datetime-local">
-              <button id="saveButton" class="btn btn-primary m-1 " onclick="createReminder()">Сохранить</button>
+              <button id="saveButton" class="btn btn-primary m-1 ">Сохранить</button>
             </ul>
           </form>
         </div>
@@ -192,7 +192,7 @@
   <script src="../js/components/navbar.js"></script>
   <script src="../js/pages/reminders.js"></script>
   <script>
-        fetch('/v1/reminders')
+        fetch('/api/reminders')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Сетевой ответ не в порядке');
