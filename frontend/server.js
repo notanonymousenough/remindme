@@ -77,7 +77,7 @@ const reminders = [];
 
 
 
-app.post('/api/reminders', async (req, res) => {
+/*app.post('/api/reminders', async (req, res) => {
   if (!req.session.token) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -105,7 +105,7 @@ app.post('/api/reminders', async (req, res) => {
   } catch (error) {
     res.status(error.response?.status || 500).json({ error: error.message });
   }
-});
+});*/
 
 //Изменение маршрута на v1
 /*app.use('/api/reminders', async (req, res) => {
@@ -157,7 +157,7 @@ app.use('/api', async (req, res) => {
 
 
 
-app.use('/api/*', async (req, res) => {
+/*app.use('/api/*', async (req, res) => {
   if (!req.session.token) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -165,7 +165,7 @@ app.use('/api/*', async (req, res) => {
   try {
     //res.json(reminders);
     // Заменяем /api на /v1 в URL
-    /*const newUrl = `${BACKEND_URL}/v1${req.originalUrl.replace('/api', '')}`;
+    const newUrl = `${BACKEND_URL}/v1${req.originalUrl.replace('/api', '')}`;
    // const reminderData = req.body;
 
     const config = {
@@ -180,13 +180,36 @@ app.use('/api/*', async (req, res) => {
   // Добавляем новое напоминание в локальное хранилище
       
       data: req.method === 'POST' ? req.body : undefined
-    };*/
+    };
    // const reminderData = req.body;
     //reminders.push(reminderData)
     //const response = await axios(config);
     const response = await axios.get('http://localhost:8000/v1/reminders');
     //console.log(req.method);
     //console.log(req.body);
+    res.status(response.status).json(response.data);
+    
+  } catch (error) {
+    res.status(error.response?.status || 500).json({ error: error.message });
+  }
+});*/
+
+app.use('/api/*', async (req, res) => {
+  if (!req.session.token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const options = {
+      method: req.method,
+      url: 'http://localhost:8000/v1/reminders',
+      data: req.method === 'POST' || req.method === 'PUT' ? req.body : undefined, // Передаем body только для POST и PUT
+      headers: {
+        'Content-Type': 'application/json', // Установите нужные заголовки
+      },
+    };
+
+    const response = await axios(options);
     res.status(response.status).json(response.data);
     
   } catch (error) {
