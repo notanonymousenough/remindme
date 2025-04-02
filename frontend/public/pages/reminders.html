@@ -90,7 +90,7 @@
                 </label>
               </div>
               <input class="calend form-control m-3" id="timeInput" type="datetime-local">
-              <button id="saveButton" class="btn btn-primary m-1 ">Сохранить</button>
+              <button id="saveButton" class="btn btn-primary m-1 " onclick="createReminder()">Сохранить</button>
             </ul>
           </form>
         </div>
@@ -192,7 +192,7 @@
   <script src="../js/components/navbar.js"></script>
   <script src="../js/pages/reminders.js"></script>
   <script>
-        fetch('/api/reminders')
+        fetch('/v1/reminders')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Сетевой ответ не в порядке');
@@ -293,6 +293,26 @@
         }
     });
   </script>
+  <script>
+    async function createReminder() {
+        const response = await fetch('/v1/reminders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userId: "usr_67890",
+                text: "Заказать билеты в кино",
+                time: "2023-12-03T19:45:00Z",
+                tags: ["развлечения"],
+            }),
+        });
+
+        const data = await response.json();
+        console.log(data); // Вывод результата в консоль
+        alert(`Напоминание создано: ${data.text}`);
+    }
+</script>
 
 </body>  
 </html>

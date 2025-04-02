@@ -72,7 +72,9 @@ app.get('/telegram', function(req, res) {
   res.sendfile('public/pages/telegram.html');
 });
 
-app.post('/api/reminders', async (req, res) => {
+const reminders = [];
+
+/*app.post('/api/reminders', async (req, res) => {
   if (!req.session.token) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -80,26 +82,27 @@ app.post('/api/reminders', async (req, res) => {
   try {
     const reminderData = req.body; // Ожидаем, что в теле запроса будут данные напоминания
     console.log(req.body);
+    reminders.push(reminderData);
     const config = {
       method: 'POST',
       url: `${BACKEND_URL}/api/reminders`, // URL бэкенда для сохранения напоминаний
-      //url:`localhost:80/temp`,
       headers: {
         'Authorization': `Bearer ${req.session.token}`,
         'Content-Type': 'application/json'
       },
       data: reminderData
     };
+    
     const response = await axios(config);
-    res.status(response.status).json(response.data);
+    //res.status(response.status).json(response.data);
     
   } catch (error) {
     res.status(error.response?.status || 500).json({ error: error.message });
   }
-});
+});*/
 
 //Изменение маршрута на v1
-app.use('/api/reminders', async (req, res) => {
+/*app.use('/api/reminders', async (req, res) => {
   if (!req.session.token) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -144,7 +147,67 @@ app.use('/api', async (req, res) => {
   } catch (error) {
     res.status(error.response?.status || 500).json({ error: error.message });
   }
+});*/
+
+
+
+app.use('/api/*', async (req, res) => {
+  if (!req.session.token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    //res.json(reminders);
+    // Заменяем /api на /v1 в URL
+    //const newUrl = `${BACKEND_URL}/v1${req.originalUrl.replace('/api', '')}`;
+   // const reminderData = req.body;
+
+    const config = {
+      method: req.method,
+      //url: newUrl,
+      url: `${BACKEND_URL}${req.originalUrl}`,
+      headers: {
+        'Authorization': `Bearer ${req.session.token}`,
+        'Content-Type': 'application/json'
+      },
+  // Проверьте данные, чтобы убедиться, что они корректны
+  // Добавляем новое напоминание в локальное хранилище
+      
+      data: req.method === 'POST' ? req.body : undefined
+    };
+    //reminders.push(reminderData)
+    const response = await axios(config);
+    //console.log(req.method);
+    //console.log(req.body);
+    res.status(response.status).json(response.data);
+    
+  } catch (error) {
+    res.status(error.response?.status || 500).json({ error: error.message });
+  }
 });
+
+/*app.get('/api/token', async (req, res) => {
+  if (!req.session.token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+  }
+  res.json({ token: req.session.token });
+});*/
+
+
+/*const reminders = [];
+
+app.post('/temp', (req, res) => {
+  const reminderData = req.body;
+  // Проверьте данные, чтобы убедиться, что они корректны
+  // Добавляем новое напоминание в локальное хранилище
+  reminders.push(reminderData);
+});
+
+// Если вы хотите получить все локальные напоминания, добавьте этот маршрут
+app.get('/temp', (req, res) => {
+  res.json(reminders);
+});*/
+
 
 // Отдача статических файлов
 app.use(express.static('public'));
