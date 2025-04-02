@@ -69,17 +69,20 @@ class RemindMeApiClient(AsyncHttpClient):
 
             """ 
             "date_exp": (datetime.now() + timedelta(days=1)).strftime("%d.%m.%Y"),
+            "tag": *emoji*
             """
 
         data = (await response.json())
         logging.info(f"response: {data}")
 
         await self._close_session()
-        return [
+
+        reminders = [
             reminder for reminder in data
-            if (date_filter is None or reminder["time"] == date_filter)  # тут надо дату
-               and (tag_filter is None or reminder["tag"] == tag_filter)
+            if (date_filter is None or datetime.fromisoformat(reminder["time"]).strftime("%d.%m.%Y") == date_filter)  # тут надо дату
+            and (tag_filter is None or reminder["tag"] == tag_filter)
         ]
+        return reminders
 
     def get_tags(self):
         endpoint = None  # TODO
@@ -114,6 +117,11 @@ class RemindMeApiClient(AsyncHttpClient):
             }
         ]
 
+_client = None
+
 
 async def get_client():
-    return RemindMeApiClient()
+    global _client
+    if not _client:
+        _client = RemindMeApiClient()
+    return _client

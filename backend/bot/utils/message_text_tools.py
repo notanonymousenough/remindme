@@ -32,6 +32,7 @@ def get_message_reminders(reminders, next_coef: int, strip: dict, day: str, tag_
             else:
                 text += f"{str(id + 1)}) {reminder['text'].capitalize()} ({reminder["time"]})\n"
             added_lines_count += 1
+
     if not added_lines_count:
         text = ''.join(text.split("\n")[:-2]) + f"\n\n{day_emoji[day]} "
         if tag_filter:

@@ -1,12 +1,17 @@
+from typing import Annotated
+
 from aiogram import Router, F
 from aiogram.filters import CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from backend.bot.clients.remindme_api import RemindMeApiClient
 from backend.bot.keyboards import reply_kbs, inline_kbs
 from backend.bot.utils import States, get_message_habits, message_text_tools
 
 from backend.bot.clients import get_client
+from backend.bot.utils.depends import Depends
+from backend.bot.utils.get_client_ import get_client_
 
 start_router = Router()
 # client = get_client() TODO()
@@ -19,7 +24,10 @@ async def start_menu(message: Message, state: FSMContext):
 
 
 @start_router.message(F.text == "Напоминания")
-async def reminders(message: Message, state: FSMContext):
+async def reminders(message: Message,
+                    state: FSMContext,
+                    client = Annotated[RemindMeApiClient, Depends(get_client_())]
+                    ):
     access_token = (await state.get_data())["access_token"]
     if (await state.get_state()) != States.reminder_menu:
         await state.set_state(States.reminder_menu)  # set state for reminders menu
