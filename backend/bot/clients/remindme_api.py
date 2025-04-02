@@ -79,8 +79,9 @@ class RemindMeApiClient(AsyncHttpClient):
 
         reminders = [
             reminder for reminder in data
-            if (date_filter is None or datetime.fromisoformat(reminder["time"]).strftime("%d.%m.%Y") == date_filter)  # тут надо дату
-            and (tag_filter is None or reminder["tag"] == tag_filter)
+            if (date_filter is None or datetime.fromisoformat(reminder["time"]).strftime(
+                "%d.%m.%Y") == date_filter)  # тут надо дату
+               and (tag_filter is None or reminder["tag"] == tag_filter)
         ]
         return reminders
 
@@ -117,10 +118,11 @@ class RemindMeApiClient(AsyncHttpClient):
             }
         ]
 
+
 _client = None
 
 
-async def get_client():
+async def get_client_async():
     global _client
     if not _client:
         _client = RemindMeApiClient()

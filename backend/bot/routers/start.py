@@ -5,16 +5,15 @@ from aiogram.filters import CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
 from backend.bot.keyboards import reply_kbs, inline_kbs
 from backend.bot.utils import States, get_message_habits, message_text_tools
 
-from backend.bot.clients import get_client
 from backend.bot.utils.depends import Depends
-from backend.bot.utils.get_client_ import get_client_
 
 start_router = Router()
-# client = get_client() TODO()
+
 
 @start_router.message(CommandStart())
 async def start_menu(message: Message, state: FSMContext):
@@ -26,8 +25,7 @@ async def start_menu(message: Message, state: FSMContext):
 @start_router.message(F.text == "Напоминания")
 async def reminders(message: Message,
                     state: FSMContext,
-                    client = Annotated[RemindMeApiClient, Depends(get_client_())]
-                    ):
+                    client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     access_token = (await state.get_data())["access_token"]
     if (await state.get_state()) != States.reminder_menu:
         await state.set_state(States.reminder_menu)  # set state for reminders menu
@@ -51,7 +49,11 @@ async def reminders(message: Message,
     day = data["day"]
     tag_filter = data["tag_filter"]
     strip = data["strip"]
-    reminders = sorted((await (await get_client()).get_reminders(data)), key=lambda x: x["time"])
+    """
+    client это зароможенная функция get_client_async, которая возвращает объект RemindMeApiClient
+    поэтому нужно вызывать каждый раз ее через скобки, чтобы получить синглтон объект
+    """
+    reminders = sorted((await client().get_reminders(state_data=data)), key=lambda x: x["time"])
     text = message_text_tools.get_message_reminders(
         reminders=reminders,
         next_coef=next_coef,
@@ -71,7 +73,9 @@ async def reminders(message: Message,
 
 
 @start_router.message(F.text == "Привычки")
-async def habits(message: Message, state: FSMContext):
+async def habits(message: Message,
+                 state: FSMContext,
+                 client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     access_token = None  # TODO
     await state.set_state(States.habits_menu)
     await state.set_data({
@@ -80,7 +84,7 @@ async def habits(message: Message, state: FSMContext):
     })
 
     data = await state.get_data()
-    habits = client.get_habits(data=data)
+    habits = client().get_habits(data=data)
     text = get_message_habits(habits=habits)
 
     await message.answer(text="Вывожу список привычек..", reply_markup=reply_kbs.habits_menu())
