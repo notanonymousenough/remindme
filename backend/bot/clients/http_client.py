@@ -5,7 +5,7 @@ class AsyncHttpClient:
     def __init__(self):
         self._session = aiohttp.ClientSession()
 
-    async def _create_session(self, base_url=""):
+    async def _create_session(self, base_url="http://127.0.0.1:8000"):  # TODO() get from config
         self._session = aiohttp.ClientSession(base_url=base_url)
 
     async def _close_session(self):

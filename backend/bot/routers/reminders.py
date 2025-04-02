@@ -128,9 +128,10 @@ async def reminders_day_filter(call: CallbackQuery, state: FSMContext):
     tag_filter_is_click = data["tag_filter_click"]
     strip = data['strip']
     tag_filter = data["tag_filter"]
-    tags = client.get_tags()
+    # tags = client.get_tags() TODO
+    tags = None
     day = data["day"]
-    reminders = sorted(client.get_reminders(day, tag_filter), key=lambda x: x["time_exp"])
+    reminders = sorted((await (await get_client()).get_reminders(data)), key=lambda x: x["time"])
     text = message_text_tools.get_message_reminders(
         reminders=reminders,
         next_coef=next_coef,

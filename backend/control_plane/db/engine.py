@@ -13,6 +13,7 @@ logger.setLevel(logging.INFO)
 # Получение параметров подключения из переменных окружения
 load_dotenv()
 DATABASE_URL = get_settings().DATABASE_URI
+print(DATABASE_URL)
 
 # Создание асинхронного движка SQLAlchemy
 engine = create_async_engine(

@@ -48,6 +48,7 @@ class AuthMiddleware(BaseMiddleware):
         if expected_access_token:
             print(f"AccessToken получен из API для пользователя {user.id}: {expected_access_token}")
             await state.update_data(access_token=expected_access_token)  # Сохраняем токен в state
+            data["state"] = state
             return await handler(event, data)  # Передаем управление handler'у
 
         print("Access token не получен с АПИ. Ошибка.")

@@ -1,16 +1,18 @@
+import logging
 import uuid
 from datetime import datetime, timedelta
 
 from backend.bot.clients.http_client import AsyncHttpClient
 from backend.control_plane.config import get_settings
-from backend.control_plane.schemas.user import UserTelegramDataSchema
+
 from backend.control_plane.utils import auth
 
 
 class RemindMeApiClient(AsyncHttpClient):
     async def get_access_token(self, data):
-        endpoint = get_settings().GET_ACCESS_TOKEN_ENDPOINT
-
+        await self._create_session()
+        #  endpoint = get_settings().GET_ACCESS_TOKEN_ENDPOINT
+        endpoint = "/auth/telegram"
         request_data = {  # from scheme/telegram_scheme
             "telegram_id": str(data["telegram_id"]),
             "first_name": data["first_name"],
@@ -29,10 +31,13 @@ class RemindMeApiClient(AsyncHttpClient):
         if response.status != 200:
             print("api response error:", (await response.json()))
             return
+        access_token = (await response.json())['access_token']
 
-        return (await response.json())['access_token']
+        await self._close_session()
+        return access_token
 
-    def get_reminder(self, user):  # user: User
+    async def get_reminder(self, user):  # user: User
+        await self._create_session(base_url="")
         endpoint = ""
         return {
             "id": 0,
@@ -40,7 +45,21 @@ class RemindMeApiClient(AsyncHttpClient):
             "date_exp": "15.05.2025"
         }
 
-    def get_reminders(self, day: str, tag_filter) -> list:  # user: User
+    async def get_reminders(self, state_data) -> list:  # user: User
+        await self._create_session()  # TODO() get from config
+
+        endpoint = "/reminder"
+
+        headers = {
+            "Authorization": f"Bearer {state_data["access_token"]}"
+        }
+
+        response = await self._session.get(
+            url=endpoint,
+            headers=headers
+        )
+
+        day, tag_filter = state_data["day"], state_data["tag_filter"]
         if day == "today":
             date_filter = datetime.now().strftime("%d.%m.%Y")
         elif day == "tomorrow":
@@ -48,131 +67,22 @@ class RemindMeApiClient(AsyncHttpClient):
         else:
             date_filter = None
 
-        data = {
-            "reminders":
-                [
-                    {
-                        "id": 0,
-                        "text": "Помыть кота",
-                        "date_exp": (datetime.now() + timedelta(days=1)).strftime("%d.%m.%Y"),
-                        "time_exp": "14:48",
-                        "state": 0,
-                        "tag": "💡"
-                    },
-                    {
-                        "id": 1,
-                        "text": "Помыть cобаку",
-                        "date_exp": date_filter,
-                        "time_exp": "06:20",
-                        "state": 1,
-                        "tag": "💡"
-                    },
-                    {
-                        "id": 2,
-                        "text": "не сделать что-то",
-                        "date_exp": (datetime.now() + timedelta(days=1)).strftime("%d.%m.%Y"),
-                        "time_exp": "09:20",
-                        "state": 0,
-                        "tag": "💡"
-                    },
-                    {
-                        "id": 3,
-                        "text": "сделать что-то",
-                        "date_exp": (datetime.now() + timedelta(days=1)).strftime("%d.%m.%Y"),
-                        "time_exp": "14:20",
-                        "state": 0,
-                        "tag": "💡"
-                    },
-                    {
-                        "id": 4,
-                        "text": "не сделать что-то",
-                        "date_exp": (datetime.now() + timedelta(days=1)).strftime("%d.%m.%Y"),
-                        "time_exp": "13:20",
-                        "state": 1,
-                        "tag": "💡"
-                    },
-                    {
-                        "id": 5,
-                        "text": "не сделать что-то",
-                        "date_exp": "13.03.2025",
-                        "time_exp": "12:20",
-                        "state": 1,
-                        "tag": "📝"
-                    },
-                    {
-                        "id": 6,
-                        "text": "не сделать что-то",
-                        "date_exp": "13.03.2025",
-                        "time_exp": "16:20",
-                        "state": 1,
-                        "tag": "📝"
-                    },
-                    {
-                        "id": 7,
-                        "text": "не сделать что-то",
-                        "date_exp": "13.03.2026",
-                        "time_exp": "04:20",
-                        "state": 0,
-                        "tag": "🐈"
-                    },
-                    {
-                        "id": 8,
-                        "text": "задача с тегом кошечка",
-                        "date_exp": "13.03.2027",
-                        "time_exp": "04:20",
-                        "state": 0,
-                        "tag": "🐈"
-                    },
-                    {
-                        "id": 9,
-                        "text": "не сделать что-то",
-                        "date_exp": "17.03.2025",
-                        "time_exp": "11:20",
-                        "state": 0,
-                        "tag": ""
-                    },
-                    {
-                        "id": 10,
-                        "text": "не сделать что-то",
-                        "date_exp": date_filter,
-                        "time_exp": "04:20",
-                        "state": 0,
-                        "tag": ""
-                    },
-                    {
-                        "id": 11,
-                        "text": "не сделать что-то",
-                        "date_exp": "13.03.2025",
-                        "time_exp": "04:20",
-                        "state": 0,
-                        "tag": ""
-                    },
-                    {
-                        "id": 12,
-                        "text": "предпоследний",
-                        "date_exp": "14.03.2025",
-                        "time_exp": "04:20",
-                        "state": 0,
-                        "tag": ""
-                    },
-                    {
-                        "id": 13,
-                        "text": "последний",
-                        "date_exp": "14.03.2025",
-                        "time_exp": "04:20",
-                        "state": 0,
-                        "tag": ""
-                    }
-                ]
-        }
+            """ 
+            "date_exp": (datetime.now() + timedelta(days=1)).strftime("%d.%m.%Y"),
+            """
 
+        data = (await response.json())
+        logging.info(f"response: {data}")
+
+        await self._close_session()
         return [
-            reminder for reminder in data["reminders"]
-            if (date_filter is None or reminder["date_exp"] == date_filter)
+            reminder for reminder in data
+            if (date_filter is None or reminder["time"] == date_filter)  # тут надо дату
                and (tag_filter is None or reminder["tag"] == tag_filter)
         ]
 
     def get_tags(self):
+        endpoint = None  # TODO
         tags_example_naming = ["Ясность", "Кошки", "Знания", "Записки", "Идеи"]
         tags_example_emoji = ["☺️", "🐈", "📚", "📝", "💡"]
         dict_tags_example = {

@@ -9,7 +9,7 @@ from backend.bot.utils import States, get_message_habits, message_text_tools
 from backend.bot.clients import get_client
 
 start_router = Router()
-client = get_client()
+# client = get_client() TODO()
 
 @start_router.message(CommandStart())
 async def start_menu(message: Message, state: FSMContext):
@@ -20,6 +20,7 @@ async def start_menu(message: Message, state: FSMContext):
 
 @start_router.message(F.text == "Напоминания")
 async def reminders(message: Message, state: FSMContext):
+    access_token = (await state.get_data())["access_token"]
     if (await state.get_state()) != States.reminder_menu:
         await state.set_state(States.reminder_menu)  # set state for reminders menu
         await state.set_data({
@@ -30,18 +31,19 @@ async def reminders(message: Message, state: FSMContext):
             "strip": [0, 5],
             "tag_filter_click": 0,
             "tag_filter": None,
-            "add_reminder": 0
+            "add_reminder": 0,
+            "access_token": access_token
         })
 
     data = await state.get_data()
     day_filter = data["day"]
     next_coef = data['next_coef']
     tag_filter_is_click = data["tag_filter_click"]
-    tags = client.get_tags()
+    tags = None  # client.get_tags() TODO(Arsen)
     day = data["day"]
     tag_filter = data["tag_filter"]
     strip = data["strip"]
-    reminders = sorted(client.get_reminders(day, tag_filter), key=lambda x: x["time_exp"])
+    reminders = sorted((await (await get_client()).get_reminders(data)), key=lambda x: x["time"])
     text = message_text_tools.get_message_reminders(
         reminders=reminders,
         next_coef=next_coef,
@@ -56,13 +58,13 @@ async def reminders(message: Message, state: FSMContext):
                                                                    next_coef=next_coef,
                                                                    day_filter=day_filter,
                                                                    tag_filter_is_click=tag_filter_is_click,
-                                                                   tags=tags
-                                                                   ),
+                                                                   tags=tags),
                          parse_mode="MarkdownV2")
 
 
 @start_router.message(F.text == "Привычки")
 async def habits(message: Message, state: FSMContext):
+    access_token = None  # TODO
     await state.set_state(States.habits_menu)
     await state.set_data({
         "user_id": message.from_user.id,
