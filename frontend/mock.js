@@ -8,6 +8,10 @@ const cors = require('cors');
 
 const app = express();
 
+app.post('/v1/auth/telegram', async (req, res) => {
+    res.json("{'access_token': '...'}")
+});
+
 app.post('/v1/reminders', (req, res) => {
     console.log("Сработало!")
     res.json({
