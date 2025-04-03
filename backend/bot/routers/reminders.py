@@ -288,6 +288,8 @@ async def add_reminder_check(message: Message, state: FSMContext):  # TODO(Arsen
     if message.text in reply_kbs.REMINDERS_MENU_TEXTS:
         return
     # TODO запрос в control_plane/utils/yandex_gpt_api
+
+    # TODO также выбирается имя тега, если он есть, и отправляется в ручку апи в след ручке здесь
     reminder_text = message.text
     await message.answer(text=f"{reminder_text}\n\nЗдесь всё верно?",
                          reply_markup=inline_kbs.add_reminder_check(),

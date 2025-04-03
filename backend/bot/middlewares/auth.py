@@ -30,7 +30,6 @@ class AuthMiddleware(BaseMiddleware):
             access_token = None
             print(f"AccessToken не найден в state для пользователя {user.id}. Проверяем API.")
 
-        fields = "telegram_id", "first_name", "last_name", "username", "photo_url"
         request_data = {
             "telegram_id": user.id,
             "first_name": user.first_name,
@@ -39,7 +38,7 @@ class AuthMiddleware(BaseMiddleware):
             "photo_url": None
         }
 
-        expected_access_token = await self.api_client.get_access_token(request_data)
+        expected_access_token = await self.api_client.get_access_token(request_data)  # generate hash in function
 
         if access_token == expected_access_token:
             print(f"AccessToken cовпадает с существующим для {user.id}: {access_token}")
@@ -52,22 +51,6 @@ class AuthMiddleware(BaseMiddleware):
             return await handler(event, data)  # Передаем управление handler'у
 
         print("Access token не получен с АПИ. Ошибка.")
-
-        """computed_hash = hmac.new(
-            secret_key,  # bot_token
-            data_str.encode(),
-            hashlib.sha256
-        ).hexdigest()"""  # control_plane...utils.auth
-
-
-        # 1) Check AccessToken in state, if exists -> ok
-        # 2) Get AccessToken in remindme api, if exists -> ok
-        # state.set("token"=data.get_state())
-        # 3) Process user registration -> hash_generate()
-
-
-
-
 
         result = await handler(event, data)
         return result
