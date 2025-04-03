@@ -1,5 +1,6 @@
 from typing import TypeVar, Generic, Type, Optional, Sequence
 
+from fastapi import HTTPException
 from sqlalchemy.future import select
 from sqlalchemy import update, delete, func, and_
 from uuid import UUID
@@ -27,11 +28,10 @@ class BaseRepository(Generic[T]):
             await session.commit()
             return obj
 
-    async def get_by_model_id(self, user_id: UUID, model_id: UUID) -> Optional[T]:
+    async def get_by_model_id(self, model_id: UUID) -> Optional[T]:
         async with await get_async_session() as session:
             stmt = select(self.model).where(
                 and_(
-                    getattr(self.model, "user_id") == user_id,
                     getattr(self.model, "id") == model_id
                 ).returning(self.model)
             )
@@ -54,11 +54,10 @@ class BaseRepository(Generic[T]):
             result = await session.execute(stmt)
             return result.scalars().all()
 
-    async def update_model(self, user_id: UUID, model_id: UUID, **kwargs) -> Optional[T]:
+    async def update_model(self, model_id: UUID, **kwargs) -> Optional[T]:
         async with await get_async_session() as session:
             stmt = update(self.model).where(
                 and_(
-                    getattr(self.model, "user_id") == user_id,
                     getattr(self.model, "id") == model_id
                 )
             ).values(**kwargs).returning(self.model)
@@ -68,15 +67,18 @@ class BaseRepository(Generic[T]):
 
     async def delete_model(self, user_id: UUID, model_id: UUID) -> bool:
         async with await get_async_session() as session:
-            stmt = delete(self.model).where(
-                and_(
-                    getattr(self.model, "user_id") == user_id,
-                    getattr(self.model, "id") == model_id
+            try:
+                count_models = await self.count_models(user_id=user_id)
+                stmt = delete(self.model).where(
+                    and_(
+                        getattr(self.model, "id") == model_id
+                    )
                 )
-            )
-            result = await session.execute(stmt)
-            await session.flush()
-            return result.rowcount() > 0
+                await session.execute(stmt)
+                await session.commit()
+                return True if count_models - await self.count_models(user_id=user_id) else False
+            except Exception as ex:
+                raise HTTPException(404, detail=f"Exception: {ex}")
 
     async def count_models(self, user_id: UUID, **kwargs) -> int:
         async with await get_async_session() as session:

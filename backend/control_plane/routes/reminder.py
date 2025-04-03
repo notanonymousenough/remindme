@@ -1,4 +1,5 @@
 from typing import Annotated, Sequence
+from uuid import UUID
 
 from aiohttp.web_response import Response
 from fastapi import APIRouter, Depends
@@ -7,8 +8,7 @@ from backend.control_plane.schemas.requests.reminder import ReminderMarkAsComple
     ReminderAddSchemaRequest
 from backend.control_plane.schemas.user import UserSchema
 from backend.control_plane.service.reminder_service import get_reminder_service, RemindersService
-from backend.control_plane.schemas import ReminderToDeleteRequestSchema, \
-    ReminderToEditTimeRequestSchema, ReminderToEditRequestSchema, ReminderSchema
+from backend.control_plane.schemas import ReminderToEditTimeRequestSchema, ReminderToEditRequestSchema, ReminderSchema
 from backend.control_plane.utils.auth import get_authorized_user
 
 reminder_router = APIRouter(
@@ -34,7 +34,7 @@ async def reminder_add(
     # in client check global quota (maybe raise exception QuotaExceeded)
     # catch exceptions => return stupid reminder
     # success => return smart reminder
-    reminder = await reminder_service.reminder_create(user_id=user.id, request=request)
+    reminder = await reminder_service.reminder_create(user_id=user.id, reminder=request)
     return reminder
 
 
@@ -67,6 +67,7 @@ async def reminder_edit(
         request: ReminderToEditRequestSchema = Depends(),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
+    # TODO если id брать с Path, то request.id = id(from_path). а в схеме убрать id, видимо
     reminder = await reminder_service.reminder_update(user_id=user.id, reminder=request)
     return reminder
 
@@ -81,11 +82,12 @@ async def reminder_edit(
 )
 async def reminder_delete(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderToDeleteRequestSchema = Depends(),
+        reminder_id: UUID,
         user: UserSchema = Depends(get_authorized_user)
 ):
-    await reminder_service.reminder_delete(user_id=user.id, reminder=request)
-    return Response(status=204)
+    if await reminder_service.reminder_delete(user_id=user.id, reminder_id=reminder_id):
+        return Response(status=204, text=f"Успешно удалено {reminder_id}")
+    return Response(status=404, text="Напоминание не удалено")
 
 
 @reminder_router.post(

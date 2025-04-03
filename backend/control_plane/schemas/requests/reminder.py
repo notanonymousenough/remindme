@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List, Sequence
+from typing import Optional, List
 from uuid import UUID
 
 from fastapi.params import Path
@@ -12,7 +12,8 @@ class ReminderToEditRequestSchema(BaseModel):
     id: UUID = Path(..., description="reminder ID")
     text: str = Field(None, description="Новый текст напоминания")
     time: Optional[datetime] = Field(None, description="Новое время напоминания")
-    tags: Optional[List[str]] = Field(None, description="Список тегов")
+    tags: Optional[List[UUID]] = Field(None, description="Список тегов")
+    # TODO(Arsen):  в ручке бота будет создаваться тег перед созданием напоминания и возращать айди созданного тега
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
 
     class Config:
@@ -33,13 +34,6 @@ class ReminderMarkAsCompleteRequestSchema(BaseModel):
     status: Optional[str] = Field(ReminderStatus.COMPLETED, description="Статус напоминания")
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
     completed_at: Optional[datetime] = Field(datetime.now(), description="Время выполнения")
-
-    class Config:
-        from_attributes = True
-
-
-class ReminderToDeleteRequestSchema(BaseModel):
-    id: UUID = Path(..., description="reminder ID to delete")
 
     class Config:
         from_attributes = True
