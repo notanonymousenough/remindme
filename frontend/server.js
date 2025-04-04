@@ -8,7 +8,7 @@ const cors = require('cors');
 const app = express();
 require('dotenv').config();
 const PORT = process.env.PORT || 80;
-const BACKEND_URL = 'http://158.160.114.109:8000'; // URL вашего бэкенда
+const BACKEND_URL = 'http://localhost:8000'; // URL вашего бэкенда
 
 app.use(cors({
   origin: 'http://localhost', // Укажите домен вашего фронтенда
@@ -28,9 +28,10 @@ app.use(session({
 
 app.get('/api/auth/telegram', async (req, res) => {
   try {
-    const response = await axios.post(`http://localhost:8000/v1/auth/telegram`, req.body);
+    const response = await axios.post(`${BACKEND_URL}/v1/auth/telegram`, req.body);
+    //const response = await axios.post(`${BACKEND_URL}/api/auth/telegram`, req.body);
     req.session.token = response.data; // Сохраняем токен в сессии
-    console.log(response);
+    //req.session.token = response.data.access_token;
     res.redirect('/reminders');
   } catch (error) {
     res.status(error.response?.status || 500).json({ error: error.message });
@@ -81,7 +82,8 @@ app.use('/api/*', async (req, res) => {
   try {
     const options = {
       method: req.method,
-      url: 'http://localhost:8000/v1/reminders',
+      url: `${BACKEND_URL}/v1${req.originalUrl.replace('/api', '')}`,
+      //url:  `${BACKEND_URL}${req.originalUrl}`,
       data: req.method === 'POST' || req.method === 'PUT' ? req.body : undefined, // Передаем body только для POST и PUT
       headers: {
         'Content-Type': 'application/json', // Установите нужные заголовки
