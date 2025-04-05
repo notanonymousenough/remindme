@@ -11,7 +11,7 @@ from uuid import UUID
 from backend.control_plane.db.repositories.reminder import ReminderRepository
 from backend.control_plane.db.repositories.user import UserRepository
 from backend.control_plane.db.models.base import ReminderStatus
-from backend.data_plane.config import settings
+from backend.config import get_settings
 from backend.data_plane.services.telegram_service import TelegramService
 
 logger = logging.getLogger("reminder_activities")
@@ -26,7 +26,7 @@ async def check_active_reminders() -> List[Dict[str, Any]]:
     reminder_repo = ReminderRepository()
 
     # Получаем активные напоминания в ближайшем временном окне
-    active_reminders = await reminder_repo.take_for_sending(settings.ACTIVE_REMINDERS_LIMIT)
+    active_reminders = await reminder_repo.take_for_sending(get_settings().ACTIVE_REMINDERS_LIMIT)
 
     # Формируем список напоминаний для отправки
     reminders_to_send = []

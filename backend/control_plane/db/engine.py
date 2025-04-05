@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
-from backend.control_plane.config import get_settings
+from backend.config import get_settings
 
 
 class DatabaseEngine:
@@ -21,7 +21,12 @@ class DatabaseEngine:
         return engine, async_session_maker
 
 
-engine, async_session_maker = DatabaseEngine.create(get_settings().DATABASE_URI)
+engine, async_session_maker = DatabaseEngine.create(get_settings().DATABASE_URI,
+                                                    echo=get_settings().SQL_ECHO,
+                                                    pool_size=get_settings().SQL_POOL_SIZE,
+                                                    max_overflow=get_settings().SQL_MAX_OVERFLOW,
+                                                    pool_timeout=get_settings().SQL_POOL_TIMEOUT,
+                                                    pool_recycle=get_settings().SQL_POOL_RECYCLE)
 
 
 async def get_async_session() -> AsyncSession:
