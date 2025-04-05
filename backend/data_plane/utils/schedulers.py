@@ -5,7 +5,7 @@ from temporalio.common import RetryPolicy
 from temporalio.exceptions import WorkflowAlreadyStartedError
 import temporalio
 
-from backend.data_plane.config import settings
+from backend.config import get_settings
 from backend.data_plane.workflows.reminders import CheckRemindersWorkflow
 
 
@@ -16,7 +16,7 @@ async def ensure_workflows_running(client):
             await client.start_workflow(
                 workflow_type,
                 id=workflow_id,
-                task_queue=settings.TEMPORAL_TASK_QUEUE,
+                task_queue=get_settings().TEMPORAL_TASK_QUEUE,
                 execution_timeout=None,
                 retry_policy=RetryPolicy(
                     initial_interval=timedelta(seconds=10),
