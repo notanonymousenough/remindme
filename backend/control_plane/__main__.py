@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from uvicorn import run
 
-from backend.control_plane.config import DefaultSettings, get_settings
+from backend.config import DefaultSettings, get_settings
 from backend.control_plane.routes import list_of_routes
 
 
@@ -36,5 +36,5 @@ if __name__ == "__main__":
         port=settings_for_application.APP_PORT,
         reload=True,
         reload_dirs=["backend/control_plane", "tests"],
-        log_level="debug",
+        log_level=settings_for_application.LOG_LEVEL,
     )

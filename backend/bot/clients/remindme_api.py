@@ -6,7 +6,8 @@ from typing import Union, Sequence
 import aiohttp
 
 from backend.bot.clients.http_client import AsyncHttpClient
-from backend.control_plane.config import get_settings
+from backend.config import get_settings
+from backend.control_plane.service.reminder_service import get_reminder_service
 from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaRequest
 from backend.control_plane.schemas.requests.tag import TagRequestSchema
 from backend.control_plane.schemas.tag import TagSchema

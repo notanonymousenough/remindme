@@ -34,6 +34,12 @@ class DefaultSettings(BaseSettings):
     POSTGRES_PORT: int = int(environ.get("POSTGRES_PORT", '5432'))
     POSTGRES_DB: str = environ.get("POSTGRES_DB", '')
 
+    SQL_ECHO: bool = environ.get("SQL_ECHO", "False").lower() in ("true", "1", "t"),
+    SQL_POOL_SIZE: int = environ.get("SQL_POOL_SIZE", "5")
+    SQL_MAX_OVERFLOW: int = environ.get("SQL_MAX_OVERFLOW", "10")
+    SQL_POOL_TIMEOUT: int = environ.get("SQL_POOL_TIMEOUT", "30")
+    SQL_POOL_RECYCLE: int = environ.get("SQL_POOL_RECYCLE", "1800")
+
     DEBUG: bool = True
 
     BOT_TOKEN: str = environ.get("BOT_TOKEN", "")
@@ -43,6 +49,24 @@ class DefaultSettings(BaseSettings):
         scheme_name="TelegramAccessToken",
         tokenUrl=f"{APP_ADDRESS}:{APP_PORT}{PATH_PREFIX}/auth/telegram"
     )
+
+    # Настройки Temporal
+    TEMPORAL_HOST: str = environ.get("TEMPORAL_HOST", "localhost:7233")
+    TEMPORAL_NAMESPACE: str = environ.get("TEMPORAL_NAMESPACE", "remindme")
+    TEMPORAL_TASK_QUEUE: str = environ.get("TEMPORAL_TASK_QUEUE", "remindme-tasks")
+    ACTIVE_REMINDERS_LIMIT: int = environ.get("ACTIVE_REMINDERS_LIMIT", 1000)
+
+    # Настройки Telegram
+    TELEGRAM_BOT_TOKEN: str = environ.get("BOT_TOKEN", "")
+    TELEGRAM_API_URL: str = "https://api.telegram.org/bot"
+
+    # Настройки Yandex GPT
+    YANDEX_GPT_API_KEY: str = environ.get("YANDEX_GPT_API_KEY", "")
+    YANDEX_GPT_API_URL: str = "https://api.yacloud.yandex.ru/gpt/v1/generation"
+    YANDEX_GPT_IMAGE_URL: str = "https://api.yacloud.yandex.ru/gpt/v1/image/generation"
+
+    # Настройки логирования
+    LOG_LEVEL: str = environ.get("LOG_LEVEL", "INFO")
 
     @computed_field  # type: ignore
     @property

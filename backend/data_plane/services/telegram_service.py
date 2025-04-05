@@ -4,7 +4,7 @@
 import aiohttp
 import logging
 from typing import Dict, Any, Optional
-from ..config import settings
+from backend.config import get_settings
 import certifi
 import aiohttp
 import ssl
@@ -18,7 +18,7 @@ class TelegramService:
 
     def __init__(self):
         """Инициализация сервиса"""
-        self.api_url = f"{settings.TELEGRAM_API_URL}{settings.TELEGRAM_BOT_TOKEN}"
+        self.api_url = f"{get_settings().TELEGRAM_API_URL}{get_settings().TELEGRAM_BOT_TOKEN}"
 
     async def send_message(
             self,
