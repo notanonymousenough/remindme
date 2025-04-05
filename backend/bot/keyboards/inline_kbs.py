@@ -15,7 +15,6 @@ def get_habits_buttons(habits):
 
 
 def reminders_buttons(reminders, next_coef: int, day_filter: str, tag_filter_is_click: bool, tags):
-
     keyboard = InlineKeyboardBuilder()
 
     count_of_reminders = len(reminders)
@@ -44,7 +43,7 @@ def reminders_buttons(reminders, next_coef: int, day_filter: str, tag_filter_is_
                                       callback_data="reminder_day_filter_all"))
 
     return reminders_buttons_make_tags(
-        tag_filter_is_click = tag_filter_is_click,
+        tag_filter_is_click=tag_filter_is_click,
         keyboard=keyboard,
         tags=tags
     )
@@ -52,10 +51,14 @@ def reminders_buttons(reminders, next_coef: int, day_filter: str, tag_filter_is_
 
 def reminders_buttons_make_tags(tag_filter_is_click: bool, keyboard: InlineKeyboardBuilder, tags):
     if tag_filter_is_click:
-        keyboard.row(InlineKeyboardButton(text="<-", callback_data=f"reminder_tag_filter_back"))
+        if tags:
+            keyboard.row(InlineKeyboardButton(text="<-", callback_data=f"reminder_tag_filter_back"))
+        else:
+            keyboard.row(InlineKeyboardButton(text="Вы не добавили теги, добавить?", callback_data=f"tag_new"))  # TODO
 
         for tag in tags:
-            keyboard.add(InlineKeyboardButton(text=tags[tag]["emoji"], callback_data=f"reminder_tag_filter_{tags[tag]["emoji"]}"))
+            keyboard.add(InlineKeyboardButton(text=tags[tag]["emoji"],
+                                              callback_data=f"reminder_tag_filter_{tags[tag]["emoji"]}"))
     else:
         keyboard.row(InlineKeyboardButton(text="Фильтрация по тэгам", callback_data="reminder_tag_filter"))
 
@@ -74,6 +77,15 @@ def tag_menu_get_tags(tags):
     keyboard = InlineKeyboardBuilder()
 
     for i, tag in enumerate(tags):
-        keyboard.add(InlineKeyboardButton(text=str(i + 1), callback_data=f"tags_edit_{str(tag)}"))
+        keyboard.add(InlineKeyboardButton(text=str(i + 1), callback_data=f"tag_edit_{str(tag)}"))
+
+    return keyboard.as_markup()
+
+
+def get_tag_review_buttons():
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.add(InlineKeyboardButton(text="Да, добавить", callback_data=f"new_tag_process_True"))
+    keyboard.add(InlineKeyboardButton(text="Отменить", callback_data=f"new_tag_process_False"))
 
     return keyboard.as_markup()

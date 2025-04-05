@@ -1,6 +1,6 @@
 from sqlalchemy import insert, delete, and_
 from sqlalchemy.future import select
-from typing import List, Sequence
+from typing import List, Sequence, Any
 from uuid import UUID
 
 from ..engine import get_async_session
@@ -58,3 +58,13 @@ class TagRepository(BaseRepository[Tag]):
                 print(f"Error deleting tag from reminder: {e}")
                 await session.rollback()
                 return False
+
+    async def get_links_tags_reminders(self, reminder_id: UUID) -> Sequence[Any]:
+        async with await get_async_session() as session:
+            stmt = select(reminder_tags).where(
+                and_(
+                    getattr(reminder_tags, "reminder_id") == reminder_id
+                )
+            )
+            result = await session.execute(stmt)
+            return result.scalars().all()

@@ -1,28 +1,31 @@
 import logging
 import uuid
 from datetime import datetime, timedelta
+from typing import Union
 
 from backend.bot.clients.http_client import AsyncHttpClient
 from backend.control_plane.config import get_settings
+from backend.control_plane.service.reminder_service import get_reminder_service
+from backend.control_plane.service.tag_service import get_tag_service
 
 from backend.control_plane.utils import auth
 
 
 class RemindMeApiClient(AsyncHttpClient):
-    async def get_access_token(self, data):
+    async def get_access_token(self, data_telegram_auth: dict) -> Union[str, None]:
         await self._create_session()
         #  endpoint = get_settings().GET_ACCESS_TOKEN_ENDPOINT
         endpoint = "/auth/telegram"
+
         request_data = {  # from scheme/telegram_scheme
-            "telegram_id": str(data["telegram_id"]),
-            "first_name": data["first_name"],
-            "last_name": data["last_name"],
-            "username": data["username"],
+            "telegram_id": str(data_telegram_auth["telegram_id"]),
+            "first_name": data_telegram_auth["first_name"],
+            "last_name": data_telegram_auth["last_name"],
+            "username": data_telegram_auth["username"],
             "photo_url": None,
             "auth_date": str(datetime.now()),
-            "hash": auth.generate_hash(data)
+            "hash": auth.generate_hash(data_telegram_auth)
         }
-        # request = UserTelegramDataSchema(**request_data)
 
         response = await self._session.post(
             url=endpoint,
@@ -30,7 +33,8 @@ class RemindMeApiClient(AsyncHttpClient):
         )
         if response.status != 200:
             print("api response error:", (await response.json()))
-            return
+            return None
+
         access_token = (await response.json())['access_token']
 
         await self._close_session()
@@ -72,31 +76,53 @@ class RemindMeApiClient(AsyncHttpClient):
             "tag": *emoji*
             """
 
-        data = (await response.json())
-        logging.info(f"response: {data}")
+        reminders = (await response.json())
+        logging.info(f"response: {reminders}")
 
         await self._close_session()
 
+        for reminder in reminders:
+            tags_id = get_tag_service().get_links_tags_reminders(reminder["id"])
+
+            emoji_tags = None  # TODO emoji_list from tags_id
+            if tags_id:
+                reminder["tags"] = emoji_tags
+
         reminders = [
-            reminder for reminder in data
+            reminder for reminder in reminders
             if (date_filter is None or datetime.fromisoformat(reminder["time"]).strftime(
                 "%d.%m.%Y") == date_filter)  # тут надо дату
-               and (tag_filter is None or reminder["tag"] == tag_filter)
+               and (tag_filter is None or reminder["tags"] == tag_filter)
         ]
         return reminders
 
-    def get_tags(self):
-        endpoint = None  # TODO
-        tags_example_naming = ["Ясность", "Кошки", "Знания", "Записки", "Идеи"]
-        tags_example_emoji = ["☺️", "🐈", "📚", "📝", "💡"]
-        dict_tags_example = {
+    async def get_tags(self, state_data):
+        await self._create_session()
+        endpoint = "/tag"  # TODO
+
+        headers = {
+            "Authorization": f"Bearer {state_data["access_token"]}"
+        }
+
+        response = await self._session.get(
+            url=endpoint,
+            headers=headers
+        )
+
+        response_json = (await response.json())
+
+        tags_id = None  # TODO
+        tags_name = [tag['name'] for tag in response_json]
+        tags_emoji = [tag["emoji"] for tag in response_json]
+
+        dict_tags = {
             uuid.uuid4(): {
                 "name": tag_name,
                 "emoji": tag_emoji
             }
-            for tag_name, tag_emoji in zip(tags_example_naming, tags_example_emoji)
+            for tag_name, tag_emoji in zip(tags_name, tags_emoji)
         }
-        return dict_tags_example
+        return dict_tags
 
     def get_habits(self, data: dict):
         return [

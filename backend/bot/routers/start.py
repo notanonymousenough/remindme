@@ -11,6 +11,7 @@ from backend.bot.keyboards import reply_kbs, inline_kbs
 from backend.bot.utils import States, get_message_habits, message_text_tools
 
 from backend.bot.utils.depends import Depends
+from backend.bot.utils.state_data_tools import state_data_reset
 
 start_router = Router()
 
@@ -26,26 +27,17 @@ async def start_menu(message: Message, state: FSMContext):
 async def reminders(message: Message,
                     state: FSMContext,
                     client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
-    access_token = (await state.get_data())["access_token"]
+    access_token = (await state.get_data())["access_token"]  # ТОКЕН БЕРЕТСЯ С МИДЛВАРЯ
     if (await state.get_state()) != States.reminder_menu:
         await state.set_state(States.reminder_menu)  # set state for reminders menu
-        await state.set_data({
-            "day": "today",
-            "user_id": message.from_user.id,
-            "day_filter": "today",
-            "next_coef": 0,
-            "strip": [0, 5],
-            "tag_filter_click": 0,
-            "tag_filter": None,
-            "add_reminder": 0,
-            "access_token": access_token
-        })
+
+        await state_data_reset(state=state, telegram_id=message.from_user.id, access_token=access_token)
 
     data = await state.get_data()
     day_filter = data["day"]
     next_coef = data['next_coef']
     tag_filter_is_click = data["tag_filter_click"]
-    tags = None  # client.get_tags() TODO(Arsen)
+    tags = await client().get_tags(state_data=data)
     day = data["day"]
     tag_filter = data["tag_filter"]
     strip = data["strip"]
