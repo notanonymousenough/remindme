@@ -16,10 +16,5 @@ class Tag(BaseModel):
     user = relationship("User", back_populates="tags")
     reminders = relationship("Reminder", secondary="reminder_tags", back_populates="tags")
 
-    # Ограничения уникальности
-    __table_args__ = (
-        UniqueConstraint('user_id', 'name', name='uq_user_tag_name'),
-    )
-
     def __repr__(self):
         return f"<Tag {self.name} ({self.id})>"

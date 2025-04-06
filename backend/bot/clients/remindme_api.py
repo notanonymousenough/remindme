@@ -5,6 +5,7 @@ from typing import Union
 
 from backend.bot.clients.http_client import AsyncHttpClient
 from backend.control_plane.config import get_settings
+from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaRequest
 from backend.control_plane.service.reminder_service import get_reminder_service
 from backend.control_plane.service.tag_service import get_tag_service
 
@@ -43,11 +44,31 @@ class RemindMeApiClient(AsyncHttpClient):
     async def get_reminder(self, user):  # user: User
         await self._create_session(base_url="")
         endpoint = ""
+
+        await self._close_session()
         return {
             "id": 0,
             "text": "Помыть кота",
             "date_exp": "15.05.2025"
         }
+
+    async def add_reminder(self, access_token: str, request: dict):
+        await self._create_session()
+
+        endpoint = "/reminder"
+
+        headers = {
+            "Authorization": f"Bearer {access_token}"
+        }
+
+        response = await self._session.post(
+            url=endpoint,
+            headers=headers,
+            json=request
+        )
+        await self._close_session()
+
+        return True if response.status == 200 else False
 
     async def get_reminders(self, state_data) -> list:  # user: User
         await self._create_session()  # TODO() get from config
@@ -62,8 +83,9 @@ class RemindMeApiClient(AsyncHttpClient):
             url=endpoint,
             headers=headers
         )
+        await self._close_session()
 
-        day, tag_filter = state_data["day"], state_data["tag_filter"]
+        day, tag_emoji_filter = state_data["day"], state_data["tag_filter"]
         if day == "today":
             date_filter = datetime.now().strftime("%d.%m.%Y")
         elif day == "tomorrow":
@@ -71,34 +93,26 @@ class RemindMeApiClient(AsyncHttpClient):
         else:
             date_filter = None
 
-            """ 
-            "date_exp": (datetime.now() + timedelta(days=1)).strftime("%d.%m.%Y"),
-            "tag": *emoji*
-            """
-
         reminders = (await response.json())
         logging.info(f"response: {reminders}")
 
-        await self._close_session()
-
         for reminder in reminders:
-            tags_id = get_tag_service().get_links_tags_reminders(reminder["id"])
-
-            emoji_tags = None  # TODO emoji_list from tags_id
-            if tags_id:
-                reminder["tags"] = emoji_tags
+            reminder_tags = await get_tag_service().get_tags_info_from_reminder_id(reminder_id=reminder['id'])
+            reminder['tags'] = reminder_tags  # TAG SCHEMA
 
         reminders = [
             reminder for reminder in reminders
-            if (date_filter is None or datetime.fromisoformat(reminder["time"]).strftime(
-                "%d.%m.%Y") == date_filter)  # тут надо дату
-               and (tag_filter is None or reminder["tags"] == tag_filter)
+            if (date_filter is None or datetime.fromisoformat(reminder["time"]).strftime("%d.%m.%Y") == date_filter)
+               and (tag_emoji_filter is None or (reminder["tags"] and
+                                                 tag_emoji_filter in [tag.emoji for tag in reminder["tags"]]
+                                                 )
+                    )
         ]
         return reminders
 
     async def get_tags(self, state_data):
         await self._create_session()
-        endpoint = "/tag"  # TODO
+        endpoint = "/tag"
 
         headers = {
             "Authorization": f"Bearer {state_data["access_token"]}"
@@ -108,21 +122,18 @@ class RemindMeApiClient(AsyncHttpClient):
             url=endpoint,
             headers=headers
         )
+        await self._close_session()
 
         response_json = (await response.json())
 
-        tags_id = None  # TODO
-        tags_name = [tag['name'] for tag in response_json]
-        tags_emoji = [tag["emoji"] for tag in response_json]
-
-        dict_tags = {
-            uuid.uuid4(): {
-                "name": tag_name,
-                "emoji": tag_emoji
-            }
-            for tag_name, tag_emoji in zip(tags_name, tags_emoji)
+        tags = {
+            tag["id"]: {
+                "name": tag["name"],
+                "emoji": tag['emoji']
+            } for tag in response_json
         }
-        return dict_tags
+
+        return tags
 
     def get_habits(self, data: dict):
         return [

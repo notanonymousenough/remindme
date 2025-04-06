@@ -40,7 +40,7 @@ async def reminders(message: Message,
     tags = await client().get_tags(state_data=data)
     day = data["day"]
     tag_filter = data["tag_filter"]
-    strip = data["strip"]
+    strip = data["strip"]  # TODO убрать переменные
     """
     client это зароможенная функция get_client_async, которая возвращает объект RemindMeApiClient
     поэтому нужно вызывать каждый раз ее через скобки, чтобы получить синглтон объект

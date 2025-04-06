@@ -6,6 +6,9 @@ from backend.bot.app import bot
 from backend.bot.clients.remindme_api import get_client_async
 from backend.bot.middlewares.auth import AuthMiddleware
 from backend.bot.middlewares.not_modified_messages import IgnoreMessageNotModifiedMiddleware
+from backend.bot.routers.state_actions.edit_reminder import edit_reminder_router
+from backend.bot.routers.state_actions.new_reminder import add_reminder_router
+from backend.bot.routers.tags import tags_router
 from routers import start_router, reminders_router, habits_router
 
 
@@ -15,6 +18,9 @@ async def main():
     dp.include_router(start_router)
     dp.include_router(reminders_router)
     dp.include_router(habits_router)
+    dp.include_router(tags_router)
+    dp.include_router(add_reminder_router)
+    dp.include_router(edit_reminder_router)
 
     api_client = await get_client_async()
     auth_middleware = AuthMiddleware(api_client=api_client)

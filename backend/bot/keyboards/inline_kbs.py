@@ -56,9 +56,10 @@ def reminders_buttons_make_tags(tag_filter_is_click: bool, keyboard: InlineKeybo
         else:
             keyboard.row(InlineKeyboardButton(text="Вы не добавили теги, добавить?", callback_data=f"tag_new"))  # TODO
 
-        for tag in tags:
-            keyboard.add(InlineKeyboardButton(text=tags[tag]["emoji"],
-                                              callback_data=f"reminder_tag_filter_{tags[tag]["emoji"]}"))
+        if tags:
+            for tag in tags:
+                keyboard.add(InlineKeyboardButton(text=tags[tag]["emoji"],
+                                                  callback_data=f"reminder_tag_filter_{tags[tag]["emoji"]}"))
     else:
         keyboard.row(InlineKeyboardButton(text="Фильтрация по тэгам", callback_data="reminder_tag_filter"))
 
@@ -68,6 +69,7 @@ def reminders_buttons_make_tags(tag_filter_is_click: bool, keyboard: InlineKeybo
 def add_reminder_check():
     keyboard = InlineKeyboardBuilder()
     keyboard.add(InlineKeyboardButton(text="Да, добавить", callback_data="reminder_check_OK"))
+    keyboard.add(InlineKeyboardButton(text="Нет, ввести вручную", callback_data="reminder_check_MANUAL"))
     keyboard.add(InlineKeyboardButton(text="Отменить", callback_data="reminder_check_CANCEL"))
 
     return keyboard.as_markup()

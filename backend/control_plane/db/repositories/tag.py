@@ -15,6 +15,9 @@ class TagRepository(BaseRepository[Tag]):
     def __init__(self):
         super().__init__(Tag)
 
+    async def get_tag(self, tag_id: UUID):
+        return await self.get_by_model_id(model_id=tag_id)
+
     async def get_tags(self, user_id: UUID) -> Sequence[TagSchema]:
         response = await self.get_models(user_id=user_id)
         return [TagSchema.model_validate(tag) for tag in response]
@@ -59,11 +62,21 @@ class TagRepository(BaseRepository[Tag]):
                 await session.rollback()
                 return False
 
-    async def get_links_tags_reminders(self, reminder_id: UUID) -> Sequence[Any]:
+    async def get_links_tags_id_from_reminder_id(self, reminder_id: UUID) -> Sequence[UUID]:
         async with await get_async_session() as session:
-            stmt = select(reminder_tags).where(
+            stmt = select(reminder_tags.c.tag_id).where(
                 and_(
-                    getattr(reminder_tags, "reminder_id") == reminder_id
+                    reminder_tags.c.reminder_id == reminder_id
+                )
+            )
+            result = await session.execute(stmt)
+            return result.scalars().all()
+
+    async def get_links_reminders_id_from_tag_id(self, tag_id: UUID) -> Sequence[UUID]:
+        async with await get_async_session() as session:
+            stmt = select(reminder_tags.c.reminder_id).where(
+                and_(
+                    reminder_tags.c.tag_id == tag_id
                 )
             )
             result = await session.execute(stmt)

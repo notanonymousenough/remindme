@@ -33,7 +33,7 @@ class BaseRepository(Generic[T]):
             stmt = select(self.model).where(
                 and_(
                     getattr(self.model, "id") == model_id
-                ).returning(self.model)
+                )
             )
             result = await session.execute(stmt)
             return result.scalars().one_or_none()

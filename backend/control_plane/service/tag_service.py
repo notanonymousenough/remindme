@@ -1,4 +1,4 @@
-from typing import Sequence, Any
+from typing import Sequence, Any, Union
 from uuid import UUID
 
 from backend.control_plane.db.repositories.tag import TagRepository
@@ -31,8 +31,19 @@ class TagService:
     async def delete_tag_from_reminder(self, tag_id: UUID, reminder_id: UUID):
         return await self.repo.delete_tag_from_reminder(tag_id=tag_id, reminder_id=reminder_id)
 
-    async def get_links_tags_reminders(self, reminder_id: UUID) -> Sequence[Any]:
-        return await self.repo.get_links_tags_reminders(reminder_id=reminder_id)
+    async def get_links_tags_id_from_reminder_id(self, reminder_id: UUID) -> Sequence[UUID]:
+        return await self.repo.get_links_tags_id_from_reminder_id(reminder_id=reminder_id)
+
+    async def get_links_reminders_id_from_tag_id(self, tag_id: UUID) -> Sequence[UUID]:
+        return await self.repo.get_links_reminders_id_from_tag_id(tag_id=tag_id)
+
+    async def get_tags_info_from_reminder_id(self, reminder_id: UUID) -> Union[Sequence[TagSchema], None]:
+        tags_id = await self.get_links_tags_id_from_reminder_id(reminder_id=reminder_id)
+        tags = [await self.repo.get_tag(tag_id=tag_id) for tag_id in tags_id]
+
+        if tags:
+            return [TagSchema.model_validate(tag) for tag in tags]
+        return None
 
 
 _tag_service = TagService()

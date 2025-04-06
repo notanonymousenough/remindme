@@ -6,19 +6,16 @@ from aiogram.fsm.context import FSMContext
 
 from aiogram.types import Message, CallbackQuery
 
-from backend.bot import bot
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
 
-from backend.bot.keyboards import inline_kbs, reply_kbs
+from backend.bot.keyboards import inline_kbs
 
 from backend.bot.utils import message_text_tools
 from backend.bot.utils.depends import Depends
 from backend.bot.utils.message_checkers import emoji_check
 from backend.bot.utils.state_data_tools import state_data_reset
 from backend.bot.utils.states import States
-
-reminders_router = Router()
 
 from aiogram import Router
 
@@ -36,24 +33,38 @@ async def _tags(message_or_call: Union[CallbackQuery, Message],
     data = await state.get_data()
 
     tags = await client().get_tags(state_data=data)
+
     if tags:
         text = message_text_tools.get_tags_edit(tags=tags)
     else:
-        text = "Какое эмодзи будет у вашего тэга?"
+        text = "Какое эмодзи будет у вашего первого тэга?"
         await state.update_data(new_tag_review=True)
 
-    await bot.send_message(chat_id=message_or_call.chat.id,
-                           text=text,
-                           reply_markup=inline_kbs.tag_menu_get_tags(tags=tags) if tags else None,
-                           parse_mode="MarkdownV2")
+    reply_ = inline_kbs.tag_menu_get_tags(tags=tags) if tags else None
+
+    if type(message_or_call) is Message:
+        await message_or_call.reply(text=text, reply_markup=reply_, parse_mode="MarkdownV2")
+    elif type(message_or_call) is CallbackQuery:
+        await message_or_call.message.answer(text=text, reply_markup=reply_, parse_mode="MarkdownV2")
+        await message_or_call.answer()
+    return None
+
+
+@tags_router.callback_query(StateFilter(States.reminder_menu),
+                                 F.data.startswith("tag_new"))
+async def tags_edit_link_from_inline(call: CallbackQuery,
+                                state: FSMContext,
+                                client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+    await _tags(call, state, client)
 
 
 @tags_router.message(StateFilter(States.reminder_menu))
 async def new_tag_process_1(message: Message,
-                           state: FSMContext):
+                            state: FSMContext):
     data = await state.get_data()
     if not data["new_tag_review"]:
         return
+
     if not emoji_check(message.text):
         text = "Пожалуйста, пришлите эмодзи!"
         await message.edit_text(text=text)
@@ -67,8 +78,7 @@ async def new_tag_process_1(message: Message,
 
 @tags_router.message(StateFilter(States.reminder_menu))
 async def new_tag_process_2(message: Message,
-                           state: FSMContext):
-
+                            state: FSMContext):
     data = await state.get_data()
     if not data["new_tag_review"]:
         return
@@ -81,12 +91,12 @@ async def new_tag_process_2(message: Message,
 @tags_router.message(StateFilter(States.reminder_menu),
                      F.data.startswith("new_tag_process_"))
 async def new_tag_process_3(call: CallbackQuery,
-                           state: FSMContext):
+                            state: FSMContext):
     answer = call.message.text.split("_")[-1]
 
     data = await state.get_data()
     if bool(answer):
-        text=f"Тэг {data["new_tag_emoji"]} успешно добавлен!"
+        text = f"Тэг {data["new_tag_emoji"]} успешно добавлен!"
 
     text = "Создание тэга отменено"
     await state_data_reset(state=state, telegram_id=call.from_user.id)
@@ -106,5 +116,5 @@ async def tag_edit_(call: CallbackQuery, state: FSMContext):  # TODO(Arsen): edi
     keyboard = None  # TODO
 
     await call.message.answer(text=text,
-                      parse_mode="MarkdownV2",
-                      reply_markup=keyboard)
+                              parse_mode="MarkdownV2",
+                              reply_markup=keyboard)

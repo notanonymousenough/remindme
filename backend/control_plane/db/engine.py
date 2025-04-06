@@ -8,7 +8,7 @@ from backend.control_plane.config import get_settings
 # Настройка логирования SQL запросов
 logging.basicConfig()
 logger = logging.getLogger("sqlalchemy.engine")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.ERROR)
 
 # Получение параметров подключения из переменных окружения
 load_dotenv()
