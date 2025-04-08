@@ -109,7 +109,7 @@ async def new_tag_process_3(call: CallbackQuery,
 async def tag_edit_(call: CallbackQuery, state: FSMContext):  # TODO(Arsen): edit tag by tag_id
     data = await state.get_data()
 
-    tag_id_to_edit = call.message.text.split("_")[-1]
+    tag_id = call.message.text.split("_")[-1]
 
     text = "Эмодзи тэга: {}\nИмя тэга: {}\n\nЧто вы хотите поменять?"
 

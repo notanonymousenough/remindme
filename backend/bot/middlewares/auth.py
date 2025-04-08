@@ -1,9 +1,13 @@
+from datetime import datetime
+
 from aiogram import BaseMiddleware
 from aiogram.fsm.context import FSMContext
 from aiogram.types import TelegramObject
 from typing import Callable, Dict, Any, Awaitable
 
 from backend.bot.clients.remindme_api import RemindMeApiClient
+from backend.control_plane.schemas.user import UserTelegramDataSchema
+from backend.control_plane.utils import auth
 
 
 class AuthMiddleware(BaseMiddleware):
@@ -30,14 +34,16 @@ class AuthMiddleware(BaseMiddleware):
             access_token = None
             print(f"AccessToken не найден в state для пользователя {user.id}. Проверяем API.")
 
-        request_data = {
-            "telegram_id": user.id,
+        request_data = UserTelegramDataSchema.model_validate({
+            "telegram_id": str(user.id),
             "first_name": user.first_name,
             "last_name": user.last_name,
             "username": user.username,
-            "photo_url": None
-        }
-
+            "photo_url": None,
+            "auth_date": str(datetime.now()),
+            "hash": ""
+        })
+        request_data.hash = auth.generate_hash(request_data.model_dump())
         expected_access_token = await self.api_client.get_access_token(request_data)  # generate hash in function
 
         if access_token == expected_access_token:

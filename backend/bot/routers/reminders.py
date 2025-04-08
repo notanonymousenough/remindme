@@ -12,7 +12,7 @@ from backend.bot.clients.remindme_api import RemindMeApiClient
 
 from backend.bot.keyboards import inline_kbs, reply_kbs
 from backend.bot.routers.state_actions.new_reminder import new_reminder_manual_process_1, \
-    add_reminder_process_1, add_reminder_process_2, new_reminder_manual_process_2
+    add_reminder_process_1, add_reminder_process_2, new_reminder_manual_process_2, new_reminder_manual_process_3
 from backend.bot.routers.tags import _tags
 
 from backend.bot.utils import message_text_tools
@@ -31,7 +31,7 @@ async def route_reminder_menu_message(message: Message, state: FSMContext):
     state_data = await state.get_data()
     action_type = state_data.get("action")  # Предположим, что в state.data есть ключ "menu_action"
     await state.update_data(action=None)
-    # TODO do menu_action dictionary in state
+    # TODO прибраться здесь
 
     if action_type == "create_tag":
         pass
@@ -51,6 +51,8 @@ async def route_reminder_menu_message(message: Message, state: FSMContext):
         await new_reminder_manual_process_1(message=message, state=state)
     elif action_type == "new_reminder_manual_process_2":
         await new_reminder_manual_process_2(message=message, state=state)
+    elif action_type == 'new_reminder_manual_process_3':
+        await new_reminder_manual_process_3(message=message, state=state)
     else:
         # Обработка случая, когда нет данных или данные не соответствуют ожидаемым
         await message.answer("Не понимаю, что вы хотите сделать. Пожалуйста, выберите действие из меню.")

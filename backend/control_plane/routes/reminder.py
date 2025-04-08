@@ -2,7 +2,7 @@ from typing import Annotated, Sequence
 from uuid import UUID
 
 from aiohttp.web_response import Response
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
 
 from backend.control_plane.schemas.requests.reminder import ReminderMarkAsCompleteRequestSchema, \
     ReminderAddSchemaRequest
@@ -20,14 +20,14 @@ reminder_router = APIRouter(
 @reminder_router.post(
     path="/",
     responses={
-        201: {
+        200: {
             "description": "Напоминание успешно создано"
         }
     }
 )
 async def reminder_add(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderAddSchemaRequest = Depends(),
+        request: ReminderAddSchemaRequest = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
     # TODO: try to call yandex gpt client
@@ -64,10 +64,9 @@ async def reminders_get_active(
 )
 async def reminder_edit(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderToEditRequestSchema = Depends(),
+        request: ReminderToEditRequestSchema = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
-    # TODO если id брать с Path, то request.id = id(from_path). а в схеме убрать id, видимо
     reminder = await reminder_service.reminder_update(user_id=user.id, reminder=request)
     return reminder
 
@@ -100,7 +99,7 @@ async def reminder_delete(
 )
 async def reminder_to_complete(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderMarkAsCompleteRequestSchema = Depends(),
+        request: ReminderMarkAsCompleteRequestSchema = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
     reminder = await reminder_service.mark_as_complete(user_id=user.id, reminder=request)
@@ -117,7 +116,7 @@ async def reminder_to_complete(
 )
 async def reminder_postpone(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderToEditTimeRequestSchema = Depends(),
+        request: ReminderToEditTimeRequestSchema = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
     reminder = await reminder_service.postpone(user_id=user.id, reminder=request)

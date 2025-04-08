@@ -34,32 +34,23 @@ async def reminders(message: Message,
         await state_data_reset(state=state, telegram_id=message.from_user.id, access_token=access_token)
 
     data = await state.get_data()
-    day_filter = data["day"]
-    next_coef = data['next_coef']
-    tag_filter_is_click = data["tag_filter_click"]
     tags = await client().get_tags(state_data=data)
-    day = data["day"]
-    tag_filter = data["tag_filter"]
-    strip = data["strip"]  # TODO убрать переменные
-    """
-    client это зароможенная функция get_client_async, которая возвращает объект RemindMeApiClient
-    поэтому нужно вызывать каждый раз ее через скобки, чтобы получить синглтон объект
-    """
     reminders = sorted((await client().get_reminders(state_data=data)), key=lambda x: x["time"])
+
     text = message_text_tools.get_message_reminders(
         reminders=reminders,
-        next_coef=next_coef,
-        strip=strip,
-        day=day,
-        tag_filter=tag_filter
+        next_coef=data['next_coef'],
+        strip=data["strip"],
+        day=data["day"],
+        tag_filter=data["tag_filter"]
     )
 
     await message.answer(text="Вывожу список напоминаний..", reply_markup=reply_kbs.reminders_menu())
     await message.answer(text=text,
                          reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
-                                                                   next_coef=next_coef,
-                                                                   day_filter=day_filter,
-                                                                   tag_filter_is_click=tag_filter_is_click,
+                                                                   next_coef=data['next_coef'],
+                                                                   day_filter=data["day"],
+                                                                   tag_filter_is_click=data["tag_filter_click"],
                                                                    tags=tags),
                          parse_mode="MarkdownV2")
 
@@ -68,7 +59,7 @@ async def reminders(message: Message,
 async def habits(message: Message,
                  state: FSMContext,
                  client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
-    access_token = None  # TODO
+    access_token = (await state.get_data())["access_token"]
     await state.set_state(States.habits_menu)
     await state.set_data({
         "user_id": message.from_user.id,

@@ -1,11 +1,15 @@
 import logging
 import uuid
 from datetime import datetime, timedelta
+from traceback import print_tb
 from typing import Union
+
+import aiohttp
 
 from backend.bot.clients.http_client import AsyncHttpClient
 from backend.control_plane.config import get_settings
 from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaRequest
+from backend.control_plane.schemas.user import UserTelegramDataSchema
 from backend.control_plane.service.reminder_service import get_reminder_service
 from backend.control_plane.service.tag_service import get_tag_service
 
@@ -13,24 +17,20 @@ from backend.control_plane.utils import auth
 
 
 class RemindMeApiClient(AsyncHttpClient):
-    async def get_access_token(self, data_telegram_auth: dict) -> Union[str, None]:
+    async def get_access_token(self, request: UserTelegramDataSchema) -> Union[str, None]:
         await self._create_session()
         #  endpoint = get_settings().GET_ACCESS_TOKEN_ENDPOINT
         endpoint = "/auth/telegram"
 
-        request_data = {  # from scheme/telegram_scheme
-            "telegram_id": str(data_telegram_auth["telegram_id"]),
-            "first_name": data_telegram_auth["first_name"],
-            "last_name": data_telegram_auth["last_name"],
-            "username": data_telegram_auth["username"],
-            "photo_url": None,
-            "auth_date": str(datetime.now()),
-            "hash": auth.generate_hash(data_telegram_auth)
+        headers = {
+            'accept': "application/json",
+            "Content-Type": "application/json"
         }
 
         response = await self._session.post(
+            headers=headers,
             url=endpoint,
-            json=request_data
+            data=request.model_dump_json()
         )
         if response.status != 200:
             print("api response error:", (await response.json()))
@@ -41,9 +41,14 @@ class RemindMeApiClient(AsyncHttpClient):
         await self._close_session()
         return access_token
 
-    async def get_reminder(self, user):  # user: User
+    async def get_reminder(self, access_token: str, reminder_id: int):  # user: User
         await self._create_session(base_url="")
         endpoint = ""
+
+        headers = {
+            'accept': "application/json",
+            "Content-Type": "application/json"
+        }
 
         await self._close_session()
         return {
@@ -52,19 +57,21 @@ class RemindMeApiClient(AsyncHttpClient):
             "date_exp": "15.05.2025"
         }
 
-    async def add_reminder(self, access_token: str, request: dict):
+    async def add_reminder(self, access_token: str, request: ReminderAddSchemaRequest):
         await self._create_session()
 
-        endpoint = "/reminder"
+        endpoint = "/reminder/"
 
         headers = {
-            "Authorization": f"Bearer {access_token}"
+            "Authorization": f"Bearer {access_token}",
+            'accept': "application/json",
+            "Content-Type": "application/json"
         }
 
         response = await self._session.post(
             url=endpoint,
             headers=headers,
-            json=request
+            data=request.model_dump_json()
         )
         await self._close_session()
 
@@ -73,7 +80,7 @@ class RemindMeApiClient(AsyncHttpClient):
     async def get_reminders(self, state_data) -> list:  # user: User
         await self._create_session()  # TODO() get from config
 
-        endpoint = "/reminder"
+        endpoint = "/reminder/"
 
         headers = {
             "Authorization": f"Bearer {state_data["access_token"]}"
@@ -83,6 +90,7 @@ class RemindMeApiClient(AsyncHttpClient):
             url=endpoint,
             headers=headers
         )
+        reminders = (await response.json())
         await self._close_session()
 
         day, tag_emoji_filter = state_data["day"], state_data["tag_filter"]
@@ -93,7 +101,6 @@ class RemindMeApiClient(AsyncHttpClient):
         else:
             date_filter = None
 
-        reminders = (await response.json())
         logging.info(f"response: {reminders}")
 
         for reminder in reminders:
@@ -104,15 +111,13 @@ class RemindMeApiClient(AsyncHttpClient):
             reminder for reminder in reminders
             if (date_filter is None or datetime.fromisoformat(reminder["time"]).strftime("%d.%m.%Y") == date_filter)
                and (tag_emoji_filter is None or (reminder["tags"] and
-                                                 tag_emoji_filter in [tag.emoji for tag in reminder["tags"]]
-                                                 )
-                    )
+                                                 tag_emoji_filter in [tag.emoji for tag in reminder["tags"]]))
         ]
         return reminders
 
     async def get_tags(self, state_data):
         await self._create_session()
-        endpoint = "/tag"
+        endpoint = "/tag/"
 
         headers = {
             "Authorization": f"Bearer {state_data["access_token"]}"
@@ -122,9 +127,16 @@ class RemindMeApiClient(AsyncHttpClient):
             url=endpoint,
             headers=headers
         )
-        await self._close_session()
 
-        response_json = (await response.json())
+        try:
+            response.raise_for_status()
+            response_json = (await response.json())
+        except aiohttp.ClientError as e:
+            await self._close_session()
+            print(f"Ошибка при получении тегов: {e}")
+            return {}  # Или raise e чтобы пробросить ошибку выше
+
+        await self._close_session()
 
         tags = {
             tag["id"]: {

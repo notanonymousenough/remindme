@@ -1,3 +1,4 @@
+import datetime
 from typing import Annotated
 
 from aiogram import F, Router
@@ -75,7 +76,7 @@ async def add_reminder_process_3(call: CallbackQuery,
 
 async def new_reminder_manual_process_1(message: Message, state: FSMContext):
     await state.update_data(action="new_reminder_manual_process_2")
-    await state.update_data(add_reminder_manual_reminder_text=message.text)
+    await state.update_data(add_reminder_manual_text=message.text)
 
     text = ("Теперь введи дату, когда его прислать в формате ДД\.ММ\.ГГГГ или ключевым словом \(завтра\, послезавтра\, "
             "через неделю\.\.\.\)")
@@ -84,29 +85,49 @@ async def new_reminder_manual_process_1(message: Message, state: FSMContext):
 
 
 async def new_reminder_manual_process_2(message: Message,
+                                        state: FSMContext):
+    date = parse_relative_date(date=message.text)
+
+    if date:
+        await state.update_data(action="new_reminder_manual_process_3")
+        await state.update_data(add_reminder_manual_date=date)
+        text = "Во сколько времени напомнить?"
+    else:
+        text = "Ошибка формата даты\.\. возврат"
+        await state.update_data(action=None)
+
+    await message.reply(text=text, parse_mode="MarkdownV2")
+
+
+async def new_reminder_manual_process_3(message: Message,
                                         state: FSMContext,
                                         client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     data = await state.get_data()
-    access_token = data["access_token"]
-    reminder_text = data["add_reminder_manual_reminder_text"]
+    access_token = data['access_token']
+    add_reminder_manual_text = data["add_reminder_manual_text"]
+    add_reminder_manual_date = data["add_reminder_manual_date"]
+    time = message.text
 
-    date = parse_relative_date(date=message.text)
-    if date:
-        try:
-            request = {
-                "text": reminder_text,
-                "time": str(date.isoformat()),
-                "tags": []
-            }
-            if await (await get_client_async()).add_reminder(access_token=access_token, request=request):
-                text = "Напоминание успешно добавлено\!"
-            else:
-                text = "Ошибка отправки на сервер\.\. возврат"
-        except Exception as ex:
-            print(ex)
-            text = "Ошибка формата напоминания\.\. возврат"
-    else:
-        text = "Ошибка формата даты\.\. возврат"
+    try:
+        if len(time) == 2:
+            add_reminder_manual_time = datetime.time(int(time), 0, 0)
+        else:
+            add_reminder_manual_time = datetime.time(*map(int, time.split(":")), second=0)
+
+        request = {
+            "text": add_reminder_manual_text,
+            "time": datetime.datetime.combine(add_reminder_manual_date, add_reminder_manual_time),
+            "tags": []
+        }
+        request = ReminderAddSchemaRequest.model_validate(request)
+
+        if await client().add_reminder(access_token=access_token, request=request):
+            text = "Напоминание успешно добавлено\!"
+        else:
+            text = "Ошибка отправки на сервер\.\. возврат"
+    except Exception as ex:
+        print(ex)
+        text = "Ошибка формата напоминания\.\. возврат"
 
     await message.reply(text=text, parse_mode="MarkdownV2")
     await start.reminders(message=message, state=state)

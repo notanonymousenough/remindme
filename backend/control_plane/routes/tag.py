@@ -1,7 +1,7 @@
 from typing import Annotated, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
 
 from backend.control_plane.schemas.requests.tag import TagRequestSchema
 from backend.control_plane.schemas.tag import TagSchema
@@ -21,7 +21,7 @@ tag_router = APIRouter(
 )
 async def tag_add(
     tag_service: Annotated[TagService, Depends(get_tag_service)],
-    request: TagRequestSchema = Depends(),
+    request: TagRequestSchema = Body(...),
     user: UserSchema = Depends(get_authorized_user)
 ):
     return await tag_service.add_tag(user_id=user.id, tag=request)
