@@ -11,7 +11,7 @@ from backend.control_plane.service.user_service import get_user_service, UserSer
 from backend.control_plane.utils.auth import has_correct_hash
 
 auth_router = APIRouter(
-    prefix="/auth",
+    prefix="/v1/auth",
     tags=["Auth"],
 )
 

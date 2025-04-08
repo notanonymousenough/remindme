@@ -12,7 +12,7 @@ from backend.control_plane.schemas import ReminderToEditTimeRequestSchema, Remin
 from backend.control_plane.utils.auth import get_authorized_user
 
 reminder_router = APIRouter(
-    prefix="/reminder",
+    prefix="/v1/reminder",
     tags=["Reminder"],
 )
 

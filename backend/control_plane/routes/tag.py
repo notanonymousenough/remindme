@@ -10,7 +10,7 @@ from backend.control_plane.service.tag_service import TagService, get_tag_servic
 from backend.control_plane.utils.auth import get_authorized_user
 
 tag_router = APIRouter(
-    prefix="/tag",
+    prefix="/v1/tag",
     tags=["Tag"]
 )
 
