@@ -8,7 +8,7 @@ const cors = require('cors');
 const app = express();
 require('dotenv').config();
 const PORT = process.env.PORT || 80;
-const BACKEND_URL = 'http://localhost:8000'; // URL вашего бэкенда
+const BACKEND_URL = process.env.BACKEND_URL ||'http://localhost:8000'; // URL вашего бэкенда
 
 app.use(cors({
   origin: 'http://localhost', // Укажите домен вашего фронтенда
@@ -80,16 +80,18 @@ app.use('/api/*', async (req, res) => {
   }
 
   try {
+    console.log(req.method);
+    console.log(req.body);
     const options = {
       method: req.method,
       url: `${BACKEND_URL}/v1${req.originalUrl.replace('/api', '')}`,
       //url:  `${BACKEND_URL}${req.originalUrl}`,
-      data: req.method === 'POST' || req.method === 'PUT' ? req.body : undefined, // Передаем body только для POST и PUT
+      data: (req.method === 'POST' || req.method === 'PUT') ? req.body : undefined, // Передаем body только для POST и PUT
       headers: {
-        'Content-Type': 'application/json', // Установите нужные заголовки
+        'Authorization': `Bearer ${req.session.token}`,
+        'Content-Type': 'application/json' // Установите нужные заголовки
       },
     };
-
     const response = await axios(options);
     res.status(response.status).json(response.data);
     

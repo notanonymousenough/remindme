@@ -66,34 +66,19 @@
     <div class="row">
       <div class="col-2 col-sm-3"></div>
       <div class="dropdown col-1 col-sm-2 m-4">
-        <a class="btn btn-primary dropdown-toggle " href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-          Привычки
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-          <li><a class="dropdown-item" href="#">30 Отжиманий</a></li>
-          <li><a class="dropdown-item" href="#">Бег</a></li>
-          <li><a class="dropdown-item" href="#">Курс по физике</a></li>
-        </ul>            
+          <a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+              Привычки
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink" id="dropdownHabits">
+              <!-- Привычки будут добавлены сюда динамически -->
+          </ul>
       </div>
-    </div>
-    <div class="row">
-      <div class="col-2 col-sm-3"></div>
-      <div class="col-5 col-sm-3 col-lg-2">
-        <h7>30 Отжиманий</h7>
-      </div>
-      
-      <div class="col-3 col-sm-3 col-md-2 col-lg-2 btn-delete-h">
-        <form>
-          <button type="button" class="btn btn-warning btn-sm "  >Выполнить</button>
-        </form>
-      </div>
-      <div class="col-6 col-sm-1 col-md-2 col-lg-1 btn-delete-h">
-        <form>
-          <button type="button" class="btn btn-sm btn-danger "   >Удалить</button>
-        </form>
-      </div>
-    </div>
-    <p></p>
+  </div>
+  
+  <div class="habit-rows" id="habitRows">
+      <!-- Привычки будут отображены здесь -->
+  </div>
+  <p></p>
     <div class="row">
       <div class="col-2 col-sm-3"></div>
       <table class="tabel col-8 table-bordered table-priv">
@@ -165,6 +150,62 @@
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="../js/components/navbar.js"></script>
- 
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      async function fetchHabits() {
+          try {
+              const response = await fetch('/api/habits');
+              if (!response.ok) {
+                  throw new Error('Ошибка сети');
+              }
+              const habits = await response.json();
+              displayHabits(habits);
+          } catch (error) {
+              console.error('Ошибка:', error);
+          }
+      }
+
+      function displayHabits(habits) {
+          const habitRows = document.getElementById('habitRows');
+          const dropdownHabits = document.getElementById('dropdownHabits');
+
+          // Очистить контейнеры
+          habitRows.innerHTML = '';
+          dropdownHabits.innerHTML = '';
+
+          // Добавить привычки в контейнеры
+          habits.forEach(habit => {
+              // Создаем строку для привычки
+              const habitRow = document.createElement('div');
+              habitRow.className = 'row';
+              habitRow.innerHTML = `
+                  <div class="col-2 col-sm-3"></div>
+                  <div class="col-5 col-sm-3 col-lg-2">
+                      <h7>${habit.text}</h7>
+                  </div>
+                  <div class="col-3 col-sm-3 col-md-2 col-lg-2 btn-delete-h">
+                      <form>
+                          <button type="button" class="btn btn-warning btn-sm">Выполнить</button>
+                      </form>
+                  </div>
+                  <div class="col-6 col-sm-1 col-md-2 col-lg-1 btn-delete-h">
+                      <form>
+                          <button type="button" class="btn btn-sm btn-danger">Удалить</button>
+                      </form>
+                  </div>
+              `;
+              habitRows.appendChild(habitRow);
+              
+              // Добавляем элемент в дропдаун
+              const dropdownItem = document.createElement('li');
+              dropdownItem.innerHTML = `<a class="dropdown-item" href="#">${habit.text}</a>`;
+              dropdownHabits.appendChild(dropdownItem);
+          });
+      }
+
+      fetchHabits();  // Вызов функции при загрузке страницы
+  });
+</script>
+
 </body>  
 </html>

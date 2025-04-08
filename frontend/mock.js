@@ -7,12 +7,113 @@ const cors = require('cors');
 
 
 const app = express();
+app.use(express.json());
 
 app.post('/v1/auth/telegram', async (req, res) => {
     res.json("{'access_token': '...'}")
 });
 
+const habits=[
+    {
+    "id": "habit_12345",
+    "userId": "user_67890",
+    "text": "Отжимания",
+    "period": "daily",
+    "customPeriod": null,
+    "progress": 5,
+    "target": 7,
+    "currentStreak": 3,
+    "bestStreak": 10,
+    "startDate": "2023-09-01",
+    "endDate": "2023-12-01",
+    "removed": false,
+    "createdAt": "2023-09-01T12:00:00Z",
+    "updatedAt": "2023-10-01T12:00:00Z"
+  }];
+const reminders = [
+    {
+        "id": "r0k1l2m3n4",
+        "userId": "usr_67890",
+        "text": "Заказать билеты в кино",
+        "time": "2023-12-03T19:45:00Z",
+        "tags": ["развлечения"],
+        "status": "active",
+        "removed": false,
+        "createdAt": "2023-11-29T21:30:00Z",
+        "updatedAt": "2023-11-29T21:30:00Z",
+        "completedAt": null,
+        "notificationSent": false
+        }
+];
+
 app.post('/v1/reminders', (req, res) => {
+    const reminderData = req.body;
+    reminders.push(reminderData);
+});
+
+// Если вы хотите получить все локальные напоминания, добавьте этот маршрут
+app.get('/v1/reminders', (req, res) => {
+  res.json(reminders);
+});
+app.get('/v1/habits', (req, res) => {
+    res.json(habits);
+  });
+
+
+app.put('/v1/reminders/:id/status', (req, res) => {
+    const reminderId = req.params.id;
+    const { status } = req.body; // Ожидаем, что статус будет передан в теле запроса
+    const reminder = reminders.find(r => r.id === reminderId);
+
+    if (reminder) {
+        reminder.status = status; // Обновление статуса
+        reminder.updatedAt = new Date().toISOString(); // Обновление времени изменения
+        if (status === "completed") {
+            reminder.completedAt = new Date().toISOString(); // Устанавливаем время завершения, если статус completed
+        }
+        res.json(reminder); // Возвращаем обновленное напоминание
+    } else {
+        res.status(404).json({ error: 'Напоминание не найдено' });
+    }
+});
+
+app.put('/v1/reminders/:id', (req, res) => {
+    const id = req.params.id;
+    const updatedData = req.body;
+    console.log(req.body);    
+    // Находим индекс напоминания по ID
+    const index = reminders.findIndex(reminder => reminder.id === id);
+
+    // Если напоминание найдено, обновляем его
+    if (index !== -1) {
+        reminders[index].text = updatedData.text || reminders[index].text; // Сохраняем старое значение, если новое не передано
+        reminders[index].time = updatedData.time || reminders[index].time; // Сохраняем старое значение, если новое не передано
+        return res.status(200).json({ success: true, updatedReminder: reminders[index] });
+    } else {
+        // Если напоминание не найдено, возвращаем ошибку
+        return res.status(404).json({ success: false, message: 'Напоминание не найдено.' });
+    }
+});
+
+app.delete('/v1/reminders/:id', (req, res) => {
+    const id = req.params.id;
+
+    // Находим индекс напоминания по ID
+    const index = reminders.findIndex(reminder => reminder.id === id);
+
+    // Если напоминание найдено, удаляем его
+    if (index !== -1) {
+        reminders.splice(index, 1); // Удаляем напоминание из массива
+        return res.status(200).json({ success: true, message: 'Напоминание успешно удалено.' });
+    } else {
+        // Если напоминание не найдено, возвращаем ошибку
+        return res.status(404).json({ success: false, message: 'Напоминание не найдено.' });
+    }
+});
+
+
+
+/*app.post('/v1/reminders', (req, res) => {
     console.log("Сработало!")
     res.json({
         "id": "r0k1l2m3n4",
@@ -29,128 +130,10 @@ app.post('/v1/reminders', (req, res) => {
         })
 });
 app.get('/v1/reminders', function(req, res) {
-    const reminders = [
-        {
-        "id": "r1a2b3c4d5",
-        "userId": "usr_12345",
-        "text": "Купить молоко",
-        "time": "2023-12-02T18:30:00Z",
-        "tags": ["покупки"],
-        "status": "active",
-        "removed": false,
-        "createdAt": "2023-11-30T22:15:00Z",
-        "updatedAt": "2023-11-30T22:15:00Z",
-        "completedAt": null,
-        "notificationSent": false
-        },
-        {
-        "id": "r2e3f4g5h6",
-        "userId": "usr_12345",
-        "text": "Позвонить маме",
-        "time": "2023-12-02T18:30:00Z",
-        "tags": ["семья"],
-        "status": "active",
-        "removed": false,
-        "createdAt": "2023-11-28T14:20:00Z",
-        "updatedAt": "2023-11-29T10:05:00Z",
-        "completedAt": null,
-        "notificationSent": false
-        },
-        {
-        "id": "r3i4j5k6l7",
-        "userId": "usr_54321",
-        "text": "Оплатить счет за интернет",
-        "time": "2023-11-25T12:00:00Z",
-        "tags": ["платежи"],
-        "status": "completed",
-        "removed": false,
-        "createdAt": "2023-11-20T08:45:00Z",
-        "updatedAt": "2023-11-25T13:10:00Z",
-        "completedAt": "2023-11-25T13:10:00Z",
-        "notificationSent": true
-        },
-        {
-        "id": "r4m5n6o7p8",
-        "userId": "usr_12345",
-        "text": "Подготовить презентацию для встречи",
-        "time": "2023-11-28T09:30:00Z",
-        "tags": ["работа"],
-        "status": "forgotten",
-        "removed": false,
-        "createdAt": "2023-11-26T16:00:00Z",
-        "updatedAt": "2023-11-29T10:00:00Z",
-        "completedAt": null,
-        "notificationSent": true
-        },
-        {
-        "id": "r5q6r7s8t9",
-        "userId": "usr_67890",
-        "text": "Записаться к стоматологу",
-        "time": "2023-12-10T14:15:00Z",
-        "tags": ["здоровье"],
-        "status": "active",
-        "removed": false,
-        "createdAt": "2023-11-27T19:30:00Z",
-        "updatedAt": "2023-11-27T19:30:00Z",
-        "completedAt": null,
-        "notificationSent": false
-        },
-        {
-        "id": "r6u7v8w9x0",
-        "userId": "usr_54321",
-        "text": "Забрать посылку с почты",
-        "time": "2023-12-01T16:00:00Z",
-        "tags": ["дела"],
-        "status": "active",
-        "removed": false,
-        "createdAt": "2023-11-29T11:45:00Z",
-        "updatedAt": "2023-11-29T11:45:00Z",
-        "completedAt": null,
-        "notificationSent": false
-        },
-        {
-        "id": "r7y8z9a0b1",
-        "userId": "usr_67890",
-        "text": "Дедлайн по проекту",
-        "time": "2023-11-30T18:00:00Z",
-        "tags": ["работа"],
-        "status": "completed",
-        "removed": false,
-        "createdAt": "2023-11-15T09:20:00Z",
-        "updatedAt": "2023-11-30T17:50:00Z",
-        "completedAt": "2023-11-30T17:50:00Z",
-        "notificationSent": true
-        },
-        {
-        "id": "r8c9d0e1f2",
-        "userId": "usr_12345",
-        "text": "Совещание с командой",
-        "time": "2023-11-24T10:00:00Z",
-        "tags": ["встреча"],
-        "status": "active",
-        "removed": true,
-        "createdAt": "2023-11-20T15:30:00Z",
-        "updatedAt": "2023-11-23T18:00:00Z",
-        "completedAt": null,
-        "notificationSent": false
-        },
-        {
-        "id": "r9g0h1i2j3",
-        "userId": "usr_54321",
-        "text": "Поздравить друга с днем рождения",
-        "time": "2023-12-05T00:00:00Z",
-        "tags": ["праздники"],
-        "status": "active",
-        "removed": false,
-        "createdAt": "2023-11-25T20:10:00Z",
-        "updatedAt": "2023-11-25T20:10:00Z",
-        "completedAt": null,
-        "notificationSent": false
-        }
-    ];
+    
     res.json(reminders);
 });
-
+*/
 app.use(express.static('public'));
 
 app.listen(8000, () => {
