@@ -1,26 +1,23 @@
 import logging
 import uuid
 from datetime import datetime, timedelta
-from traceback import print_tb
-from typing import Union
+from typing import Union, Sequence
 
 import aiohttp
 
 from backend.bot.clients.http_client import AsyncHttpClient
 from backend.control_plane.config import get_settings
 from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaRequest
+from backend.control_plane.schemas.requests.tag import TagRequestSchema
+from backend.control_plane.schemas.tag import TagSchema
 from backend.control_plane.schemas.user import UserTelegramDataSchema
-from backend.control_plane.service.reminder_service import get_reminder_service
 from backend.control_plane.service.tag_service import get_tag_service
-
-from backend.control_plane.utils import auth
 
 
 class RemindMeApiClient(AsyncHttpClient):
     async def get_access_token(self, request: UserTelegramDataSchema) -> Union[str, None]:
         await self._create_session()
-        #  endpoint = get_settings().GET_ACCESS_TOKEN_ENDPOINT
-        endpoint = "/auth/telegram"
+        endpoint = get_settings().GET_ACCESS_TOKEN_ENDPOINT
 
         headers = {
             'accept': "application/json",
@@ -41,8 +38,8 @@ class RemindMeApiClient(AsyncHttpClient):
         await self._close_session()
         return access_token
 
-    async def get_reminder(self, access_token: str, reminder_id: int):  # user: User
-        await self._create_session(base_url="")
+    async def get_reminder(self, access_token: str, reminder_id: int):
+        await self._create_session()
         endpoint = ""
 
         headers = {
@@ -57,7 +54,7 @@ class RemindMeApiClient(AsyncHttpClient):
             "date_exp": "15.05.2025"
         }
 
-    async def add_reminder(self, access_token: str, request: ReminderAddSchemaRequest):
+    async def post_reminder(self, access_token: str, request: ReminderAddSchemaRequest):
         await self._create_session()
 
         endpoint = "/reminder/"
@@ -77,8 +74,48 @@ class RemindMeApiClient(AsyncHttpClient):
 
         return True if response.status == 200 else False
 
-    async def get_reminders(self, state_data) -> list:  # user: User
-        await self._create_session()  # TODO() get from config
+    @staticmethod
+    async def edit_tag(request: TagRequestSchema, tag_id: str) -> bool:
+        return await get_tag_service().update_tag(tag_id=tag_id, request=request)
+
+    @staticmethod
+    async def get_tag(tag_id: str) -> Union[TagSchema, bool]:
+        try:
+            tag = await get_tag_service().get_tag(uuid.UUID(tag_id))
+            return tag
+        except Exception as ex:
+            print(f"Ошибка: {ex}")
+            return False
+
+    async def post_tag(self, access_token: str, request: TagRequestSchema) -> bool:
+        await self._create_session()
+
+        endpoint = "/tags/"
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            'accept': "application/json",
+            "Content-Type": "application/json"
+        }
+
+        try:
+            response = await self._session.get(
+                url=endpoint,
+                headers=headers,
+                data=request.model_dump_json()
+            )
+            if response.status == 200:
+                await self._close_session()
+                return True
+            await self._close_session()
+            return False
+        except Exception as ex:
+            print(f"{ex} ошибка при отправке за сервер.")
+            await self._close_session()
+            return False
+
+    async def get_reminders(self, state_data) -> list:
+        await self._create_session()
 
         endpoint = "/reminder/"
 
@@ -115,7 +152,7 @@ class RemindMeApiClient(AsyncHttpClient):
         ]
         return reminders
 
-    async def get_tags(self, state_data):
+    async def get_tags(self, state_data: dict) -> Union[Sequence[dict], None]:
         await self._create_session()
         endpoint = "/tag/"
 

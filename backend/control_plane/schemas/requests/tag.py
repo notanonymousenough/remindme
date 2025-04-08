@@ -15,6 +15,5 @@ class TagRequestSchema(BaseModel):
             raise ValueError("Значение должно быть emoji")
         return value
 
-
     class Config:
         from_attributes = True

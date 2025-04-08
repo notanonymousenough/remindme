@@ -11,9 +11,9 @@ from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
 
 from backend.bot.keyboards import inline_kbs, reply_kbs
-from backend.bot.routers.state_actions.new_reminder import new_reminder_manual_process_1, \
-    add_reminder_process_1, add_reminder_process_2, new_reminder_manual_process_2, new_reminder_manual_process_3
-from backend.bot.routers.tags import _tags
+
+from backend.bot.routers.reminder_state_actions import *
+from backend.bot.routers.tag_state_actions import *
 
 from backend.bot.utils import message_text_tools
 from backend.bot.utils.depends import Depends
@@ -29,8 +29,7 @@ async def route_reminder_menu_message(message: Message, state: FSMContext):
     сообщение в зависимости от данных в state.
     """
     state_data = await state.get_data()
-    action_type = state_data.get("action")  # Предположим, что в state.data есть ключ "menu_action"
-    await state.update_data(action=None)
+    action_type = state_data.get("action")
     # TODO прибраться здесь
 
     if action_type == "create_tag":
@@ -38,12 +37,23 @@ async def route_reminder_menu_message(message: Message, state: FSMContext):
     elif action_type == "edit_tag":
         pass
 
-    elif message.text == "Добавить напоминание":
-        await add_reminder_process_1(message=message, state=state)
     elif message.text == "Назад":
+        await state.update_data(action=None)
         await return_to_menu(message=message, state=state)
     elif message.text == "Редактировать тэги":
-        await _tags(message_or_call=message, state=state)
+        await state.update_data(action=None)
+        await tags_edit(message=message, state=state)
+    elif message.text == "Добавить напоминание":
+        await state.update_data(action=None)
+        await add_reminder_process_1(message=message, state=state)
+
+    elif action_type == "new_tag_process_1":
+        await new_tag_process_1(message=message, state=state)
+    elif action_type == "new_tag_process_2":
+        await new_tag_process_2(message=message, state=state)
+
+    elif action_type == "tag_edit_process_2":
+        await tag_edit_process_2(message=message, state=state)
 
     elif action_type == "reminder_add":
         await add_reminder_process_2(message=message, state=state)
@@ -61,7 +71,7 @@ async def route_reminder_menu_message(message: Message, state: FSMContext):
 
 async def return_to_menu(message: Message, state: FSMContext):
     await state.set_state(States.start_menu)
-    await message.answer(text="Возвращение в меню", reply_markup=reply_kbs.main_menu())
+    await message.reply(text="Возвращение в меню", reply_markup=reply_kbs.main_menu())
 
 
 @reminders_router.callback_query(StateFilter(States.reminder_menu),

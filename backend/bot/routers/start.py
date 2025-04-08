@@ -30,7 +30,6 @@ async def reminders(message: Message,
     access_token = (await state.get_data())["access_token"]  # ТОКЕН БЕРЕТСЯ С МИДЛВАРЯ
     if (await state.get_state()) != States.reminder_menu:
         await state.set_state(States.reminder_menu)  # set state for reminders menu
-
         await state_data_reset(state=state, telegram_id=message.from_user.id, access_token=access_token)
 
     data = await state.get_data()

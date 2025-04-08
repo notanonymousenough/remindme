@@ -43,7 +43,6 @@ class ReminderRepository(BaseRepository[Reminder]):
         return ReminderSchema.model_validate(response)
 
     async def reminder_delete(self, user_id: UUID, reminder_id: UUID) -> bool:
-        # TODO get_tag from reminder_id and DELETE
         return await self.delete_model(user_id=user_id, model_id=reminder_id)
 
     async def get_active_reminders(self, user_id: UUID) -> Sequence[ReminderSchema]:

@@ -121,7 +121,7 @@ async def new_reminder_manual_process_3(message: Message,
         }
         request = ReminderAddSchemaRequest.model_validate(request)
 
-        if await client().add_reminder(access_token=access_token, request=request):
+        if await client().post_reminder(access_token=access_token, request=request):
             text = "Напоминание успешно добавлено\!"
         else:
             text = "Ошибка отправки на сервер\.\. возврат"

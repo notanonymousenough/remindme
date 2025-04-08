@@ -1,12 +1,16 @@
 import aiohttp
 
+from backend.control_plane.config import get_settings
+
 
 class AsyncHttpClient:
     def __init__(self):
         self._session = aiohttp.ClientSession()
+        self.base_url = "http://" + get_settings().APP_ADDRESS + ":" + str(get_settings().APP_PORT)
 
-    async def _create_session(self, base_url="http://127.0.0.1:8000"):  # TODO() get from config
-        self._session = aiohttp.ClientSession(base_url=base_url)
+    async def _create_session(self):
+        # "http://127.0.0.1:8000"
+        self._session = aiohttp.ClientSession(base_url=self.base_url)
 
     async def _close_session(self):
         if self._session:

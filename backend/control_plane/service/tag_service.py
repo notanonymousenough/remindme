@@ -10,8 +10,19 @@ class TagService:
     def __init__(self):
         self.repo = TagRepository()
 
+    async def get_tag(self, tag_id: UUID) -> TagSchema:
+        return await self.repo.get_tag(tag_id=tag_id)
+
     async def get_tags(self, user_id: UUID) -> Sequence[TagSchema]:
         return await self.repo.get_tags(user_id=user_id)
+
+    async def update_tag(self, tag_id: UUID, request: TagRequestSchema) -> bool:
+        response = await self.repo.update_model(model_id=tag_id, **request.model_dump())
+        try:
+            return True if TagSchema.model_validate(response) else False
+        except Exception as ex:
+            print(f"Ошибка при обновлении тэга: {ex}")
+            return False
 
     async def add_tag(self, user_id: UUID, tag: TagRequestSchema) -> TagSchema:
         return await self.repo.add_tag(user_id=user_id, tag=tag)
