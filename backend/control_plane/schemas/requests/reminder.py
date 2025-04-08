@@ -13,7 +13,6 @@ class ReminderToEditRequestSchema(BaseModel):
     text: str = Field(None, description="Новый текст напоминания")
     time: Optional[datetime] = Field(None, description="Новое время напоминания")
     tags: Optional[List[UUID]] = Field(None, description="Список тегов")
-    # TODO(Arsen):  в ручке бота будет создаваться тег перед созданием напоминания и возращать айди созданного тега
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
 
     class Config:
@@ -42,7 +41,7 @@ class ReminderMarkAsCompleteRequestSchema(BaseModel):
 class ReminderAddSchemaRequest(BaseModel):
     text: str = Field(..., description="Текст напоминания")
     time: datetime = Field(..., description="Время напоминания")
-    tags: Optional[List[str]] = Field(None, description="Список тегов")
+    tags: Optional[List[str]] = Field(..., description="Список тегов")
     status: Optional[str] = Field(ReminderStatus.ACTIVE, description="Статус напоминания")
     created_at: Optional[datetime] = Field(datetime.now(), description="Время создания")
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
