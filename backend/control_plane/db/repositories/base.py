@@ -54,6 +54,18 @@ class BaseRepository(Generic[T]):
             result = await session.execute(stmt)
             return result.scalars().all()
 
+    async def get_all_models(self, **kwargs) -> Sequence[T]:
+        async with await get_async_session() as session:
+            stmt = select(self.model)
+            for key, value in kwargs.items():
+                stmt = stmt.where(
+                    and_(
+                        getattr(self.model, key) == value
+                    )
+                )
+            result = await session.execute(stmt)
+            return result.scalars().all()
+
     async def update_model(self, model_id: UUID, **kwargs) -> Optional[T]:
         async with await get_async_session() as session:
             stmt = update(self.model).where(
