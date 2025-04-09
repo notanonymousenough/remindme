@@ -4,6 +4,8 @@ from uuid import UUID
 from aiohttp.web_response import Response
 from fastapi import APIRouter, Depends, Body
 
+from backend.control_plane.schemas import ReminderSchema, ReminderEditRequest, ReminderEditTimeRequest
+from backend.control_plane.schemas.requests import ReminderPostRequest, ReminderCompleteRequest
 from backend.control_plane.schemas.user import UserSchema
 from backend.control_plane.service.reminder_service import get_reminder_service, RemindersService
 from backend.control_plane.utils.auth import get_authorized_user
@@ -24,7 +26,7 @@ reminder_router = APIRouter(
 )
 async def reminder_add(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderAddSchemaRequest = Body(...),
+        request: ReminderPostRequest = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
     reminder = await reminder_service.reminder_create(user_id=user.id, reminder=request)

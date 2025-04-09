@@ -8,8 +8,8 @@ from .base import BaseRepository
 
 
 class NeuroImageRepository(BaseRepository[NeuroImage]):
-    def __init__(self, session: AsyncSession):
-        super().__init__(session, NeuroImage)
+    def __init__(self):
+        super().__init__(NeuroImage)
 
     async def get_by_user(self, user_id: UUID, limit: int = 10, offset: int = 0) -> List[NeuroImage]:
         """Получение изображений пользователя с пагинацией"""

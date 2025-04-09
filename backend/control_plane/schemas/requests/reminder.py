@@ -14,7 +14,6 @@ class ReminderEditStatusRequest(BaseModel):
 
 
 class ReminderEditRequest(BaseModel):
-class ReminderToEditRequestSchema(BaseModel):
     id: UUID = Path(..., description="reminder ID")
     text: str = Field(None, description="Новый текст напоминания")
     time: Optional[datetime] = Field(None, description="Новое время напоминания")

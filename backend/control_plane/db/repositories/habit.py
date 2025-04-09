@@ -9,7 +9,7 @@ from .base import BaseRepository
 from ..engine import get_async_session
 from ..models.habit import Habit, HabitProgress
 from ...schemas.habit import HabitSchemaResponse
-from ...schemas.requests.habit import HabitProgressSchemaPostRequest
+from ...schemas.requests.habit_progress import HabitProgressRequest
 from ...utils import timeutils
 
 class HabitRepository(BaseRepository[Habit]):
@@ -40,14 +40,14 @@ class HabitRepository(BaseRepository[Habit]):
 
     # habit_progress table
     @staticmethod
-    async def add_habit_progress(request: dict) -> HabitProgressSchemaPostRequest:
+    async def add_habit_progress(request: dict) -> HabitProgressRequest:
         async with get_async_session() as session:
             obj = HabitProgress(**request)
             session.add(obj)
 
             await session.flush()
             await session.commit()
-            return HabitProgressSchemaPostRequest.model_validate(obj)
+            return HabitProgressRequest.model_validate(obj)
 
     @staticmethod
     async def habit_progress_delete_last_record(habit_id: UUID) -> bool:

@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.utils.habit_tools import get_last_record_status_bool
-from backend.control_plane.db.models import HabitPeriod, Habit
+from backend.control_plane.db.models import HabitInterval, Habit
 from backend.control_plane.schemas.habit import HabitSchemaResponse
 from backend.control_plane.schemas.requests.habit import HabitPostRequest, HabitPutRequest
 from backend.control_plane.schemas.requests.habit_progress import HabitProgressRequest
@@ -20,14 +20,14 @@ class TestHabitAPI:
     ):
         habit_request = {
             "text": "habitTest0",
-            "interval": HabitPeriod.WEEKLY
+            "interval": HabitInterval.WEEKLY
         }
         habit = HabitPostRequest.model_validate(habit_request)
         response = await client.post("/v1/habit/", headers=auth_user, data=habit.model_dump_json())
 
         response_data = HabitSchemaResponse.model_validate(response.json())
         assert response_data.text == habit_request["text"]
-        assert response_data.interval == HabitPeriod.WEEKLY
+        assert response_data.interval == HabitInterval.WEEKLY
 
         async with await session as session:
             habit_from_db = await session.get(Habit, response_data.id)

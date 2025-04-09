@@ -1,6 +1,5 @@
 import datetime
 import logging
-from typing import Sequence
 from uuid import UUID
 
 from numpy.random.mtrand import Sequence
@@ -12,12 +11,10 @@ from backend.control_plane.db.repositories.reminder import ReminderRepository
 from backend.control_plane.db.repositories.user import UserRepository
 from backend.control_plane.exceptions.quota import QuotaExceededException
 from backend.control_plane.schemas import ReminderSchema
-from backend.control_plane.schemas.requests.reminder import ReminderEditRequest, \
-    ReminderCompleteRequest, ReminderEditTimeRequest, ReminderPostRequest
-from backend.control_plane.schemas.requests.reminder import ReminderToEditRequestSchema, \
-    ReminderMarkAsCompleteRequestSchema, ReminderToEditTimeRequestSchema, ReminderAddSchemaRequest
+from backend.control_plane.schemas.requests import ReminderPostRequest
+from backend.control_plane.schemas.requests.reminder import ReminderCompleteRequest, ReminderEditTimeRequest
+from backend.control_plane.schemas.requests.reminder import ReminderEditRequest
 from backend.control_plane.service.quota_service import get_quota_service
-from backend.control_plane.service.tag_service import get_tag_service
 from backend.control_plane.utils import timeutils
 
 logger = logging.getLogger("reminder_service")
@@ -36,14 +33,14 @@ class RemindersService:
 
     async def reminder_update(self, reminder: ReminderEditRequest) -> ReminderSchema:
         return await self.repo.reminder_update(reminder=reminder)
-    async def reminder_update(self, reminder: ReminderToEditRequestSchema) -> ReminderSchema:
+    async def reminder_update(self, reminder: ReminderEditRequest) -> ReminderSchema:
         request = reminder.model_dump(exclude_unset=True, exclude_none=True)
         return await self.repo.reminder_update(request=request)
 
     async def reminder_remove(self, user_id: UUID, reminder_id: UUID) -> bool:
         return await self.repo.delete_model(user_id=user_id, model_id=reminder_id)
 
-    async def reminder_create(self, user_id: UUID, reminder: ReminderAddSchemaRequest) -> ReminderSchema:
+    async def reminder_create(self, user_id: UUID, reminder: ReminderPostRequest) -> ReminderSchema:
         # Missing time in request means that we need an AI help without creation in DB
         if reminder.time is None:
             return await self.create_with_ai_predicted_time(user_id=user_id, reminder_text=reminder.text)

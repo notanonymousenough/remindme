@@ -62,7 +62,7 @@ class DefaultSettings(BaseSettings):
     POSTGRES_DB: str = environ.get("POSTGRES_DB", 'RemindMe')
 
     # DEBUG MODE
-    TEST_MODE: bool = True
+    DEBUG: bool = True
 
     # JWT ENCODE SETTINGS
     SECRET_KEY: str = environ.get("SECRET_KEY", "")

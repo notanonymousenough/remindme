@@ -14,7 +14,7 @@ class Habit(BaseModel):
 
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     text = Column(Text, nullable=False)
-    interval = Column(Enum(HabitPeriod), nullable=False)  # можно выполнить раз в *interval*
+    interval = Column(Enum(HabitInterval), nullable=False)  # можно выполнить раз в *interval*
     custom_interval = Column(Text, nullable=True)  # после MVP можно поменять на Integer - количество дней/недель и тд
     # progress column is removed - now derived from HabitProgress
     best_streak = Column(Integer, default=0)

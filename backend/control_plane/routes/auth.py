@@ -1,13 +1,10 @@
-from datetime import datetime, timedelta
 from typing import Annotated
 
 import jwt
-
 from fastapi import APIRouter, HTTPException, Depends, Body
 
-from backend.control_plane.config import get_settings
-from backend.control_plane.schemas.auth import UserTelegramDataSchema
 from backend.config import get_settings
+from backend.control_plane.config import get_settings
 from backend.control_plane.schemas.user import UserTelegramDataSchema
 from backend.control_plane.service.user_service import get_user_service, UserService
 from backend.control_plane.utils import timeutils
@@ -28,7 +25,7 @@ async def auth_telegram(
 ):
     # id = telegram_id
 
-    if not get_settings().TEST_MODE and not has_correct_hash(request):  # если ДЕБАГ режим – не проверяем хэш.
+    if not get_settings().DEBUG and not has_correct_hash(request):  # если ДЕБАГ режим – не проверяем хэш.
         raise HTTPException(401, detail="Invalid Telegram hash")
 
     # создаем или обновляем информацию пользователя, если он существует

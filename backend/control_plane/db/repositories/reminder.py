@@ -1,21 +1,17 @@
-from typing import List, Union, Sequence, Annotated
+from typing import List, Union, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime, UTC
 from sqlalchemy import select, update, and_
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..engine import get_async_session
-from ..models.reminder import Reminder, ReminderStatus
 from .base import BaseRepository
 from .tag import get_tag_repo
+from ..engine import get_async_session
 from ..models import ReminderStatus
+from ..models.reminder import Reminder
 from ...schemas import ReminderSchema
-from ...schemas.requests.reminder import ReminderEditRequest, ReminderEditStatusRequest
-from ...schemas.requests.reminder import ReminderMarkAsCompleteRequestSchema, ReminderToEditTimeRequestSchema, \
-    ReminderAddSchemaRequest, ReminderToEditRequestSchema
-from ...service.tag_service import TagService, get_tag_service
+from ...schemas.requests.reminder import ReminderEditStatusRequest, ReminderEditRequest
 from ...utils import timeutils
 
 

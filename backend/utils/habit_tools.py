@@ -1,16 +1,16 @@
-from backend.control_plane.db.models import HabitPeriod
+from backend.control_plane.db.models import HabitInterval
 from backend.control_plane.schemas.habit import HabitSchemaResponse
 
 HABIT_PERIOD_NAMES = {
-    HabitPeriod.DAILY: "месяц",
-    HabitPeriod.WEEKLY: "полгода",
-    HabitPeriod.MONTHLY: "год"
+    HabitInterval.DAILY: "месяц",
+    HabitInterval.WEEKLY: "полгода",
+    HabitInterval.MONTHLY: "год"
 }
 
 HABIT_PERIOD_NAMES_INTERVAL = {
-    HabitPeriod.DAILY: "сегодня",
-    HabitPeriod.WEEKLY: "на этой неделе",
-    HabitPeriod.MONTHLY: "в этом месяце"
+    HabitInterval.DAILY: "сегодня",
+    HabitInterval.WEEKLY: "на этой неделе",
+    HabitInterval.MONTHLY: "в этом месяце"
 }
 
 STATUS_EMOJI = {

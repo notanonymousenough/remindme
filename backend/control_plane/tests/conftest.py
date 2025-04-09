@@ -9,7 +9,7 @@ from starlette import status
 
 from backend.control_plane.app import get_app
 from backend.control_plane.db.engine import get_async_session
-from backend.control_plane.db.models import HabitPeriod, UserAchievement, AchievementCategory, AchievementTemplate
+from backend.control_plane.db.models import UserAchievement, AchievementCategory, AchievementTemplate, HabitInterval
 from backend.control_plane.schemas import ReminderSchema
 from backend.control_plane.schemas.achievementschema import AchievementSchema
 from backend.control_plane.schemas.auth import UserTelegramDataSchema
@@ -116,7 +116,7 @@ async def TestHabit(client, auth_user) -> AsyncGenerator[HabitSchemaResponse, No
     else:
         habit_request = {
             "text": "habitTest0",
-            "interval": HabitPeriod.WEEKLY
+            "interval": HabitInterval.WEEKLY
         }
         habit = HabitPostRequest.model_validate(habit_request)
         response = await client.post("/v1/habit/", headers=auth_user, data=habit.model_dump_json())

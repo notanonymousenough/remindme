@@ -12,6 +12,32 @@ import os
 config = context.config
 section = config.config_ini_section
 
+print("--- Alembic env.py Debug Info ---")
+print(f"Current working directory (os.getcwd()): {os.getcwd()}")
+print(f"Path to env.py (os.path.abspath(__file__)): {os.path.abspath(__file__)}")
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+print(f"Directory of env.py (current_dir): {current_dir}")
+
+# ИЗМЕНЕНИЕ ЗДЕСЬ: Поднимаемся на два уровня вверх, чтобы получить 'remindme/'
+# current_dir = .../remindme/backend/alembic
+# os.path.join(current_dir, "..") = .../remindme/backend
+# os.path.join(current_dir, "..", "..") = .../remindme
+project_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
+print(f"Calculated project root (project_root): {project_root}")
+
+# Добавляем корневую директорию проекта (remindme/) в sys.path
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+    print(f"Added '{project_root}' to sys.path.")
+else:
+    print(f"'{project_root}' already in sys.path.")
+
+print("\n--- sys.path AFTER modification ---")
+for p in sys.path:
+    print(f"  - {p}")
+print("----------------------------------\n")
+
 # Подставляем значения из переменных окружения
 config.set_section_option(section, "DB_USER", os.environ.get("POSTGRES_USER", "postgres"))
 config.set_section_option(section, "DB_PASSWORD", os.environ.get("POSTGRES_PASSWORD", "postgres"))
