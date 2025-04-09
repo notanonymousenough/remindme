@@ -7,7 +7,7 @@ from backend.control_plane.service.user_service import UserService, get_user_ser
 from backend.control_plane.utils.auth import get_authorized_user
 
 user_router = APIRouter(
-    prefix="/user",
+    prefix="/v1/user",
     tags=["User"],
 )
 

@@ -1,46 +1,136 @@
+import logging
 import uuid
 from datetime import datetime, timedelta
+from typing import Union, Sequence
+
+import aiohttp
 
 from backend.bot.clients.http_client import AsyncHttpClient
 from backend.control_plane.config import get_settings
+from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaRequest
+from backend.control_plane.schemas.requests.tag import TagRequestSchema
+from backend.control_plane.schemas.tag import TagSchema
 from backend.control_plane.schemas.user import UserTelegramDataSchema
-from backend.control_plane.utils import auth
+from backend.control_plane.service.tag_service import get_tag_service
 
 
 class RemindMeApiClient(AsyncHttpClient):
-    async def get_access_token(self, data):
-        endpoint = "http://control-plane:8000/auth/telegram"
+    async def get_access_token(self, request: UserTelegramDataSchema) -> Union[str, None]:
+        await self._create_session()
+        endpoint = get_settings().GET_ACCESS_TOKEN_ENDPOINT
 
-        request_data = {  # from scheme/telegram_scheme
-            "telegram_id": str(data["telegram_id"]),
-            "first_name": data["first_name"],
-            "last_name": data["last_name"],
-            "username": data["username"],
-            "photo_url": None,
-            "auth_date": str(datetime.now()),
-            "hash": auth.generate_hash(data)
+        headers = {
+            'accept': "application/json",
+            "Content-Type": "application/json"
         }
-        # request = UserTelegramDataSchema(**request_data)
 
         response = await self._session.post(
+            headers=headers,
             url=endpoint,
-            json=request_data
+            data=request.model_dump_json()
         )
         if response.status != 200:
             print("api response error:", (await response.json()))
-            return
+            return None
 
-        return (await response.json())['access_token']
+        access_token = (await response.json())['access_token']
 
-    def get_reminder(self, user):  # user: User
+        await self._close_session()
+        return access_token
+
+    async def get_reminder(self, access_token: str, reminder_id: int):
+        await self._create_session()
         endpoint = ""
+
+        headers = {
+            'accept': "application/json",
+            "Content-Type": "application/json"
+        }
+
+        await self._close_session()
         return {
             "id": 0,
             "text": "Помыть кота",
             "date_exp": "15.05.2025"
         }
 
-    def get_reminders(self, day: str, tag_filter) -> list:  # user: User
+    async def post_reminder(self, access_token: str, request: ReminderAddSchemaRequest):
+        await self._create_session()
+
+        endpoint = "/reminder/"
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            'accept': "application/json",
+            "Content-Type": "application/json"
+        }
+
+        response = await self._session.post(
+            url=endpoint,
+            headers=headers,
+            data=request.model_dump_json()
+        )
+        await self._close_session()
+
+        return True if response.status == 200 else False
+
+    @staticmethod
+    async def edit_tag(request: TagRequestSchema, tag_id: str) -> bool:
+        return await get_tag_service().update_tag(tag_id=tag_id, request=request)
+
+    @staticmethod
+    async def get_tag(tag_id: str) -> Union[TagSchema, bool]:
+        try:
+            tag = await get_tag_service().get_tag(uuid.UUID(tag_id))
+            return tag
+        except Exception as ex:
+            print(f"Ошибка: {ex}")
+            return False
+
+    async def post_tag(self, access_token: str, request: TagRequestSchema) -> bool:
+        await self._create_session()
+
+        endpoint = "/tags/"
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            'accept': "application/json",
+            "Content-Type": "application/json"
+        }
+
+        try:
+            response = await self._session.get(
+                url=endpoint,
+                headers=headers,
+                data=request.model_dump_json()
+            )
+            if response.status == 200:
+                await self._close_session()
+                return True
+            await self._close_session()
+            return False
+        except Exception as ex:
+            print(f"{ex} ошибка при отправке за сервер.")
+            await self._close_session()
+            return False
+
+    async def get_reminders(self, state_data) -> list:
+        await self._create_session()
+
+        endpoint = "/reminder/"
+
+        headers = {
+            "Authorization": f"Bearer {state_data["access_token"]}"
+        }
+
+        response = await self._session.get(
+            url=endpoint,
+            headers=headers
+        )
+        reminders = (await response.json())
+        await self._close_session()
+
+        day, tag_emoji_filter = state_data["day"], state_data["tag_filter"]
         if day == "today":
             date_filter = datetime.now().strftime("%d.%m.%Y")
         elif day == "tomorrow":
@@ -48,141 +138,51 @@ class RemindMeApiClient(AsyncHttpClient):
         else:
             date_filter = None
 
-        data = {
-            "reminders":
-                [
-                    {
-                        "id": 0,
-                        "text": "Помыть кота",
-                        "date_exp": (datetime.now() + timedelta(days=1)).strftime("%d.%m.%Y"),
-                        "time_exp": "14:48",
-                        "state": 0,
-                        "tag": "💡"
-                    },
-                    {
-                        "id": 1,
-                        "text": "Помыть cобаку",
-                        "date_exp": date_filter,
-                        "time_exp": "06:20",
-                        "state": 1,
-                        "tag": "💡"
-                    },
-                    {
-                        "id": 2,
-                        "text": "не сделать что-то",
-                        "date_exp": (datetime.now() + timedelta(days=1)).strftime("%d.%m.%Y"),
-                        "time_exp": "09:20",
-                        "state": 0,
-                        "tag": "💡"
-                    },
-                    {
-                        "id": 3,
-                        "text": "сделать что-то",
-                        "date_exp": (datetime.now() + timedelta(days=1)).strftime("%d.%m.%Y"),
-                        "time_exp": "14:20",
-                        "state": 0,
-                        "tag": "💡"
-                    },
-                    {
-                        "id": 4,
-                        "text": "не сделать что-то",
-                        "date_exp": (datetime.now() + timedelta(days=1)).strftime("%d.%m.%Y"),
-                        "time_exp": "13:20",
-                        "state": 1,
-                        "tag": "💡"
-                    },
-                    {
-                        "id": 5,
-                        "text": "не сделать что-то",
-                        "date_exp": "13.03.2025",
-                        "time_exp": "12:20",
-                        "state": 1,
-                        "tag": "📝"
-                    },
-                    {
-                        "id": 6,
-                        "text": "не сделать что-то",
-                        "date_exp": "13.03.2025",
-                        "time_exp": "16:20",
-                        "state": 1,
-                        "tag": "📝"
-                    },
-                    {
-                        "id": 7,
-                        "text": "не сделать что-то",
-                        "date_exp": "13.03.2026",
-                        "time_exp": "04:20",
-                        "state": 0,
-                        "tag": "🐈"
-                    },
-                    {
-                        "id": 8,
-                        "text": "задача с тегом кошечка",
-                        "date_exp": "13.03.2027",
-                        "time_exp": "04:20",
-                        "state": 0,
-                        "tag": "🐈"
-                    },
-                    {
-                        "id": 9,
-                        "text": "не сделать что-то",
-                        "date_exp": "17.03.2025",
-                        "time_exp": "11:20",
-                        "state": 0,
-                        "tag": ""
-                    },
-                    {
-                        "id": 10,
-                        "text": "не сделать что-то",
-                        "date_exp": date_filter,
-                        "time_exp": "04:20",
-                        "state": 0,
-                        "tag": ""
-                    },
-                    {
-                        "id": 11,
-                        "text": "не сделать что-то",
-                        "date_exp": "13.03.2025",
-                        "time_exp": "04:20",
-                        "state": 0,
-                        "tag": ""
-                    },
-                    {
-                        "id": 12,
-                        "text": "предпоследний",
-                        "date_exp": "14.03.2025",
-                        "time_exp": "04:20",
-                        "state": 0,
-                        "tag": ""
-                    },
-                    {
-                        "id": 13,
-                        "text": "последний",
-                        "date_exp": "14.03.2025",
-                        "time_exp": "04:20",
-                        "state": 0,
-                        "tag": ""
-                    }
-                ]
-        }
+        logging.info(f"response: {reminders}")
 
-        return [
-            reminder for reminder in data["reminders"]
-            if (date_filter is None or reminder["date_exp"] == date_filter)
-               and (tag_filter is None or reminder["tag"] == tag_filter)
+        for reminder in reminders:
+            reminder_tags = await get_tag_service().get_tags_info_from_reminder_id(reminder_id=reminder['id'])
+            reminder['tags'] = reminder_tags  # TAG SCHEMA
+
+        reminders = [
+            reminder for reminder in reminders
+            if (date_filter is None or datetime.fromisoformat(reminder["time"]).strftime("%d.%m.%Y") == date_filter)
+               and (tag_emoji_filter is None or (reminder["tags"] and
+                                                 tag_emoji_filter in [tag.emoji for tag in reminder["tags"]]))
         ]
+        return reminders
 
-    def get_tags(self):
-        tags_example_naming = ["Ясность", "Кошки", "Знания", "Записки", "Идеи"]
-        tags_example_emoji = ["☺️", "🐈", "📚", "📝", "💡"]
-        dict_tags_example = {
-            uuid.uuid4(): {
-                "name": tag_name,
-                "emoji": tag_emoji
-            }
-            for tag_name, tag_emoji in zip(tags_example_naming, tags_example_emoji)
+    async def get_tags(self, state_data: dict) -> Union[Sequence[dict], None]:
+        await self._create_session()
+        endpoint = "/tag/"
+
+        headers = {
+            "Authorization": f"Bearer {state_data["access_token"]}"
         }
-        return dict_tags_example
+
+        response = await self._session.get(
+            url=endpoint,
+            headers=headers
+        )
+
+        try:
+            response.raise_for_status()
+            response_json = (await response.json())
+        except aiohttp.ClientError as e:
+            await self._close_session()
+            print(f"Ошибка при получении тегов: {e}")
+            return {}  # Или raise e чтобы пробросить ошибку выше
+
+        await self._close_session()
+
+        tags = {
+            tag["id"]: {
+                "name": tag["name"],
+                "emoji": tag['emoji']
+            } for tag in response_json
+        }
+
+        return tags
 
     def get_habits(self, data: dict):
         return [
@@ -205,5 +205,11 @@ class RemindMeApiClient(AsyncHttpClient):
         ]
 
 
-async def get_client():
-    return RemindMeApiClient()
+_client = None
+
+
+async def get_client_async():
+    global _client
+    if not _client:
+        _client = RemindMeApiClient()
+    return _client

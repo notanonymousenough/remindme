@@ -27,11 +27,12 @@ def get_message_reminders(reminders, next_coef: int, strip: dict, day: str, tag_
     added_lines_count = 0
     for id, reminder in enumerate(reminders):
         if id in range(*strip):
-            if reminder["state"]:
+            if reminder["status"] == "complete":  # выполнено - strike
                 text += f"~{str(id + 1)}) {reminder['text'].capitalize()}~\n"
             else:
-                text += f"{str(id + 1)}) {reminder['text'].capitalize()} ({reminder["time_exp"]})\n"
+                text += f"{str(id + 1)}) {reminder['text'].capitalize()} ({reminder["time"]})\n"
             added_lines_count += 1
+
     if not added_lines_count:
         text = ''.join(text.split("\n")[:-2]) + f"\n\n{day_emoji[day]} "
         if tag_filter:
@@ -50,13 +51,15 @@ def get_message_reminders(reminders, next_coef: int, strip: dict, day: str, tag_
             replace("-", "\-").replace("!", "\!")).replace("(", "\(")
 
 
-def get_tags_edit(tags):
+def get_message_tags(tags, new_tag: bool = False):
     text = "🔍 Ваши тэги:\n\n"
 
     for i, tag in enumerate(tags):
-        text += f"{i + 1}\) {tags[tag]["name"]}  {tags[tag]["emoji"]}\n"
-
-    text += "\nВыберите тэг для редактирования:"
+        text += f"{i + 1}) {tags[tag]["emoji"]}  – {tags[tag]["name"]}\n"
+    if new_tag:
+        text += "\nКакое эмодзи будет у нового тэга?"
+    else:
+        text += "\nВыберите тэг для редактирования:"
 
     return text
 

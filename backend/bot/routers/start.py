@@ -1,15 +1,20 @@
+from typing import Annotated
+
 from aiogram import Router, F
 from aiogram.filters import CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from backend.bot.clients import get_client_async
+from backend.bot.clients.remindme_api import RemindMeApiClient
 from backend.bot.keyboards import reply_kbs, inline_kbs
 from backend.bot.utils import States, get_message_habits, message_text_tools
 
-from backend.bot.clients import get_client
+from backend.bot.utils.depends import Depends
+from backend.bot.utils.state_data_tools import state_data_reset
 
 start_router = Router()
-client = get_client()
+
 
 @start_router.message(CommandStart())
 async def start_menu(message: Message, state: FSMContext):
@@ -19,50 +24,41 @@ async def start_menu(message: Message, state: FSMContext):
 
 
 @start_router.message(F.text == "Напоминания")
-async def reminders(message: Message, state: FSMContext):
+async def reminders(message: Message,
+                    state: FSMContext,
+                    client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+    access_token = (await state.get_data())["access_token"]  # ТОКЕН БЕРЕТСЯ С МИДЛВАРЯ
     if (await state.get_state()) != States.reminder_menu:
         await state.set_state(States.reminder_menu)  # set state for reminders menu
-        await state.set_data({
-            "day": "today",
-            "user_id": message.from_user.id,
-            "day_filter": "today",
-            "next_coef": 0,
-            "strip": [0, 5],
-            "tag_filter_click": 0,
-            "tag_filter": None,
-            "add_reminder": 0
-        })
+        await state_data_reset(state=state, telegram_id=message.from_user.id, access_token=access_token)
 
     data = await state.get_data()
-    day_filter = data["day"]
-    next_coef = data['next_coef']
-    tag_filter_is_click = data["tag_filter_click"]
-    tags = client.get_tags()
-    day = data["day"]
-    tag_filter = data["tag_filter"]
-    strip = data["strip"]
-    reminders = sorted(client.get_reminders(day, tag_filter), key=lambda x: x["time_exp"])
+    tags = await client().get_tags(state_data=data)
+    reminders = sorted((await client().get_reminders(state_data=data)), key=lambda x: x["time"])
+
     text = message_text_tools.get_message_reminders(
         reminders=reminders,
-        next_coef=next_coef,
-        strip=strip,
-        day=day,
-        tag_filter=tag_filter
+        next_coef=data['next_coef'],
+        strip=data["strip"],
+        day=data["day"],
+        tag_filter=data["tag_filter"]
     )
 
     await message.answer(text="Вывожу список напоминаний..", reply_markup=reply_kbs.reminders_menu())
     await message.answer(text=text,
                          reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
-                                                                   next_coef=next_coef,
-                                                                   day_filter=day_filter,
-                                                                   tag_filter_is_click=tag_filter_is_click,
-                                                                   tags=tags
-                                                                   ),
+                                                                   next_coef=data['next_coef'],
+                                                                   day_filter=data["day"],
+                                                                   tag_filter_is_click=data["tag_filter_click"],
+                                                                   tags=tags),
                          parse_mode="MarkdownV2")
 
 
 @start_router.message(F.text == "Привычки")
-async def habits(message: Message, state: FSMContext):
+async def habits(message: Message,
+                 state: FSMContext,
+                 client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+    access_token = (await state.get_data())["access_token"]
     await state.set_state(States.habits_menu)
     await state.set_data({
         "user_id": message.from_user.id,
@@ -70,7 +66,7 @@ async def habits(message: Message, state: FSMContext):
     })
 
     data = await state.get_data()
-    habits = client.get_habits(data=data)
+    habits = client().get_habits(data=data)
     text = get_message_habits(habits=habits)
 
     await message.answer(text="Вывожу список привычек..", reply_markup=reply_kbs.habits_menu())
@@ -82,6 +78,7 @@ async def habits(message: Message, state: FSMContext):
 @start_router.message(F.text == "Прогресс")
 async def progress():
     pass
+    # TODO прогресс на день. возможно следует переименовать в "ЗАДАЧИ"?
 
 
 @start_router.message(StateFilter(States.start_menu))

@@ -1,4 +1,4 @@
-from .message_text_tools import get_message_reminders, get_message_habits, get_tags_edit
+from .message_text_tools import get_message_reminders, get_message_habits, get_message_tags
 from .states import States
 from .config import get_settings
 

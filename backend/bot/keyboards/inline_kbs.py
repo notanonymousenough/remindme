@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -15,7 +17,6 @@ def get_habits_buttons(habits):
 
 
 def reminders_buttons(reminders, next_coef: int, day_filter: str, tag_filter_is_click: bool, tags):
-
     keyboard = InlineKeyboardBuilder()
 
     count_of_reminders = len(reminders)
@@ -44,7 +45,7 @@ def reminders_buttons(reminders, next_coef: int, day_filter: str, tag_filter_is_
                                       callback_data="reminder_day_filter_all"))
 
     return reminders_buttons_make_tags(
-        tag_filter_is_click = tag_filter_is_click,
+        tag_filter_is_click=tag_filter_is_click,
         keyboard=keyboard,
         tags=tags
     )
@@ -52,10 +53,15 @@ def reminders_buttons(reminders, next_coef: int, day_filter: str, tag_filter_is_
 
 def reminders_buttons_make_tags(tag_filter_is_click: bool, keyboard: InlineKeyboardBuilder, tags):
     if tag_filter_is_click:
-        keyboard.row(InlineKeyboardButton(text="<-", callback_data=f"reminder_tag_filter_back"))
+        if tags:
+            keyboard.row(InlineKeyboardButton(text="<-", callback_data=f"reminder_tag_filter_back"))
+        else:
+            keyboard.row(InlineKeyboardButton(text="Вы не добавили теги, добавить?", callback_data=f"tag_new"))
 
-        for tag in tags:
-            keyboard.add(InlineKeyboardButton(text=tags[tag]["emoji"], callback_data=f"reminder_tag_filter_{tags[tag]["emoji"]}"))
+        if tags:
+            for tag in tags:
+                keyboard.add(InlineKeyboardButton(text=tags[tag]["emoji"],
+                                                  callback_data=f"reminder_tag_filter_{tags[tag]["emoji"]}"))
     else:
         keyboard.row(InlineKeyboardButton(text="Фильтрация по тэгам", callback_data="reminder_tag_filter"))
 
@@ -65,15 +71,36 @@ def reminders_buttons_make_tags(tag_filter_is_click: bool, keyboard: InlineKeybo
 def add_reminder_check():
     keyboard = InlineKeyboardBuilder()
     keyboard.add(InlineKeyboardButton(text="Да, добавить", callback_data="reminder_check_OK"))
+    keyboard.add(InlineKeyboardButton(text="Нет, ввести вручную", callback_data="reminder_check_MANUAL"))
     keyboard.add(InlineKeyboardButton(text="Отменить", callback_data="reminder_check_CANCEL"))
 
     return keyboard.as_markup()
 
 
-def tag_menu_get_tags(tags):
+def tag_menu_get_tags(tags: Sequence[dict]):
     keyboard = InlineKeyboardBuilder()
 
-    for i, tag in enumerate(tags):
-        keyboard.add(InlineKeyboardButton(text=str(i + 1), callback_data=f"tags_edit_{str(tag)}"))
+    # tag_uuid: {...: ..., ...: ...}
+    for i, tag in enumerate(tags):  # for tag in tags.keys()
+        keyboard.add(InlineKeyboardButton(text=str(i + 1), callback_data=f"tag_edit_id_{str(tag)}"))
+    keyboard.row(InlineKeyboardButton(text='Добавить новый тэг', callback_data=f"tag_new"))
+
+    return keyboard.as_markup()
+
+
+def tag_edit_menu_get_actions():
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.add(InlineKeyboardButton(text="Имя", callback_data=f"tag_edit_action_NAME"))
+    keyboard.add(InlineKeyboardButton(text='Эмодзи', callback_data=f"tag_edit_action_EMOJI"))
+
+    return keyboard.as_markup()
+
+
+def get_tag_review_buttons():
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.add(InlineKeyboardButton(text="Да, добавить", callback_data=f"new_tag_process_True"))
+    keyboard.add(InlineKeyboardButton(text="Отменить", callback_data=f"new_tag_process_False"))
 
     return keyboard.as_markup()

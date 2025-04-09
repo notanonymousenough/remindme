@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List, Sequence
+from typing import Optional, List
 from uuid import UUID
 
 from fastapi.params import Path
@@ -12,7 +12,7 @@ class ReminderToEditRequestSchema(BaseModel):
     id: UUID = Path(..., description="reminder ID")
     text: str = Field(None, description="Новый текст напоминания")
     time: Optional[datetime] = Field(None, description="Новое время напоминания")
-    tags: Optional[List[str]] = Field(None, description="Список тегов")
+    tags: Optional[List[UUID]] = Field(None, description="Список тегов")
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
 
     class Config:
@@ -38,17 +38,10 @@ class ReminderMarkAsCompleteRequestSchema(BaseModel):
         from_attributes = True
 
 
-class ReminderToDeleteRequestSchema(BaseModel):
-    id: UUID = Path(..., description="reminder ID to delete")
-
-    class Config:
-        from_attributes = True
-
-
 class ReminderAddSchemaRequest(BaseModel):
     text: str = Field(..., description="Текст напоминания")
     time: datetime = Field(..., description="Время напоминания")
-    tags: Optional[List[str]] = Field(None, description="Список тегов")
+    tags: Optional[List[str]] = Field(..., description="Список тегов")
     status: Optional[str] = Field(ReminderStatus.ACTIVE, description="Статус напоминания")
     created_at: Optional[datetime] = Field(datetime.now(), description="Время создания")
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")

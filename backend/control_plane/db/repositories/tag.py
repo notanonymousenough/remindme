@@ -1,44 +1,83 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import insert, delete, and_
 from sqlalchemy.future import select
-from sqlalchemy import and_
-from typing import List, Optional
+from typing import List, Sequence, Any
 from uuid import UUID
+
+from ..engine import get_async_session
+from ..models import reminder_tags
 from ..models.tag import Tag
 from .base import BaseRepository
+from ...schemas.requests.tag import TagRequestSchema
+from ...schemas.tag import TagSchema
 
 
 class TagRepository(BaseRepository[Tag]):
-    def __init__(self, session: AsyncSession):
-        super().__init__(session, Tag)
+    def __init__(self):
+        super().__init__(Tag)
 
-    async def get_by_user(self, user_id: UUID) -> List[Tag]:
-        """Получение всех тегов пользователя"""
-        stmt = select(Tag).where(Tag.user_id == user_id)
-        result = await self.session.execute(stmt)
-        return result.scalars().all()
+    async def get_tag(self, tag_id: UUID):
+        return await self.get_by_model_id(model_id=tag_id)
 
-    async def get_by_name(self, user_id: UUID, name: str) -> Optional[Tag]:
-        """Получение тега пользователя по имени"""
-        stmt = select(Tag).where(
-            and_(
-                Tag.user_id == user_id,
-                Tag.name == name
+    async def get_tags(self, user_id: UUID) -> Sequence[TagSchema]:
+        response = await self.get_models(user_id=user_id)
+        return [TagSchema.model_validate(tag) for tag in response]
+
+    async def add_tag(self, user_id: UUID, tag: TagRequestSchema) -> TagSchema:
+        tag_model = tag.model_dump(exclude_none=True, exclude_unset=True)
+        response = await self.create(user_id=user_id, **tag_model)
+        return TagSchema.model_validate(response)
+
+    async def delete_tag(self, user_id: UUID, tag_id: UUID) -> bool:
+        return await self.delete_model(user_id=user_id, model_id=tag_id)
+
+    async def add_tag_to_reminder(self, tag_id: UUID, reminder_id: UUID) -> bool:  # in reminder_tags table
+        async with await get_async_session() as session:
+            stmt = insert(reminder_tags).values(
+                tag_id=tag_id,
+                reminder_id=reminder_id
             )
-        )
-        result = await self.session.execute(stmt)
-        return result.scalars().first()
+            try:
+                await session.execute(stmt)
+                await session.commit()
+                return True
+            except Exception as e:
+                print(f"Error adding tag to reminder: {e}")
+                await session.rollback()
+                return False
 
-    async def replace_tag(self, old_tag_id: UUID, new_tag_id: UUID) -> bool:
-        """
-        Замена тега во всех напоминаниях
-        Используется при удалении тега с указанием замены
-        """
-        # Здесь выполняем SQL-запрос для замены тега в таблице reminder_tags
-        stmt = """
-        UPDATE reminder_tags
-        SET tag_id = :new_tag_id
-        WHERE tag_id = :old_tag_id
-        """
-        await self.session.execute(stmt, {"old_tag_id": old_tag_id, "new_tag_id": new_tag_id})
-        await self.session.flush()
-        return True
+    async def delete_tag_from_reminder(self, tag_id: UUID, reminder_id: UUID) -> bool:
+        async with await get_async_session() as session:
+            stmt = delete(reminder_tags).where(
+                and_(
+                    getattr(reminder_tags, "reminder_id") == reminder_id,
+                    getattr(reminder_tags, "tag_id") == tag_id,
+                )
+            )
+            try:
+                await session.execute(stmt)
+                await session.commit()
+                return True
+            except Exception as e:
+                print(f"Error deleting tag from reminder: {e}")
+                await session.rollback()
+                return False
+
+    async def get_links_tags_id_from_reminder_id(self, reminder_id: UUID) -> Sequence[UUID]:
+        async with await get_async_session() as session:
+            stmt = select(reminder_tags.c.tag_id).where(
+                and_(
+                    reminder_tags.c.reminder_id == reminder_id
+                )
+            )
+            result = await session.execute(stmt)
+            return result.scalars().all()
+
+    async def get_links_reminders_id_from_tag_id(self, tag_id: UUID) -> Sequence[UUID]:
+        async with await get_async_session() as session:
+            stmt = select(reminder_tags.c.reminder_id).where(
+                and_(
+                    reminder_tags.c.tag_id == tag_id
+                )
+            )
+            result = await session.execute(stmt)
+            return result.scalars().all()

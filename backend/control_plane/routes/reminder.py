@@ -1,18 +1,18 @@
 from typing import Annotated, Sequence
+from uuid import UUID
 
 from aiohttp.web_response import Response
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
 
 from backend.control_plane.schemas.requests.reminder import ReminderMarkAsCompleteRequestSchema, \
     ReminderAddSchemaRequest
 from backend.control_plane.schemas.user import UserSchema
 from backend.control_plane.service.reminder_service import get_reminder_service, RemindersService
-from backend.control_plane.schemas import ReminderToDeleteRequestSchema, \
-    ReminderToEditTimeRequestSchema, ReminderToEditRequestSchema, ReminderSchema
+from backend.control_plane.schemas import ReminderToEditTimeRequestSchema, ReminderToEditRequestSchema, ReminderSchema
 from backend.control_plane.utils.auth import get_authorized_user
 
 reminder_router = APIRouter(
-    prefix="/reminder",
+    prefix="/v1/reminder",
     tags=["Reminder"],
 )
 
@@ -20,21 +20,21 @@ reminder_router = APIRouter(
 @reminder_router.post(
     path="/",
     responses={
-        201: {
+        200: {
             "description": "Напоминание успешно создано"
         }
     }
 )
 async def reminder_add(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderAddSchemaRequest = Depends(),
+        request: ReminderAddSchemaRequest = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
     # TODO: try to call yandex gpt client
     # in client check global quota (maybe raise exception QuotaExceeded)
     # catch exceptions => return stupid reminder
     # success => return smart reminder
-    reminder = await reminder_service.reminder_create(user_id=user.id, request=request)
+    reminder = await reminder_service.reminder_create(user_id=user.id, reminder=request)
     return reminder
 
 
@@ -64,7 +64,7 @@ async def reminders_get_active(
 )
 async def reminder_edit(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderToEditRequestSchema = Depends(),
+        request: ReminderToEditRequestSchema = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
     reminder = await reminder_service.reminder_update(user_id=user.id, reminder=request)
@@ -81,11 +81,12 @@ async def reminder_edit(
 )
 async def reminder_delete(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderToDeleteRequestSchema = Depends(),
+        reminder_id: UUID,
         user: UserSchema = Depends(get_authorized_user)
 ):
-    await reminder_service.reminder_delete(user_id=user.id, reminder=request)
-    return Response(status=204)
+    if await reminder_service.reminder_delete(user_id=user.id, reminder_id=reminder_id):
+        return Response(status=204, text=f"Успешно удалено {reminder_id}")
+    return Response(status=404, text="Напоминание не удалено")
 
 
 @reminder_router.post(
@@ -98,7 +99,7 @@ async def reminder_delete(
 )
 async def reminder_to_complete(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderMarkAsCompleteRequestSchema = Depends(),
+        request: ReminderMarkAsCompleteRequestSchema = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
     reminder = await reminder_service.mark_as_complete(user_id=user.id, reminder=request)
@@ -115,7 +116,7 @@ async def reminder_to_complete(
 )
 async def reminder_postpone(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
-        request: ReminderToEditTimeRequestSchema = Depends(),
+        request: ReminderToEditTimeRequestSchema = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
     reminder = await reminder_service.postpone(user_id=user.id, reminder=request)
