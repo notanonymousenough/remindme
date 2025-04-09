@@ -1,11 +1,13 @@
 import asyncio
 from datetime import timedelta
 
+from temporalio.client import Schedule, ScheduleActionStartWorkflow, ScheduleSpec, ScheduleCalendarSpec, ScheduleRange, \
+    ScheduleAlreadyRunningError
 from temporalio.common import RetryPolicy
 from temporalio.exceptions import WorkflowAlreadyStartedError
-import temporalio
 
 from backend.config import get_settings
+from backend.data_plane.workflows.morning import MorningMessageWorkflow
 from backend.data_plane.workflows.reminders import CheckRemindersWorkflow
 
 
@@ -29,6 +31,26 @@ async def ensure_workflows_running(client):
         except WorkflowAlreadyStartedError:
             print(f"Workflow {workflow_id} уже запущен")
 
+    async def schedule_if_not_scheduled(workflow_type, workflow_id):
+        try:
+            await client.create_schedule(
+                f"{workflow_id}-schedule",
+                Schedule(
+                    action=ScheduleActionStartWorkflow(
+                        workflow_type.run,
+                        id=workflow_id,
+                        task_queue=get_settings().TEMPORAL_TASK_QUEUE,
+                    ),
+                    spec=ScheduleSpec(
+                        calendars=[ScheduleCalendarSpec(hour=(ScheduleRange(6),))]
+                    ),
+                ),
+            )
+            print(f"Workflow {workflow_id} запланирован")
+        except ScheduleAlreadyRunningError:
+            print(f"Workflow {workflow_id} уже запланирован")
+
     await asyncio.gather(
         start_if_not_exists(CheckRemindersWorkflow, "check-reminders"),
+        schedule_if_not_scheduled(MorningMessageWorkflow, "morning-message"),
     )

@@ -36,11 +36,16 @@ async def main():
         workflows=[
             workflows.reminders.CheckRemindersWorkflow,
             workflows.reminders.SendReminderNotificationWorkflow,
+            workflows.morning.MorningMessageWorkflow
         ],
         activities=[
             activities.reminders.check_active_reminders,
             activities.reminders.send_telegram_notification,
-            activities.reminders.abort_sent
+            activities.reminders.abort_sent,
+            activities.morning.get_active_users,
+            activities.morning.check_today_habits,
+            activities.morning.check_today_reminders,
+            activities.morning.send_telegram_message
         ],
     )
 

@@ -1,8 +1,7 @@
 import hashlib
-from datetime import timedelta, datetime
+from datetime import timedelta
 from os import environ
 
-from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import computed_field, ConfigDict
 from pydantic_settings import BaseSettings
@@ -54,16 +53,15 @@ class DefaultSettings(BaseSettings):
     POSTGRES_PASSWORD: str = environ.get("POSTGRES_PASSWORD", 'postgres')
     POSTGRES_ADDRESS: str = environ.get("POSTGRES_ADDRESS", '127.0.0.1')
     POSTGRES_PORT: int = int(environ.get("POSTGRES_PORT", '5432'))
-    POSTGRES_DB: str = environ.get("POSTGRES_DB", 'RemindMe')
+    POSTGRES_DB: str = environ.get("POSTGRES_DB", 'remind_me')
 
-    SQL_ECHO: bool = environ.get("SQL_ECHO", "False").lower() in ("true", "1", "t"),
+    SQL_ECHO: bool = environ.get("SQL_ECHO", "False").lower() in ("true", "1", "t")
     SQL_POOL_SIZE: int = environ.get("SQL_POOL_SIZE", "5")
     SQL_MAX_OVERFLOW: int = environ.get("SQL_MAX_OVERFLOW", "10")
     SQL_POOL_TIMEOUT: int = environ.get("SQL_POOL_TIMEOUT", "30")
     SQL_POOL_RECYCLE: int = environ.get("SQL_POOL_RECYCLE", "1800")
 
-    # DEBUG MODE
-    DEBUG: bool = True
+    DEBUG: bool = environ.get("DEBUG", "false").lower() in ("true", "1", "t")
 
     # JWT ENCODE SETTINGS
     SECRET_KEY: str = environ.get("SECRET_KEY", "")
@@ -73,12 +71,8 @@ class DefaultSettings(BaseSettings):
     BOT_TOKEN: str = environ.get("BOT_TOKEN", "")
 
     # OAUTH2 SETTINGS
-    JWT_TOKEN_LIFETIME: datetime = datetime.now() + timedelta(days=1)
+    JWT_TOKEN_LIFETIME: datetime = timedelta(days=1)
     PWD_CONTEXT: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    OAUTH2_SCHEME: OAuth2PasswordBearer = OAuth2PasswordBearer(
-        scheme_name="TelegramAccessToken",
-        tokenUrl=GET_ACCESS_TOKEN_ENDPOINT
-    )
 
     # CONSTANTS
     TAGS_MAX_LENGTH: int = 7  # for bot inline keyboard
@@ -113,6 +107,14 @@ class DefaultSettings(BaseSettings):
                 f"{self.POSTGRES_PASSWORD}@"
                 f"{self.POSTGRES_ADDRESS}/"
                 f"{self.POSTGRES_DB}")
+
+    @property
+    def OAUTH2_SCHEME(self):
+        from fastapi.security import OAuth2PasswordBearer
+        return OAuth2PasswordBearer(
+            scheme_name="TelegramAccessToken",
+            tokenUrl=GET_ACCESS_TOKEN_ENDPOINT
+        )
 
 
 def get_settings():
