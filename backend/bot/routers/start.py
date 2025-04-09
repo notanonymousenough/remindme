@@ -78,6 +78,7 @@ async def habits(message: Message,
 @start_router.message(F.text == "Прогресс")
 async def progress():
     pass
+    # TODO прогресс на день. возможно следует переименовать в "ЗАДАЧИ"?
 
 
 @start_router.message(StateFilter(States.start_menu))

@@ -56,7 +56,7 @@ def reminders_buttons_make_tags(tag_filter_is_click: bool, keyboard: InlineKeybo
         if tags:
             keyboard.row(InlineKeyboardButton(text="<-", callback_data=f"reminder_tag_filter_back"))
         else:
-            keyboard.row(InlineKeyboardButton(text="Вы не добавили теги, добавить?", callback_data=f"tag_new"))  # TODO
+            keyboard.row(InlineKeyboardButton(text="Вы не добавили теги, добавить?", callback_data=f"tag_new"))
 
         if tags:
             for tag in tags:
