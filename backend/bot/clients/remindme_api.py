@@ -57,7 +57,8 @@ class RemindMeApiClient(AsyncHttpClient):
     async def post_reminder(self, access_token: str, request: ReminderAddSchemaRequest):
         await self._create_session()
 
-        endpoint = "/reminder/"
+        endpoint = "/v1/reminder/"
+
 
         headers = {
             "Authorization": f"Bearer {access_token}",
@@ -90,7 +91,7 @@ class RemindMeApiClient(AsyncHttpClient):
     async def post_tag(self, access_token: str, request: TagRequestSchema) -> bool:
         await self._create_session()
 
-        endpoint = "/tags/"
+        endpoint = "/v1/tag/"
 
         headers = {
             "Authorization": f"Bearer {access_token}",
@@ -99,7 +100,7 @@ class RemindMeApiClient(AsyncHttpClient):
         }
 
         try:
-            response = await self._session.get(
+            response = await self._session.post(
                 url=endpoint,
                 headers=headers,
                 data=request.model_dump_json()
@@ -117,7 +118,7 @@ class RemindMeApiClient(AsyncHttpClient):
     async def get_reminders(self, state_data) -> list:
         await self._create_session()
 
-        endpoint = "/reminder/"
+        endpoint = "/v1/reminder/"
 
         headers = {
             "Authorization": f"Bearer {state_data["access_token"]}"
@@ -154,7 +155,7 @@ class RemindMeApiClient(AsyncHttpClient):
 
     async def get_tags(self, state_data: dict) -> Union[Sequence[dict], None]:
         await self._create_session()
-        endpoint = "/tag/"
+        endpoint = "/v1/tag/"
 
         headers = {
             "Authorization": f"Bearer {state_data["access_token"]}"

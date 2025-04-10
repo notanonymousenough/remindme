@@ -11,9 +11,10 @@ from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
 
 from backend.bot.keyboards import inline_kbs, reply_kbs
-
-from backend.bot.routers.reminder_state_actions import *
-from backend.bot.routers.tag_state_actions import *
+from backend.bot.routers.reminder_state_actions import add_reminder_process_1, add_reminder_process_2, \
+    new_reminder_manual_process_1, new_reminder_manual_process_2, new_reminder_manual_process_3
+from backend.bot.routers.tag_state_actions import new_tag_process_1, new_tag_process_2, tag_edit_process_2
+from backend.bot.routers.tag_state_actions.edit_tag import tags_edit
 
 from backend.bot.utils import message_text_tools
 from backend.bot.utils.depends import Depends

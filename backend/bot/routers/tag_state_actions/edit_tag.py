@@ -11,7 +11,6 @@ from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
 
 from backend.bot.keyboards import inline_kbs
-from backend.bot.routers.tag_state_actions import new_tag_process_0
 from backend.bot.routers.tags import tags_router
 
 from backend.bot.utils import message_text_tools
@@ -26,12 +25,12 @@ async def tags_edit(message: Message,
                     client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     data = await state.get_data()
     tags = await client().get_tags(state_data=data)
-    if not tags:
-        await new_tag_process_0(message, state)
-    else:
-        text = message_text_tools.get_message_tags(tags=tags)
-        markup = inline_kbs.tag_menu_get_tags(tags=tags)
-        await message.reply(text=text, reply_markup=markup)
+
+    text = message_text_tools.get_message_tags(tags=tags)
+    markup = inline_kbs.tag_menu_get_tags(tags=tags)
+    await message.reply(text=text, reply_markup=markup)
+
+
 
 
 @tags_router.callback_query(StateFilter(States.reminder_menu),

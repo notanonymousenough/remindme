@@ -11,7 +11,7 @@ from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
 
 from backend.bot.keyboards import inline_kbs
-from backend.bot.routers.tag_state_actions import tags_edit
+from backend.bot.routers.tag_state_actions.edit_tag import tags_edit
 from backend.bot.routers.tags import tags_router
 
 from backend.bot.utils.depends import Depends
@@ -28,6 +28,15 @@ async def new_tag_process_from_callback(call: CallbackQuery,
                                         state: FSMContext,
                                         client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     await new_tag_process_0(call, state, client)
+
+
+async def tags_edit_no_tags(message: Message,  # КОГДА НЕТ ТЭГОВ
+                    state: FSMContext,
+                    client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+    data = await state.get_data()
+    tags = await client().get_tags(state_data=data)
+    if not tags:
+        await new_tag_process_0(message, state)
 
 
 async def new_tag_process_0(message_or_call: Union[CallbackQuery, Message],
@@ -101,4 +110,5 @@ async def new_tag_process_3_call(call: CallbackQuery,
 
     await state_data_reset(state=state, telegram_id=call.from_user.id, access_token=data['access_token'])
     await call.message.edit_text(text=text)
+
     await tags_edit(message=call.message, state=state)

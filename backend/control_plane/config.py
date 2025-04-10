@@ -26,7 +26,9 @@ class DefaultSettings(BaseSettings):
     SECRET_KEY: str = environ.get("SECRET_KEY", "")
     ALGORITHM: str = environ.get("ALGORITHM", "HS256")
 
-    GET_ACCESS_TOKEN_ENDPOINT: str = "/auth/telegram"
+    GET_ACCESS_TOKEN_ENDPOINT: str = "/v1/auth/telegram"
+    REMINDER_ENDPOINT: str = "/v1/.."
+
 
     POSTGRES_USER: str = environ.get("POSTGRES_USER", 'postgres')
     POSTGRES_PASSWORD: str = environ.get("POSTGRES_PASSWORD", 'postgres')
