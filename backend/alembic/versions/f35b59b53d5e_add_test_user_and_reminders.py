@@ -1,8 +1,8 @@
 """Add test user and reminders
 
 Revision ID: f35b59b53d5e
-Revises: 4f4bbdab64f1
-Create Date: 2025-04-04 15:07:34.722518
+Revises: 36db7907d5a7
+Create Date: 2025-04-19 18:11:34.722518
 
 """
 from typing import Sequence, Union
@@ -16,7 +16,7 @@ from sqlalchemy.dialects.postgresql import UUID, ENUM
 
 # revision identifiers, used by Alembic.
 revision: str = 'f35b59b53d5e'
-down_revision: Union[str, None] = '4f4bbdab64f1'
+down_revision: Union[str, None] = '36db7907d5a7'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: 4f4bbdab64f1
+Revision ID: 36db7907d5a7
 Revises: 
-Create Date: 2025-03-30 21:04:16.195831
+Create Date: 2025-04-19 18:10:56.435623
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '4f4bbdab64f1'
+revision: str = '36db7907d5a7'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -57,14 +57,12 @@ def upgrade() -> None:
     op.create_table('habits',
     sa.Column('user_id', sa.UUID(), nullable=False),
     sa.Column('text', sa.Text(), nullable=False),
-    sa.Column('period', sa.Enum('DAILY', 'WEEKLY', 'MONTHLY', 'CUSTOM', name='habitperiod'), nullable=False),
-    sa.Column('custom_period', sa.Text(), nullable=True),
-    sa.Column('progress', sa.Integer(), nullable=True),
-    sa.Column('target', sa.Integer(), nullable=True),
+    sa.Column('interval', sa.Enum('DAILY', 'WEEKLY', 'MONTHLY', 'CUSTOM', name='habitperiod'), nullable=False),
+    sa.Column('custom_interval', sa.Text(), nullable=True),
     sa.Column('current_streak', sa.Integer(), nullable=True),
     sa.Column('best_streak', sa.Integer(), nullable=True),
-    sa.Column('start_date', sa.Date(), nullable=False),
-    sa.Column('end_date', sa.Date(), nullable=True),
+    sa.Column('start_date', sa.DateTime(), nullable=False),
+    sa.Column('end_date', sa.DateTime(), nullable=True),
     sa.Column('removed', sa.Boolean(), nullable=True),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -95,8 +93,7 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('user_id', 'name', name='uq_user_tag_name')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user_achievements',
     sa.Column('user_id', sa.UUID(), nullable=False),
@@ -111,17 +108,6 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id', 'template_id', name='uq_user_achievement')
-    )
-    op.create_table('user_statistics',
-    sa.Column('user_id', sa.UUID(), nullable=False),
-    sa.Column('reminders_completed', sa.Integer(), nullable=True),
-    sa.Column('reminders_forgotten', sa.Integer(), nullable=True),
-    sa.Column('last_calculated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('user_id', 'id')
     )
     op.create_table('habit_progress',
     sa.Column('habit_id', sa.UUID(), nullable=False),
@@ -166,7 +152,6 @@ def downgrade() -> None:
     op.drop_table('reminder_tags')
     op.drop_table('neuro_images')
     op.drop_table('habit_progress')
-    op.drop_table('user_statistics')
     op.drop_table('user_achievements')
     op.drop_table('tags')
     op.drop_table('reminders')
