@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Text, Date, Boolean, ForeignKey, Enum, Integer, UniqueConstraint
+from sqlalchemy import Column, Text, Date, Boolean, ForeignKey, Enum, Integer, UniqueConstraint, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from .base import BaseModel, HabitPeriod
@@ -9,14 +9,12 @@ class Habit(BaseModel):
 
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     text = Column(Text, nullable=False)
-    period = Column(Enum(HabitPeriod), nullable=False)
-    custom_period = Column(Text)
-    progress = Column(Integer, default=0)
-    target = Column(Integer, default=1)
+    interval = Column(Enum(HabitPeriod), nullable=False)
+    custom_interval = Column(Text)
     current_streak = Column(Integer, default=0)
     best_streak = Column(Integer, default=0)
-    start_date = Column(Date, nullable=False)
-    end_date = Column(Date)
+    start_date = Column(DateTime, nullable=False)
+    end_date = Column(DateTime)
     removed = Column(Boolean, default=False)
 
     # Отношения
