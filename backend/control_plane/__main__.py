@@ -36,5 +36,5 @@ if __name__ == "__main__":
         port=settings_for_application.APP_PORT,
         reload=True,
         reload_dirs=["backend/control_plane", "tests"],
-        log_level=settings_for_application.LOG_LEVEL,
+        log_level=settings_for_application.LOG_LEVEL.lower(),
     )

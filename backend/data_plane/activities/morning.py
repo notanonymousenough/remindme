@@ -37,20 +37,22 @@ async def check_today_habits(user_id: UUID) -> List[Dict[str, Any]]:
     # habits_repo = HabitRepository()
     #
     # # Получаем активные напоминания в ближайшем временном окне
-    # active_reminders = await habits_repo.get_active_habits(user_id=user_id)
+    # active_habits = await habits_repo.get_active_habits(user_id=user_id)
     #
     # # Формируем список напоминаний для отправки
-    # reminders_to_send = []
-    # for reminder in active_reminders:
-    #     reminder_data = {
-    #         "id": str(reminder.id),
-    #         "user_id": str(reminder.user_id),
-    #         "text": reminder.text,
-    #         "time": reminder.time.isoformat()
+    # habits_to_send = []
+    # for habit in active_habits:
+    #     if habit.time.date() != datetime.now().date():
+    #         continue
+    #     habit_data = {
+    #         "id": str(habit.id),
+    #         "user_id": str(habit.user_id),
+    #         "text": habit.text,
+    #         "time": habit.time.isoformat()
     #     }
-    #     reminders_to_send.append(reminder_data)
+    #     habits_to_send.append(habit_data)
     #
-    # return reminders_to_send
+    # return habits_to_send
     return []
 
 
@@ -97,15 +99,15 @@ async def send_telegram_message(user_id: str, reminders: List[Dict[str, Any]], h
         reminders_string = "🎯 Задачи на сегодня:"
         for reminder in reminders:
             # TODO: зачеркивать если выполнено
-            reminders_string += f"{reminder["text"]}\n"
+            reminders_string += f"– {reminder["text"]}\n"
     if len(habits):
         if len(reminders):
             habits_string = "🧩 Привычки:\n"
         else:
             habits_string = "🧩 Привычки на сегодня:\n"
         for habit in habits:
-            habits_string += f"{habit["text"]}\n"
-    message = f"{reminders_string}\n{habits_string}\nХорошего и продуктивного дня! ✨"
+            habits_string += f"– {habit["text"]}\n"
+    message = f"{reminders_string}\n{habits_string}\n✨ Хорошего и продуктивного дня!"
 
     # Отправляем сообщение
     telegram_service = TelegramService()
