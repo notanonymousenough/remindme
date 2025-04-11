@@ -1,7 +1,6 @@
 import hashlib
 from os import environ
 
-from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import computed_field, ConfigDict
 from pydantic_settings import BaseSettings
@@ -32,23 +31,19 @@ class DefaultSettings(BaseSettings):
     POSTGRES_PASSWORD: str = environ.get("POSTGRES_PASSWORD", 'postgres')
     POSTGRES_ADDRESS: str = environ.get("POSTGRES_ADDRESS", '127.0.0.1')
     POSTGRES_PORT: int = int(environ.get("POSTGRES_PORT", '5432'))
-    POSTGRES_DB: str = environ.get("POSTGRES_DB", '')
+    POSTGRES_DB: str = environ.get("POSTGRES_DB", 'remind_me')
 
-    SQL_ECHO: bool = environ.get("SQL_ECHO", "False").lower() in ("true", "1", "t"),
+    SQL_ECHO: bool = environ.get("SQL_ECHO", "False").lower() in ("true", "1", "t")
     SQL_POOL_SIZE: int = environ.get("SQL_POOL_SIZE", "5")
     SQL_MAX_OVERFLOW: int = environ.get("SQL_MAX_OVERFLOW", "10")
     SQL_POOL_TIMEOUT: int = environ.get("SQL_POOL_TIMEOUT", "30")
     SQL_POOL_RECYCLE: int = environ.get("SQL_POOL_RECYCLE", "1800")
 
-    DEBUG: bool = True
+    DEBUG: bool = environ.get("DEBUG", "false").lower() in ("true", "1", "t")
 
     BOT_TOKEN: str = environ.get("BOT_TOKEN", "")
 
     PWD_CONTEXT: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    OAUTH2_SCHEME: OAuth2PasswordBearer = OAuth2PasswordBearer(
-        scheme_name="TelegramAccessToken",
-        tokenUrl=f"{APP_ADDRESS}:{APP_PORT}{PATH_PREFIX}/auth/telegram"
-    )
 
     # Настройки Temporal
     TEMPORAL_HOST: str = environ.get("TEMPORAL_HOST", "localhost:7233")
@@ -80,6 +75,14 @@ class DefaultSettings(BaseSettings):
                 f"{self.POSTGRES_PASSWORD}@"
                 f"{self.POSTGRES_ADDRESS}/"
                 f"{self.POSTGRES_DB}")
+
+    @property
+    def OAUTH2_SCHEME(self):
+        from fastapi.security import OAuth2PasswordBearer
+        return OAuth2PasswordBearer(
+            scheme_name="TelegramAccessToken",
+            tokenUrl=f"{self.APP_ADDRESS}:{self.APP_PORT}{self.PATH_PREFIX}/auth/telegram"
+        )
 
 
 def get_settings():

@@ -8,19 +8,13 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 from typing import List, Dict, Any
 
-from temporalio.exceptions import ActivityError
-from temporalio.workflow import ParentClosePolicy
-
-from backend.bot.routers.start import habits
-from backend.data_plane.activities.morning import check_today_reminders, check_today_habits
-
 with workflow.unsafe.imports_passed_through():
     from backend.data_plane.activities.morning import (
         check_today_habits,
         check_today_reminders,
         send_telegram_message,
         get_active_users
-)
+    )
     import logging
 
 logger = logging.getLogger("morning_message_workflows")
@@ -60,10 +54,11 @@ class MorningMessageWorkflow:
                 schedule_to_close_timeout=timedelta(minutes=5),
                 args=[user_id]
             )
-            # Высылаем сообщение
-            await workflow.execute_activity(
-                send_telegram_message,
-                retry_policy=retry_policy,
-                schedule_to_close_timeout=timedelta(minutes=5),
-                args=[user_id, reminders, habits]
-            )
+            if len(reminders) > 0 or len(habits) > 0:
+                # Высылаем сообщение
+                await workflow.execute_activity(
+                    send_telegram_message,
+                    retry_policy=retry_policy,
+                    schedule_to_close_timeout=timedelta(minutes=5),
+                    args=[user_id, reminders, habits]
+                )
