@@ -80,8 +80,8 @@ app.use('/api/*', async (req, res) => {
   }
 
   try {
-    console.log(req.method);
-    console.log(req.body);
+    //console.log(req.method);
+    //console.log(req.body);
     const options = {
       method: req.method,
       url: `${BACKEND_URL}/v1${req.originalUrl.replace('/api', '')}`,
