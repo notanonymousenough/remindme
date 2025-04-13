@@ -103,187 +103,157 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="../js/components/navbar.js"></script>
   
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    fetchHabits(); 
-    
-});
-
-async function fetchHabits() {
-    try {
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      fetchHabits(); 
+    });
+    async function fetchHabits() {
+      try {
         const response = await fetch('/api/habits');
-              if (!response.ok) {
-                  throw new Error('Ошибка сети');
-              }
-              const habits = await response.json();
-              populateDropdown(habits);
-          } catch (error) {
-              console.error('Ошибка:', error);
+          if (!response.ok) {
+            throw new Error('Ошибка сети');
           }
-      }
-
-      function populateDropdown(habits) {
-          const dropdownHabits = document.getElementById('dropdownHabits');
-          habits.forEach(habit => {
-              const option = document.createElement('option');
-              option.value = habit.id; // Убедитесь, что habit.id существует
-              option.textContent = habit.text; // Убедитесь, что habit.name существует
-              dropdownHabits.appendChild(option);
-          });
-      }
-
-      async function fetchAndDisplayHabit() {
-          const habitId = document.getElementById('dropdownHabits').value;
-          if (!habitId) return; 
-
-          try {
-              const response = await fetch(`/api/habits/${habitId}`);
-              if (!response.ok) {
-                  throw new Error('Ошибка сети при получении привычки');
-              }
-              const habit = await response.json();
-              displayHabit(habit);
-          } catch (error) {
-              console.error('Ошибка:', error);
-          }
-      }
-
-      function displayHabit(habit) {
-        const endDate = new Date(habit.endDate);
-        const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
-        const month = monthNames[endDate.getMonth()];
-        document.getElementById('monthHeader').innerText = month;
-    
-        const customPeriod = habit.customPeriod.map(date => new Date(date).getDate());
-        const startDate = new Date(habit.startDate).getDate();
-        const lastDate = endDate.getDate();
-    
-        let tableBodyHtml = '<tr>';
-        for (let day = 1; day <= lastDate; day++) {
-            let className = '';
-            if (day >= startDate && customPeriod.includes(day)) {
-                className = 'bg-success';
-            } else if (day >= startDate && day < lastDate) {
-                className = 'bg-danger';
-            }
-            tableBodyHtml += `<td class="${className}" scope="col">${day}</td>`;
-            if (day % 7 === 0) {
-                tableBodyHtml += '</tr><tr>';
-            }
-        }
-        tableBodyHtml += '</tr>';
-        document.getElementById('tableBody').innerHTML = tableBodyHtml;
-    
-        const currentStreak = habit.currentStreak;
-        document.getElementById('streakDiv').innerHTML = `${currentStreak} дня подряд <p>Молодец!!! &#128077</p>`;
-        const buttonClass = getButtonClass(habit.status);
-        const buttonText = getButtonText(habit.status);
-
-        const habitDetailsHtml = `
-        <div class="row">
-            <div class="col-2 col-sm-3"></div>
-            <div class="col-5 col-sm-3 col-lg-2">
-                <h7>${habit.text}</h7>
-            </div>
-            <div class="col-3 col-sm-3 col-md-2 col-lg-2 btn-delete-h">
-                <button type="button" class="btn ${buttonClass} btn-sm" id="performHabit-${habit.id}">${buttonText}</button>
-            </div>
-            <div class="col-6 col-sm-1 col-md-2 col-lg-1 btn-delete-h">
-                <button type="button" class="btn btn-sm btn-danger" id="deleteHabit-${habit.id}">Удалить</button>
-            </div>
-        </div>
-        <p></p>`;
-
-    const habitRows = document.getElementById('habitRows');
-    habitRows.innerHTML = habitDetailsHtml;
-
-    // Изменено на уникальный ID кнопки "Удалить"
-    const deleteButton = document.getElementById(`deleteHabit-${habit.id}`);
-deleteButton.addEventListener('click', async function() {
-    if (confirm('Вы уверены, что хотите удалить эту привычку?')) { 
-        try {
-            const response = await fetch(`/api/habits/${habit.id}`, { // Исправлено на обратные кавычки
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                throw new Error('Ошибка сети при удалении привычки');
-            }
-
-            alert('Привычка успешно удалена!');
-            location.reload(); // Обновите список привычек
-
-
-            document.getElementById('habitRows').innerHTML = ''; // Очистите детали привычки
-        } catch (error) {
-            console.error('Ошибка:', error);
-        }
-    }
-});
-
-// Выполнение привычки
-const performHabit = document.getElementById(`performHabit-${habit.id}`);
-performHabit.addEventListener('click', async function() {
-    if (!habit.id) return; // Используйте habit.id вместо habitId
-
-    try {
-        const response = await fetch(`/api/habits/${habit.id}/complete`, { // Исправлено на обратные кавычки
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json' // Указываем, что контент отправляется в формате JSON
-            },
-            body: JSON.stringify({ status: 'completed' }) // Отправляем JSON-объект с новым статусом
-        });
-
-        if (!response.ok) {
-            throw new Error('Ошибка обновления статуса');
-        }
-
-        fetchHabits(); // Обновляем список привычек
-    } catch (error) {
+          const habits = await response.json();
+            populateDropdown(habits);
+      } catch (error) {
         console.error('Ошибка:', error);
+      } 
     }
-});
-
-// Получение класса для кнопки в зависимости от статуса
-function getButtonClass(status) {
-    switch (status) {
-        case 'active':
+    function populateDropdown(habits) {
+      const dropdownHabits = document.getElementById('dropdownHabits');
+      habits.forEach(habit => {
+        const option = document.createElement('option');
+        option.value = habit.id; 
+        option.textContent = habit.text; 
+        dropdownHabits.appendChild(option);
+      });
+    }
+    async function fetchAndDisplayHabit() {
+      const habitId = document.getElementById('dropdownHabits').value;
+      if (!habitId) return; 
+      try {
+        const response = await fetch(`/api/habits/${habitId}`);
+        if (!response.ok) {
+          throw new Error('Ошибка сети при получении привычки');
+        }
+        const habit = await response.json();
+        displayHabit(habit);
+      } catch (error) {
+        console.error('Ошибка:', error);
+      }  
+    }
+    function displayHabit(habit) {
+      const endDate = new Date(habit.endDate);
+      const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+      const month = monthNames[endDate.getMonth()];
+      document.getElementById('monthHeader').innerText = month;
+      const startDate = new Date(habit.startDate);
+      const lastDate = endDate.getDate();
+      const progressMap = Object.fromEntries(habit.progress);
+      let tableBodyHtml = '<tr>';
+      for (let day = 1; day <= lastDate; day++) {
+        let className = '';
+        const currentDate = new Date(endDate.getFullYear(), endDate.getMonth(), day+1);
+        const formattedDate = currentDate.toISOString().split('T')[0];
+        if (progressMap.hasOwnProperty(formattedDate)) {
+          className = progressMap[formattedDate] ? 'bg-success' : 'bg-danger';
+        } else if (currentDate >= startDate) {
+          className = 'bg-primary'; 
+        }
+        tableBodyHtml += `<td class="${className}" scope="col">${day}</td>`;
+        if (day % 7 === 0) {
+          tableBodyHtml += '</tr><tr>';
+        }
+      }
+      tableBodyHtml += '</tr>';
+      document.getElementById('tableBody').innerHTML = tableBodyHtml;
+      const currentStreak = habit.currentStreak;
+      document.getElementById('streakDiv').innerHTML = `${currentStreak} дня подряд <p>Молодец!!! &#128077</p>`;
+      const buttonClass = getButtonClass(habit.status);
+      const buttonText = getButtonText(habit.status);
+      const habitDetailsHtml = `
+        <div class="row">
+          <div class="col-2 col-sm-3"></div>
+          <div class="col-5 col-sm-3 col-lg-2">
+              <h7>${habit.text}</h7>
+          </div>
+          <div class="col-3 col-sm-3 col-md-2 col-lg-2 btn-delete-h">
+              <button type="button" class="btn ${buttonClass} btn-sm" id="performHabit-${habit.id}">${buttonText}</button>
+          </div>
+          <div class="col-6 col-sm-1 col-md-2 col-lg-1 btn-delete-h">
+              <button type="button" class="btn btn-sm btn-danger" id="deleteHabit-${habit.id}">Удалить</button>
+          </div>
+        </div>`; 
+      const habitRows = document.getElementById('habitRows');
+      habitRows.innerHTML = habitDetailsHtml;
+      const deleteButton = document.getElementById(`deleteHabit-${habit.id}`);
+      deleteButton.addEventListener('click', async function() {
+        if (confirm('Вы уверены, что хотите удалить эту привычку?')) { 
+          try {
+            const response = await fetch(`/api/habits/${habit.id}`, { 
+              method: 'DELETE',
+            });
+            if (!response.ok) {
+              throw new Error('Ошибка сети при удалении привычки');
+            }
+            alert('Привычка успешно удалена!');
+            location.reload(); 
+            document.getElementById('habitRows').innerHTML = ''; 
+          } catch (error) {
+            console.error('Ошибка:', error);
+          }
+        }
+      });
+      const performHabit = document.getElementById(`performHabit-${habit.id}`);
+      if (performHabit) {
+        performHabit.addEventListener('click', async function() {
+          if (!habit.id) return;
+          const currentDate = new Date(); 
+          const formattedDate = currentDate.toISOString().split('T')[0]; 
+          const progressIndex = habit.progress.findIndex(entry => entry[0] === formattedDate);
+          if (progressIndex >= 0) {
+            habit.progress[progressIndex][1] = true;
+          } else {
+            habit.progress.push([formattedDate, true]);
+          }
+          try {
+            const response = await fetch(`/api/habits/${habit.id}/complete`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ status: 'completed' })
+            });
+            if (!response.ok) {
+              throw new Error('Ошибка обновления статуса');
+            }
+            fetchAndDisplayHabit(); 
+          } catch (error) {
+            console.error('Ошибка:', error);
+          }
+        });
+      }
+      function getButtonClass(status) {
+        switch (status) {
+          case 'active':
             return 'btn-warning';
-        case 'completed':
+          case 'completed':
             return 'btn-outline-warning';
-        default:
+          default:
             return 'btn-default';
+        }
+      }
+      function getButtonText(status) {
+        switch (status) {
+          case 'active':
+            return 'Выполнить';
+          case 'completed':
+            return 'Выполнено';
+          default:
+            return 'Ошибка';
+        }
+      } 
     }
-}
-function getButtonText(status) {
-  switch (status) {
-      case 'active':
-        return 'Выполнить';
-      case 'completed':
-        return 'Выполнено';
-      default:
-        return 'Ошибка';
-  }
-} function fetchHabits2() {
-      fetch('/api/habits')
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error('Сетевой ответ не в порядке');
-              }
-              return response.json();
-          })
-          .then(data => {
-            displayHabit(data); // Переносим функцию рендеринга
-          })
-          .catch(error => {
-              console.error('Ошибка получения данных:', error);
-          });
-    }
-   
-  }
-
-    
-</script>
+  </script>
 </body>  
 </html>

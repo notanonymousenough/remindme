@@ -18,22 +18,28 @@ const habits=[
     "id": "habit_12345",
     "userId": "user_67890",
     "text": "Отжимания",
-    "period": "daily",
-    "customPeriod": null,
-    "status": "active",
-    "progress": 6,
-    "target": 7,
+    "interval": "daily",
+    "custom_interval": "string",
     "currentStreak": 3,
-    "customPeriod": [   '2025-04-01T12:00:00Z',
-                        '2025-04-02T12:00:00Z',
-                        '2025-04-04T12:00:00Z',
-                        '2025-04-05T12:00:00Z',
-                        '2025-04-06T12:00:00Z',
-                        '2025-04-08T12:00:00Z',
-                    ],
+    "status": "active",
+    "progress": [   
+        ["2025-04-01", true ],
+        ["2025-04-02", true ],
+        ["2025-04-03", false ],
+        ["2025-04-04", true ],
+        ["2025-04-05", false ],
+        ["2025-04-06", true ],
+        ["2025-04-07", true ],
+        ["2025-04-08", false ],
+        ["2025-04-09", true ],
+        ["2025-04-10", true ],
+        ["2025-04-11", true ],
+        ["2025-04-12", true ],
+        ["2025-04-13", false ],
+    ],
     "bestStreak": 3,
-    "startDate": "2025-04-01",
-    "endDate": "2025-04-09",
+    "startDate": "2025-03-31",
+    "endDate": "2025-04-13",
     "removed": false,
     "createdAt": "2023-09-01T12:00:00Z",
     "updatedAt": "2023-10-01T12:00:00Z"
@@ -42,21 +48,23 @@ const habits=[
     "id": "habit_12344",
     "userId": "user_67890",
     "text": "Бег",
-    "period": "daily",
-    "status": "active",
-    "customPeriod": null,
-    "progress": 6,
-    "target": 7,
+    "interval": "daily",
+    "custom_interval": "string",
     "currentStreak": 3,
-    "customPeriod": [   '2025-03-01T12:00:00Z',
-                        '2025-03-02T12:00:00Z',
-                        '2025-03-03T12:00:00Z',
-                        '2025-03-05T12:00:00Z',
-                        '2025-03-06T12:00:00Z',
-                        '2025-03-09T12:00:00Z',
-                    ],
+    "status": "active",
+    "progress": [   
+        ["2025-03-02", false ],
+        ["2025-03-03", true ],
+        ["2025-03-04", true ],
+        ["2025-03-05", true ],
+        ["2025-03-06", false ],
+        ["2025-03-07", true ],
+        ["2025-03-08", true ],
+        ["2025-03-09", false ],
+        ["2025-03-10", false ],
+    ],
     "bestStreak": 3,
-    "startDate": "2025-03-01",
+    "startDate": "2025-03-02",
     "endDate": "2025-03-10",
     "removed": false,
     "createdAt": "2023-09-01T12:00:00Z",
@@ -98,7 +106,8 @@ const statistics=[
     {
         "userId": "usr_67890",
         "remindersCompleted": 0,
-        "remindersForgotten": 0
+        "remindersForgotten": 0,
+        "lastReset": 0
     }
 ];
 
@@ -109,40 +118,60 @@ app.post('/v1/reminders', (req, res) => {
     reminders.push(reminderData);
 });
 
-// Если вы хотите получить все локальные напоминания, добавьте этот маршрут
 app.get('/v1/reminders', (req, res) => {
     const now = new Date();
+    const today = now.toISOString().split('T')[0];
+
+    statistics.forEach(stat => {
+        if (stat.lastReset !== today) {
+            stat.remindersCompleted = 0; 
+            stat.remindersForgotten = 0;  
+            stat.lastReset = today; 
+        }
+    });
 
     reminders.forEach(reminder => {
-        // Увеличиваем счетчик remindersCompleted для уже завершенных напоминаний
-        if (reminder.status === 'completed' && !reminder.alreadyCounted) {
-            const userStats = statistics.find(stat => stat.userId === reminder.userId);
-            if (userStats) {
-                userStats.remindersCompleted++;
-                reminder.alreadyCounted = true; // Отмечаем, что мы уже учитывали это напоминание
+        if (reminder.time && !isNaN(new Date(reminder.time))) {
+            const reminderDate = new Date(reminder.time).toISOString().split('T')[0];
+            if (today === reminderDate) {
+                if (reminder.status === 'completed' && !reminder.alreadyCounted) {
+                    const userStats = statistics.find(stat => stat.userId === reminder.userId);
+                    if (userStats) {
+                        userStats.remindersCompleted++;
+                        reminder.alreadyCounted = true;
+                    }
+                } 
+                else if (reminder.status !== 'completed') {
+                    const reminderTime = new Date(reminder.time);
+                    if (reminderTime <= now && !reminder.alreadyCounted) {
+                        reminder.status = 'forgotten';
+                        const userStats = statistics.find(stat => stat.userId === reminder.userId);
+                        if (userStats) {
+                            userStats.remindersForgotten++;
+                            reminder.alreadyCounted = true; 
+                        }
+                    }
+                }
+                
             }
-        } 
-        // Проверяем дату только для напоминаний со статусом не completed
-        else if (reminder.status !== 'completed') {
-            const reminderTime = new Date(reminder.time);
-            if (reminderTime <= now && !reminder.alreadyCounted) {
-                // Меняем статус на forgotten
-                reminder.status = 'forgotten';
-                const userStats = statistics.find(stat => stat.userId === reminder.userId);
-                if (userStats) {
-                    userStats.remindersForgotten++;
-                    reminder.alreadyCounted = true; // Отмечаем, что мы уже учитывали это напоминание
+            if (reminder.status !== 'completed') {
+                const reminderTime = new Date(reminder.time);
+                if (reminderTime <= now) {
+                    reminder.status = 'forgotten';
+                    const userStats = statistics.find(stat => stat.userId === reminder.userId);
+                    if (userStats) {
+                        reminder.alreadyCounted = true;
+                    }
                 }
             }
         }
     });
-
     res.json(reminders);
 });
 
 app.get('/v1/habits', (req, res) => {
     res.json(habits);
-  });
+});
 app.get('/v1/habits/:habitId', (req, res) => {
     const habitId = req.params.habitId;
     const habit = habits.find(h => h.id === habitId);
@@ -153,41 +182,44 @@ app.get('/v1/habits/:habitId', (req, res) => {
     }
 });
 
-  app.get('/v1/achievement', (req, res) => {
+app.get('/v1/achievement', (req, res) => {
     res.json(achievement);
-  });
-  app.get('/v1/progress', (req, res) => {
+});
+app.get('/v1/progress', (req, res) => {
     res.json(statistics);
-  });
+});
 
 app.put('/v1/reminders/:reminderId/complete', (req, res) => {
     const reminderId = req.params.reminderId;
-    const { status } = req.body; // Ожидаем, что статус будет передан в теле запроса
+    const { status } = req.body;
     const reminder = reminders.find(r => r.id === reminderId);
-
     if (reminder) {
-        reminder.status = status; // Обновление статуса
-        reminder.updatedAt = new Date().toISOString(); // Обновление времени изменения
+        reminder.status = status; 
+        reminder.updatedAt = new Date().toISOString(); 
         if (status === "completed") {
-            reminder.completedAt = new Date().toISOString(); // Устанавливаем время завершения, если статус completed
+            reminder.completedAt = new Date().toISOString(); 
         }
-        res.json(reminder); // Возвращаем обновленное напоминание
+        res.json(reminder);
     } else {
         res.status(404).json({ error: 'Напоминание не найдено' });
     }
 });
 app.put('/v1/habits/:habitId/complete', (req, res) => {
     const habitId = req.params.habitId;
-    const { status } = req.body; // Ожидаем, что статус будет передан в теле запроса
+    const { status } = req.body; 
     const habit = habits.find(r => r.id === habitId);
-
     if (habit) {
-        habit.status = status; // Обновление статуса
-        habit.updatedAt = new Date().toISOString(); // Обновление времени изменения
+        habit.status = status; 
+        habit.updatedAt = new Date().toISOString(); 
         if (status === "completed") {
-            habit.completedAt = new Date().toISOString(); // Устанавливаем время завершения, если статус completed
+            habit.completedAt = new Date().toISOString();
         }
-        res.json(habit); // Возвращаем обновленное напоминание
+        const today = new Date().toISOString().split('T')[0]; 
+        const entry = habit.progress.find(p => p[0] === today);
+        if (entry && entry[1] === false) {
+            entry[1] = true; 
+        }
+        res.json(habit);
     } else {
         res.status(404).json({ error: 'Напоминание не найдено' });
     }
@@ -196,74 +228,38 @@ app.put('/v1/habits/:habitId/complete', (req, res) => {
 app.put('/v1/reminders/:reminderId', (req, res) => {
     const id = req.params.reminderId;
     const updatedData = req.body;    
-    // Находим индекс напоминания по ID
     const index = reminders.findIndex(reminder => reminder.id === id);
-
-    // Если напоминание найдено, обновляем его
     if (index !== -1) {
-        reminders[index].text = updatedData.text || reminders[index].text; // Сохраняем старое значение, если новое не передано
-        reminders[index].time = updatedData.time || reminders[index].time; // Сохраняем старое значение, если новое не передано
+        reminders[index].text = updatedData.text || reminders[index].text; 
+        reminders[index].time = updatedData.time || reminders[index].time; 
         return res.status(200).json({ success: true, updatedReminder: reminders[index] });
     } else {
-        // Если напоминание не найдено, возвращаем ошибку
         return res.status(404).json({ success: false, message: 'Напоминание не найдено.' });
     }
 });
 
 app.delete('/v1/habits/:habitId', (req, res) => {
     const id = req.params.habitId;
-    // Находим индекс напоминания по ID
     const index = habits.findIndex(habit => habit.id === id);
-
-    // Если напоминание найдено, удаляем его
     if (index !== -1) {
-        habits.splice(index, 1); // Удаляем напоминание из массива
+        habits.splice(index, 1); 
         return res.status(200).json({ success: true, message: 'Напоминание успешно удалено.' });
     } else {
-        // Если напоминание не найдено, возвращаем ошибку
         return res.status(404).json({ success: false, message: 'Напоминание не найдено.' });
     }
 });
 
 app.delete('/v1/reminders/:reminderId', (req, res) => {
     const id = req.params.reminderId;
-
-    // Находим индекс напоминания по ID
     const index = reminders.findIndex(reminder => reminder.id === id);
-
-    // Если напоминание найдено, удаляем его
     if (index !== -1) {
-        reminders.splice(index, 1); // Удаляем напоминание из массива
+        reminders.splice(index, 1); 
         return res.status(200).json({ success: true, message: 'Напоминание успешно удалено.' });
     } else {
-        // Если напоминание не найдено, возвращаем ошибку
         return res.status(404).json({ success: false, message: 'Напоминание не найдено.' });
     }
 });
 
-
-
-/*app.post('/v1/reminders', (req, res) => {
-    console.log("Сработало!")
-    res.json({
-        "id": "r0k1l2m3n4",
-        "userId": "usr_67890",
-        "text": "Заказать билеты в кино",
-        "time": "2023-12-03T19:45:00Z",
-        "tags": ["развлечения"],
-        "status": "active",
-        "removed": false,
-        "createdAt": "2023-11-29T21:30:00Z",
-        "updatedAt": "2023-11-29T21:30:00Z",
-        "completedAt": null,
-        "notificationSent": false
-        })
-});
-app.get('/v1/reminders', function(req, res) {
-    
-    res.json(reminders);
-});
-*/
 app.use(express.static('public'));
 
 app.listen(8000, () => {

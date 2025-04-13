@@ -20,18 +20,13 @@ app.use(session({
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // В production используйте secure: true с HTTPS
+  cookie: { secure: false } 
 }));
-
-// Прокси для аутентификации через Telegram
-
 
 app.get('/api/auth/telegram', async (req, res) => {
   try {
     const response = await axios.post(`${BACKEND_URL}/v1/auth/telegram`, req.body);
-    //const response = await axios.post(`${BACKEND_URL}/api/auth/telegram`, req.body);
-    req.session.token = response.data; // Сохраняем токен в сессии
-    //req.session.token = response.data.access_token;
+    req.session.token = response.data; 
     res.redirect('/reminders');
   } catch (error) {
     res.status(error.response?.status || 500).json({ error: error.message });
@@ -41,12 +36,12 @@ const checkToken = (req, res, next) => {
   if (req.path.startsWith('/css/') || req.path.startsWith('/js/') || req.path.startsWith('/assets/')) {
     return next();
   }
-  if (!req.session.token) { // Проверяем, сохранён ли токен в сессии
-    if (req.path !== '/telegram') { // Если мы не на странице /telegram
-      return res.redirect('/telegram'); // Перенаправляем на /telegram
+  if (!req.session.token) { 
+    if (req.path !== '/telegram') { 
+      return res.redirect('/telegram'); 
     }
   }
-  next(); // Если токен есть или мы на /telegram, продолжаем обработку
+  next(); 
 };
 
 app.use(checkToken);
@@ -78,29 +73,23 @@ app.use('/api/*', async (req, res) => {
   if (!req.session.token) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
-
   try {
-    //console.log(req.method);
-    //console.log(req.body);
     const options = {
       method: req.method,
       url: `${BACKEND_URL}/v1${req.originalUrl.replace('/api', '')}`,
-      //url:  `${BACKEND_URL}${req.originalUrl}`,
-      data: (req.method === 'POST' || req.method === 'PUT') ? req.body : undefined, // Передаем body только для POST и PUT
+      data: (req.method === 'POST' || req.method === 'PUT') ? req.body : undefined, 
       headers: {
         'Authorization': `Bearer ${req.session.token}`,
-        'Content-Type': 'application/json' // Установите нужные заголовки
+        'Content-Type': 'application/json' 
       },
     };
     const response = await axios(options);
     res.status(response.status).json(response.data);
-    
   } catch (error) {
     res.status(error.response?.status || 500).json({ error: error.message });
   }
 });
 
-// Отдача статических файлов
 app.use(express.static('public'));
 
 app.listen(PORT, () => {

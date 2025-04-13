@@ -71,110 +71,102 @@
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const reminderId = urlParams.get('id');
-
     fetch('/api/reminders/')
-        .then(response => response.json())
-        .then(data => {
-            const reminder = data.find(item => item.id === reminderId);
-            if (reminder) {
-                document.getElementById('edit').innerHTML = `
-                  <div class="row">
-                    <div class="col-1 col-md-2"></div>
-                    <div class="col-10 col-md-8">
-                      <div class="card redact">
-                        <form id="editForm">
-                          <div class="card-header">
-                            #${reminder.tags.join(', ')} 
-                            <button type="button" class="btn-close crest" onclick="history.back()" aria-label="Закрыть"></button>
-                          </div>
-                          <div class="card-body">
-                            <input class="form-control card-title" id="reminderText" value="${reminder.text}" />
-                          </div>
-                          <div class="card-body">
-                            <div class="row">
-                              <div class="col-12">
-                               <input class="calend form-control" type="datetime-local" id="reminderTime" value="${new Date(reminder.time).toISOString().slice(0, 16)}" />
-                              </div>
-                              <div class="col-6 col-sm-7 col-md-7 col-lg-7 delete">
-                                <button type="button" class="btn btn-danger" id="deleteButton">Удалить</button>
-                              </div>
-                              <div class="col-5 col-sm-3 col-md-3 col-lg-3 save">
-                                <button type="submit" class="btn btn-primary">Сохранить</button>
-                              </div>
-                              <div class="col-1"></div>
-                            </div>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                    <div class="col-1 col-md-2"></div>
+    .then(response => response.json())
+    .then(data => {
+      const reminder = data.find(item => item.id === reminderId);
+      if (reminder) {
+        document.getElementById('edit').innerHTML = `
+          <div class="row">
+            <div class="col-1 col-md-2"></div>
+            <div class="col-10 col-md-8">
+              <div class="card redact">
+                <form id="editForm">
+                  <div class="card-header">
+                    #${reminder.tags.join(', ')} 
+                    <button type="button" class="btn-close crest" onclick="history.back()" aria-label="Закрыть"></button>
                   </div>
-                `;
-
-                // Обработчик события для удаления напоминания
-                document.getElementById('deleteButton').addEventListener('click', function() {
-                    if (confirm('Вы уверены, что хотите удалить это напоминание?')) {
-                        fetch(`/api/reminders/${reminderId}`, {
-                          method: 'DELETE'
-                      })
-                      .then(response => {
-                          if (!response.ok) {
-                              throw new Error('Ошибка при удалении напоминания');
-                          }
-                          return response.json();
-                      })
-                      .then(data => {
-                          console.log('Напоминание удалено:', data);
-                          window.location.href = '/reminders'; // Перенаправление после успешного удаления
-                      })
-                      .catch(error => {
-                          console.error('Ошибка:', error);
-                          alert('Не удалось удалить напоминание!');
-                      });
-                  }
-              });
-
-              // Обработчик события на форму
-              document.getElementById('editForm').addEventListener('submit', function(event) {
-                  event.preventDefault(); // Предотвращаем перезагрузку страницы
-                  
-                  const updatedReminder = {
-                      text: document.getElementById('reminderText').value,
-                      time: new Date(document.getElementById('reminderTime').value).toISOString()
-                  };
-
-                  // Отправка PUT запроса на сервер
-                  fetch(`/api/reminders/${reminderId}`, {
-                      method: 'PUT',
-                      headers: {
-                          'Content-Type': 'application/json'
-                      },
-                      body: JSON.stringify(updatedReminder)
-                  })
-                  .then(response => {
-                      if (!response.ok) {
-                          throw new Error('Ошибка при обновлении напоминания');
-                      }
-                      return response.json();
-                  })
-                  .then(updatedData => {
-                      console.log('Напоминание обновлено:', updatedData);
-                      window.location.href = '/reminders';
-                  })
-                  .catch(error => {
-                      console.error('Ошибка:', error);
-                      alert('Не удалось обновить напоминание!');
-                  });
-              });
-          } else {
-              document.getElementById('edit').innerHTML = '<p>Напоминание не найдено.</p>';
+                  <div class="card-body">
+                    <input class="form-control card-title" id="reminderText" value="${reminder.text}" />
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-12">
+                        <input class="calend form-control" type="datetime-local" id="reminderTime" value="${new Date(reminder.time).toISOString().slice(0, 16)}" />
+                      </div>
+                      <div class="col-6 col-sm-7 col-md-7 col-lg-7 delete">
+                        <button type="button" class="btn btn-danger" id="deleteButton">Удалить</button>
+                      </div>
+                      <div class="col-5 col-sm-3 col-md-3 col-lg-3 save">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                      </div>
+                      <div class="col-1"></div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="col-1 col-md-2"></div>
+          </div>
+        `;
+        document.getElementById('deleteButton').addEventListener('click', function() {
+          if (confirm('Вы уверены, что хотите удалить это напоминание?')) {
+            fetch(`/api/reminders/${reminderId}`, {
+              method: 'DELETE'
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Ошибка при удалении напоминания');
+              }
+              return response.json();
+            })
+            .then(data => {
+              console.log('Напоминание удалено:', data);
+              window.location.href = '/reminders'; 
+            })
+            .catch(error => {
+              console.error('Ошибка:', error);
+              alert('Не удалось удалить напоминание!');
+            });
           }
-      })
-      .catch(error => {
-          console.error('Ошибка получения данных:', error);
-          document.getElementById('edit').innerHTML = '<p>Произошла ошибка при загрузке данных.</p>';
-      });
-</script>
+        });
+        document.getElementById('editForm').addEventListener('submit', function(event) {
+          event.preventDefault(); 
+          const updatedReminder = {
+            text: document.getElementById('reminderText').value,
+            time: new Date(document.getElementById('reminderTime').value).toISOString()
+          };
+          fetch(`/api/reminders/${reminderId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedReminder)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Ошибка при обновлении напоминания');
+            }
+            return response.json();
+          })
+          .then(updatedData => {
+            console.log('Напоминание обновлено:', updatedData);
+            window.location.href = '/reminders';
+          })
+          .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Не удалось обновить напоминание!');
+          });
+        });
+      } else {
+        document.getElementById('edit').innerHTML = '<p>Напоминание не найдено.</p>';
+      }
+    })
+    .catch(error => {
+      console.error('Ошибка получения данных:', error);
+      document.getElementById('edit').innerHTML = '<p>Произошла ошибка при загрузке данных.</p>';
+    });
+  </script>
   <script src="../js/lib/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
