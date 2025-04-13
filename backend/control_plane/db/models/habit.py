@@ -1,5 +1,7 @@
 from calendar import month
 from datetime import datetime, timedelta
+from typing import List
+
 from dateutil.relativedelta import relativedelta
 
 from sqlalchemy import Column, Text, Date, Boolean, ForeignKey, Enum, Integer, UniqueConstraint, DateTime, event, ARRAY
@@ -69,14 +71,10 @@ class Habit(BaseModel):
                     "completed": False
                 } for date in date_sequence]
 
-    def generate_date_sequence(self):
+    def generate_date_sequence(self) -> List[datetime.day]:
         """
         Генерирует список дат от date_filter до сегодняшней даты,
         с шагом, зависящим от HabitPeriod (daily, weekly, monthly).
-
-        Args:
-            date_filter (datetime.date): Начальная дата.
-            HabitPeriod (str): Период повторения ("daily", "weekly", "monthly").
 
         Returns:
             list[datetime.date]: Список дат.
@@ -93,7 +91,7 @@ class Habit(BaseModel):
             dates = [date_filter + timedelta(weeks=i) for i in range(
                 ((today - date_filter).days // 7) + 2)]  # +2 для запаса, чтобы точно захватить последнюю неделю
         elif self.interval == HabitPeriod.MONTHLY:
-            date_filter = datetime.now().date() - timedelta(weeks=52)  # прогресс за последние 360 дней, раз в месяц
+            date_filter = datetime.now().date() - timedelta(weeks=52)  # прогресс за последний год, раз в месяц
             dates = [date_filter + relativedelta(months=i) for i in range(
                 ((today.year - date_filter.year) * 12 + (today.month - date_filter.month)) + 2)]  # +2
         else:

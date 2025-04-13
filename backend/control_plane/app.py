@@ -1,25 +1,44 @@
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 
-from backend.control_plane.config import get_settings
+from backend.control_plane.config import get_settings, DefaultSettings
 from backend.control_plane.middlewares.log_request import start_logging
-from backend.control_plane.routes import reminder_router, auth_router
-from backend.control_plane.routes.habit import habit_router
-from backend.control_plane.routes.tag import tag_router
-from backend.control_plane.routes.user import user_router
+from backend.control_plane.routes import list_of_routes
 from backend.control_plane.utils.openapi_schema import custom_openapi
 
-app = FastAPI()
 
-app.include_router(reminder_router)
-app.include_router(auth_router)
-app.include_router(user_router)
-app.include_router(tag_router)
-app.include_router(habit_router)
+def bind_routes(application: FastAPI, setting: DefaultSettings) -> None:
+    """
+    Bind all routes to application.
+    """
+    for route in list_of_routes:
+        application.include_router(route, prefix=setting.PATH_PREFIX)
 
-app.openapi_schema = custom_openapi(app)
 
-if get_settings().DEBUG:
-    start_logging(app)
+def get_app() -> FastAPI:
+    """
+    Creates application and all dependable objects.
+    """
 
-uvicorn.run(app=app)
+    application = FastAPI(
+        title="Remind Me control-plane",
+    )
+    settings = get_settings()
+    bind_routes(application, settings)
+    application.openapi_schema = custom_openapi(application)
+    return application
+
+
+app = get_app()
+
+if __name__ == "__main__":
+    settings = get_settings()
+
+    if settings.DEBUG:
+        start_logging(app)
+
+    uvicorn.run(
+        app=app,
+        host=settings.APP_ADDRESS,
+        port=settings.APP_PORT,
+    )

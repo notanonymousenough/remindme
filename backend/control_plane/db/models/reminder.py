@@ -1,9 +1,11 @@
 import uuid
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy import Column, Text, DateTime, Boolean, ForeignKey, Enum, Table
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from sqlalchemy.util import hybridproperty
+
 from .base import BaseModel, ReminderStatus
 
 # Связующая таблица для отношения многие-ко-многим между напоминаниями и тегами
@@ -28,8 +30,12 @@ class Reminder(BaseModel):
 
     # Отношения
     user = relationship("User", back_populates="reminders")
-    tags = relationship("Tag", secondary=reminder_tags, back_populates="reminders")
+    _tags = relationship("Tag", secondary=reminder_tags, back_populates="reminders", lazy="selectin")
     neuro_images = relationship("NeuroImage", back_populates="reminder")
 
     def __repr__(self):
         return f"<Reminder {self.text[:20]}... ({self.id})>"
+
+    @hybridproperty
+    def tags(self) -> List[uuid.UUID]:
+        return [tag.id for tag in self._tags]

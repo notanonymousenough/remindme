@@ -14,7 +14,7 @@ class Tag(BaseModel):
 
     # Отношения
     user = relationship("User", back_populates="tags")
-    reminders = relationship("Reminder", secondary="reminder_tags", back_populates="tags")
+    reminders = relationship("Reminder", secondary="reminder_tags", back_populates="_tags")
 
     def __repr__(self):
         return f"<Tag {self.name} ({self.id})>"
