@@ -13,7 +13,7 @@ class RemindersService:
     def __init__(self):
         self.repo = ReminderRepository()
 
-    async def reminder_update(self, user_id: UUID, reminder: ReminderToEditRequestSchema) -> ReminderSchema:
+    async def reminder_update(self, reminder: ReminderToEditRequestSchema) -> ReminderSchema:
         return await self.repo.reminder_update(reminder=reminder, tag_service=get_tag_service())
 
     async def reminder_delete(self, user_id: UUID, reminder_id: UUID) -> bool:
@@ -25,10 +25,10 @@ class RemindersService:
     async def reminders_get_active(self, user_id: UUID) -> Sequence[ReminderSchema]:
         return await self.repo.get_active_reminders(user_id=user_id)
 
-    async def mark_as_complete(self, user_id: UUID, reminder: ReminderMarkAsCompleteRequestSchema) -> ReminderSchema:
+    async def mark_as_complete(self, reminder: ReminderMarkAsCompleteRequestSchema) -> ReminderSchema:
         return await self.repo.mark_as_completed(reminder=reminder)
 
-    async def postpone(self, user_id: UUID, reminder: ReminderToEditTimeRequestSchema) -> ReminderSchema:
+    async def postpone(self, reminder: ReminderToEditTimeRequestSchema) -> ReminderSchema:
         return await self.repo.postpone(reminder=reminder)
 
 

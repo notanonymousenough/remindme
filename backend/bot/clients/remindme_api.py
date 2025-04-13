@@ -76,7 +76,7 @@ class RemindMeApiClient(AsyncHttpClient):
         return True if response.status == 200 else False
 
     @staticmethod
-    async def edit_tag(request: TagRequestSchema, tag_id: str) -> bool:
+    async def put_tag(request: TagRequestSchema, tag_id: str) -> bool:
         return await get_tag_service().update_tag(tag_id=tag_id, request=request)
 
     @staticmethod
@@ -91,7 +91,7 @@ class RemindMeApiClient(AsyncHttpClient):
     async def post_tag(self, access_token: str, request: TagRequestSchema) -> bool:
         await self._create_session()
 
-        endpoint = "/v1/tag/"
+        endpoint = "/v1/tag/"  # TODO dynamic endpoins from config
 
         headers = {
             "Authorization": f"Bearer {access_token}",

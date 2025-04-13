@@ -67,7 +67,7 @@ async def reminder_edit(
         request: ReminderToEditRequestSchema = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
-    reminder = await reminder_service.reminder_update(user_id=user.id, reminder=request)
+    reminder = await reminder_service.reminder_update(reminder=request)
     return reminder
 
 
@@ -102,7 +102,7 @@ async def reminder_to_complete(
         request: ReminderMarkAsCompleteRequestSchema = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
-    reminder = await reminder_service.mark_as_complete(user_id=user.id, reminder=request)
+    reminder = await reminder_service.mark_as_complete(reminder=request)
     return reminder
 
 
@@ -119,5 +119,5 @@ async def reminder_postpone(
         request: ReminderToEditTimeRequestSchema = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ) -> ReminderSchema:
-    reminder = await reminder_service.postpone(user_id=user.id, reminder=request)
+    reminder = await reminder_service.postpone(reminder=request)
     return reminder

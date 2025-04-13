@@ -13,7 +13,7 @@ class ReminderSchema(BaseModel):
     user_id: Optional[UUID] = Field(None, description="ID пользователя, создавшего напоминание")
     text: str = Field(..., description="Текст напоминания")
     time: datetime = Field(..., description="Время напоминания")
-    # tags: Optional[Sequence[UUID]] = Field(None, description="Список тегов")
+    # tags: Optional[Sequence[UUID]] = Field(..., description="Список тегов")
     status: Optional[str] = Field(ReminderStatus.ACTIVE, description="Статус напоминания")
     removed: Optional[bool] = Field(None, description="Признак удаления напоминания")
     created_at: Optional[datetime] = Field(datetime.now(), description="Время создания")

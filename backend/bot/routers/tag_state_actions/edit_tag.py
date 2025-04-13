@@ -101,7 +101,7 @@ async def tag_edit_process_2(message: Message,
             tag_id = data['tag_edit_process_ID']
             request = TagRequestSchema.model_validate(request)
 
-            if await client().edit_tag(request=request, tag_id=tag_id):
+            if await client().put_tag(request=request, tag_id=tag_id):
                 text = "Тэг успешно обновлен."
                 await state.update_data(action=None)
                 await message.reply(text=text)

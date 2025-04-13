@@ -21,7 +21,7 @@ class Reminder(BaseModel):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     text = Column(Text, nullable=False)
     time = Column(DateTime(timezone=True), nullable=False)
-    status = Column(Enum(ReminderStatus), default="ACTIVE")
+    status = Column(Enum(ReminderStatus), default=ReminderStatus.ACTIVE)
     removed = Column(Boolean, default=False)
     completed_at = Column(DateTime(timezone=True))
     notification_sent = Column(Boolean, default=False)

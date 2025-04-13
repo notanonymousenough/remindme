@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
@@ -11,6 +12,8 @@ class TagSchema(BaseModel):
     name: str = Field(...)
     color: Optional[str] = Field(None, description="#FFFFFF")
     emoji: str = Field(..., description="Emoji")
+    created_at: Optional[datetime] = Field(..., description="Время создания")
+    updated_at: Optional[datetime] = Field(..., description="Время последнего обновления")
 
     @field_validator("emoji")
     def validate_emoji_string(cls, value):
