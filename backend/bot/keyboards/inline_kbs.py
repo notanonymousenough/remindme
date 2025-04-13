@@ -1,17 +1,16 @@
-from typing import Sequence
+from typing import Sequence, List
 
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from backend.control_plane.schemas.habit import HabitSchemaResponse
 
-def get_habits_buttons(habits):
+
+def get_habits_buttons(habits: List[HabitSchemaResponse]):
     keyboard = InlineKeyboardBuilder()
 
-    habits_count = len(habits)
-
-    for index in range(habits_count):
-        habit_id = habits[index]["habit_id"]
-        keyboard.add(InlineKeyboardButton(text=str(index + 1), callback_data=f"habit_edit_{habit_id}"))
+    for index, habit in enumerate(habits):
+        keyboard.add(InlineKeyboardButton(text=str(index + 1), callback_data=f"habit_edit_{habit.id}"))
 
     return keyboard.as_markup()
 

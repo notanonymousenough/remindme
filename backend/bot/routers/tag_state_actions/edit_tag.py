@@ -24,7 +24,7 @@ async def tags_edit(message: Message,
                     state: FSMContext,
                     client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     data = await state.get_data()
-    tags = await client().get_tags(state_data=data)
+    tags = await client().tags_get(state_data=data)
 
     text = message_text_tools.get_message_tags(tags=tags)
     markup = inline_kbs.tag_menu_get_tags(tags=tags)
@@ -45,7 +45,7 @@ async def tag_edit_process_0(call: CallbackQuery,
     await state.update_data(tag_edit_process_ID=tag_id)
 
     try:
-        tag = await client().get_tag(tag_id=tag_id)
+        tag = await client().tag_get(tag_id=tag_id)
         text = f"Эмодзи тэга: {tag.emoji}\nИмя тэга: {tag.name}\n\nЧто вы хотите поменять?"
 
         keyboard = inline_kbs.tag_edit_menu_get_actions()
@@ -101,7 +101,7 @@ async def tag_edit_process_2(message: Message,
             tag_id = data['tag_edit_process_ID']
             request = TagRequestSchema.model_validate(request)
 
-            if await client().put_tag(request=request, tag_id=tag_id):
+            if await client().tag_put(request=request, tag_id=tag_id):
                 text = "Тэг успешно обновлен."
                 await state.update_data(action=None)
                 await message.reply(text=text)

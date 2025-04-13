@@ -7,6 +7,8 @@ import aiohttp
 
 from backend.bot.clients.http_client import AsyncHttpClient
 from backend.control_plane.config import get_settings
+from backend.control_plane.schemas.habit import HabitSchemaResponse
+from backend.control_plane.schemas.requests.habit import HabitSchemaPostRequest
 from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaRequest
 from backend.control_plane.schemas.requests.tag import TagRequestSchema
 from backend.control_plane.schemas.tag import TagSchema
@@ -38,7 +40,7 @@ class RemindMeApiClient(AsyncHttpClient):
         await self._close_session()
         return access_token
 
-    async def get_reminder(self, access_token: str, reminder_id: int):
+    async def reminder_get(self, access_token: str, reminder_id: int):
         await self._create_session()
         endpoint = ""
 
@@ -54,11 +56,10 @@ class RemindMeApiClient(AsyncHttpClient):
             "date_exp": "15.05.2025"
         }
 
-    async def post_reminder(self, access_token: str, request: ReminderAddSchemaRequest):
+    async def reminder_post(self, access_token: str, request: ReminderAddSchemaRequest):
         await self._create_session()
 
         endpoint = "/v1/reminder/"
-
 
         headers = {
             "Authorization": f"Bearer {access_token}",
@@ -76,19 +77,19 @@ class RemindMeApiClient(AsyncHttpClient):
         return True if response.status == 200 else False
 
     @staticmethod
-    async def put_tag(request: TagRequestSchema, tag_id: str) -> bool:
+    async def tag_put(request: TagRequestSchema, tag_id: str) -> bool:
         return await get_tag_service().update_tag(tag_id=tag_id, request=request)
 
     @staticmethod
-    async def get_tag(tag_id: str) -> Union[TagSchema, bool]:
+    async def tag_get(tag_id: str) -> Union[TagSchema, bool]:
         try:
-            tag = await get_tag_service().get_tag(uuid.UUID(tag_id))
+            tag = await get_tag_service().tag_get(uuid.UUID(tag_id))
             return tag
         except Exception as ex:
             print(f"Ошибка: {ex}")
             return False
 
-    async def post_tag(self, access_token: str, request: TagRequestSchema) -> bool:
+    async def tag_post(self, access_token: str, request: TagRequestSchema) -> bool:
         await self._create_session()
 
         endpoint = "/v1/tag/"  # TODO dynamic endpoins from config
@@ -115,7 +116,7 @@ class RemindMeApiClient(AsyncHttpClient):
             await self._close_session()
             return False
 
-    async def get_reminders(self, state_data) -> list:
+    async def reminders_get(self, state_data) -> list:
         await self._create_session()
 
         endpoint = "/v1/reminder/"
@@ -153,7 +154,7 @@ class RemindMeApiClient(AsyncHttpClient):
         ]
         return reminders
 
-    async def get_tags(self, state_data: dict) -> Union[Sequence[dict], None]:
+    async def tags_get(self, state_data: dict) -> Union[Sequence[dict], None]:
         await self._create_session()
         endpoint = "/v1/tag/"
 
@@ -185,25 +186,56 @@ class RemindMeApiClient(AsyncHttpClient):
 
         return tags
 
-    def get_habits(self, data: dict):
-        return [
-            {
-                "user_id": data["user_id"],
-                "habit_id": 0,
-                "habit_text": "Уход за лицом",
-                "status": 0,
-                "period": "month",
-                "progress": 3
-            },
-            {
-                "user_id": data["user_id"],
-                "habit_id": 1,
-                "habit_text": "Бегать 100 метровку",
-                "status": 1,
-                "period": "weekly",
-                "progress": 6
-            }
-        ]
+    async def habits_get(self, state_data: dict):
+        await self._create_session()
+        endpoint = "/v1/habit/"
+
+        headers = {
+            "Authorization": f"Bearer {state_data["access_token"]}"
+        }
+
+        response = await self._session.get(
+            url=endpoint,
+            headers=headers
+        )
+
+        try:
+            response.raise_for_status()
+            response_json = (await response.json())
+        except aiohttp.ClientError as e:
+            await self._close_session()
+            print(f"Ошибка при получении привычек: {e}")
+            return {}
+
+        await self._close_session()
+        habits = [HabitSchemaResponse.model_validate(model) for model in response_json]
+        return habits
+
+    async def habits_post(self, state_data: dict, habit_request: HabitSchemaPostRequest) -> bool:
+        await self._create_session()
+        endpoint = "/v1/habit/"
+
+        headers = {
+            "Authorization": f"Bearer {state_data["access_token"]}",
+            'accept': "application/json",
+            "Content-Type": "application/json"
+        }
+
+        response = await self._session.post(
+            url=endpoint,
+            headers=headers,
+            data=habit_request.model_dump_json()
+        )
+
+        try:
+            response.raise_for_status()
+        except aiohttp.ClientError as e:
+            await self._close_session()
+            print(f"Exception in habit post: {e}")
+            return False
+
+        await self._close_session()
+        return True if response.status == 200 else False
 
 
 _client = None

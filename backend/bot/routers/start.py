@@ -11,6 +11,7 @@ from backend.bot.keyboards import reply_kbs, inline_kbs
 from backend.bot.utils import States, get_message_habits, message_text_tools
 
 from backend.bot.utils.depends import Depends
+from backend.bot.utils.parse_markdown_text import parse_for_markdown
 from backend.bot.utils.state_data_tools import state_data_reset
 
 start_router = Router()
@@ -33,8 +34,8 @@ async def reminders(message: Message,
         await state_data_reset(state=state, telegram_id=message.from_user.id, access_token=access_token)
 
     data = await state.get_data()
-    tags = await client().get_tags(state_data=data)
-    reminders = sorted((await client().get_reminders(state_data=data)), key=lambda x: x["time"])
+    tags = await client().tags_get(state_data=data)
+    reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
 
     text = message_text_tools.get_message_reminders(
         reminders=reminders,
@@ -62,11 +63,12 @@ async def habits(message: Message,
     await state.set_state(States.habits_menu)
     await state.set_data({
         "user_id": message.from_user.id,
-        "habit_add": 0
+        "action": None,
+        "access_token": access_token
     })
 
     data = await state.get_data()
-    habits = client().get_habits(data=data)
+    habits = await client().habits_get(state_data=data)
     text = get_message_habits(habits=habits)
 
     await message.answer(text="Вывожу список привычек..", reply_markup=reply_kbs.habits_menu())

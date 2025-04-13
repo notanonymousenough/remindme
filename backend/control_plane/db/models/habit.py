@@ -1,5 +1,6 @@
 from calendar import month
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 from sqlalchemy import Column, Text, Date, Boolean, ForeignKey, Enum, Integer, UniqueConstraint, DateTime, event, ARRAY
 from sqlalchemy.dialects.postgresql import UUID
@@ -26,7 +27,8 @@ class Habit(BaseModel):
 
     # Отношения
     user = relationship("User", back_populates="habits")
-    progress_records = relationship("HabitProgress", back_populates="habit", cascade="all, delete-orphan")  # lazy='selectin' для оптимизации загрузки
+    progress_records = relationship("HabitProgress", back_populates="habit",
+                                    cascade="all, delete-orphan")  # lazy='...'?
     neuro_images = relationship("NeuroImage", back_populates="habit")
 
     def __repr__(self):
@@ -54,15 +56,54 @@ class Habit(BaseModel):
         Динамическое свойство progress, получаемое из таблицы HabitProgress.
         Возвращает список кортежей (date, completed).
         """
-        if self.interval == HabitPeriod.DAILY:
-            date_filter = datetime.now().date() - timedelta(weeks=4) # прогресс за последние 30 дней
-        elif self.interval == HabitPeriod.WEEKLY:
-            date_filter = datetime.now().date() - timedelta(weeks=24)  # прогресс за последние 180 дней
-        else:
-            date_filter = datetime.now().date() - timedelta(weeks=48)  # прогресс за последние 360 дней
-        # потом можно настроить для custom_interval тоже
 
-        return [(record.record_date, record.completed) for record in self.progress_records if record.record_date >= date_filter]
+        # потом можно настроить для custom_interval тоже
+        date_sequence = self.generate_date_sequence()
+        return [{
+                    "date": date,
+                    "completed": True
+                } if date in [progress_record.record_date if progress_record.completed else None
+                              for progress_record in self.progress_records] else
+                {
+                    "date": date,
+                    "completed": False
+                } for date in date_sequence]
+
+    def generate_date_sequence(self):
+        """
+        Генерирует список дат от date_filter до сегодняшней даты,
+        с шагом, зависящим от HabitPeriod (daily, weekly, monthly).
+
+        Args:
+            date_filter (datetime.date): Начальная дата.
+            HabitPeriod (str): Период повторения ("daily", "weekly", "monthly").
+
+        Returns:
+            list[datetime.date]: Список дат.
+        """
+
+        today = datetime.now().date()
+        dates = []
+
+        if self.interval == HabitPeriod.DAILY:
+            date_filter = datetime.now().date() - timedelta(days=30)  # прогресс за последние 30 дней
+            dates = [date_filter + timedelta(days=i) for i in range((today - date_filter).days + 1)]
+        elif self.interval == HabitPeriod.WEEKLY:
+            date_filter = datetime.now().date() - timedelta(days=180)  # прогресс за последние 180 дней, раз в неделю
+            dates = [date_filter + timedelta(weeks=i) for i in range(
+                ((today - date_filter).days // 7) + 2)]  # +2 для запаса, чтобы точно захватить последнюю неделю
+        elif self.interval == HabitPeriod.MONTHLY:
+            date_filter = datetime.now().date() - timedelta(weeks=52)  # прогресс за последние 360 дней, раз в месяц
+            dates = [date_filter + relativedelta(months=i) for i in range(
+                ((today.year - date_filter.year) * 12 + (today.month - date_filter.month)) + 2)]  # +2
+        else:
+            raise ValueError("HabitPeriod должен быть 'daily', 'weekly' или 'monthly'")
+
+        return dates
+
+    @progress.expression
+    def progress(cls):
+        return None
 
 
 class HabitProgress(BaseModel):

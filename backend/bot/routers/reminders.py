@@ -85,8 +85,8 @@ async def reminders_next(call: CallbackQuery,
 
     data = await state.get_data()
 
-    reminders = sorted((await client().get_reminders(state_data=data)), key=lambda x: x["time"])
-    tags = await client().get_tags(state_data=data)
+    reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
+    tags = await client().tags_get(state_data=data)
     text = message_text_tools.get_message_reminders(
         reminders=reminders,
         next_coef=data['next_coef'],
@@ -115,8 +115,8 @@ async def reminders_previous(call: CallbackQuery,
 
     data = await state.get_data()
 
-    tags = await client().get_tags(state_data=data)
-    reminders = sorted((await client().get_reminders(state_data=data)), key=lambda x: x["time"])
+    tags = await client().tags_get(state_data=data)
+    reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
     text = message_text_tools.get_message_reminders(
         reminders=reminders,
         next_coef=data['next_coef'],
@@ -147,8 +147,8 @@ async def reminders_day_filter(call: CallbackQuery,
 
     data = await state.get_data()
 
-    tags = await client().get_tags(state_data=data)
-    reminders = sorted((await client().get_reminders(state_data=data)), key=lambda x: x["time"])
+    tags = await client().tags_get(state_data=data)
+    reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
     text = message_text_tools.get_message_reminders(
         reminders=reminders,
         next_coef=data['next_coef'],
@@ -176,8 +176,8 @@ async def reminder_tag_filter(call: CallbackQuery,
 
     data = await state.get_data()
 
-    tags = await client().get_tags(state_data=data)
-    reminders = sorted((await client().get_reminders(state_data=data)), key=lambda x: x["time"])
+    tags = await client().tags_get(state_data=data)
+    reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
     text = message_text_tools.get_message_reminders(
         reminders=reminders,
         next_coef=data['next_coef'],
@@ -208,8 +208,8 @@ async def reminder_tags_select(call: CallbackQuery,
 
     data = await state.get_data()
 
-    tags = await client().get_tags(state_data=data)
-    reminders = sorted((await client().get_reminders(state_data=data)), key=lambda x: x["time"])
+    tags = await client().tags_get(state_data=data)
+    reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
     text = message_text_tools.get_message_reminders(
         reminders=reminders,
         next_coef=data['next_coef'],
@@ -237,8 +237,8 @@ async def reminder_tags_filter_select(call: CallbackQuery,
     await state.update_data(tag_filter=tag_filter)
 
     data = await state.get_data()
-    tags = await client().get_tags(state_data=data)
-    reminders = sorted((await client().get_reminders(state_data=data)), key=lambda x: x["time"])
+    tags = await client().tags_get(state_data=data)
+    reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
 
     text = message_text_tools.get_message_reminders(
         reminders=reminders,

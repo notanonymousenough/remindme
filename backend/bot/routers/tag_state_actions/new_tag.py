@@ -34,7 +34,7 @@ async def tags_edit_no_tags(message: Message,  # КОГДА НЕТ ТЭГОВ
                     state: FSMContext,
                     client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     data = await state.get_data()
-    tags = await client().get_tags(state_data=data)
+    tags = await client().tags_get(state_data=data)
     if not tags:
         await new_tag_process_0(message, state)
 
@@ -43,7 +43,7 @@ async def new_tag_process_0(message_or_call: Union[CallbackQuery, Message],
                             state: FSMContext,
                             client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     data = await state.get_data()
-    tags = await client().get_tags(state_data=data)
+    tags = await client().tags_get(state_data=data)
     await state.update_data(action="new_tag_process_1")
 
     if tags:
@@ -99,7 +99,7 @@ async def new_tag_process_3_call(call: CallbackQuery,
                 'emoji': tag_emoji
             }
             request = TagRequestSchema.model_validate(request)
-            await client().post_tag(data["access_token"], request=request)
+            await client().tag_post(data["access_token"], request=request)
 
             text = f"Тэг {tag_emoji} {tag_name} успешно добавлен!"
 
