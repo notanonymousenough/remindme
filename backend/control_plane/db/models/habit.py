@@ -9,7 +9,6 @@ from sqlalchemy.orm import relationship
 
 from .base import BaseModel, HabitPeriod
 
-
 HABIT_PERIOD_DATE_FILTER = {
     HabitPeriod.DAILY: datetime.now().date() - timedelta(days=30),
     HabitPeriod.WEEKLY: datetime.now().date() - timedelta(days=180),
@@ -36,7 +35,7 @@ class Habit(BaseModel):
     # Отношения
     user = relationship("User", back_populates="habits")
     progress_records = relationship("HabitProgress", back_populates="habit",
-                                    cascade="all, delete-orphan")  # lazy='...'?
+                                    cascade="all, delete-orphan", lazy="selectin")  # lazy='...'?
     neuro_images = relationship("NeuroImage", back_populates="habit")
 
     def __repr__(self):
@@ -88,11 +87,14 @@ class Habit(BaseModel):
             Returns:
                 list with second dates, but with replace with main list
             """
+            if not main:
+                return second
             main_sequence = [item["date"] for item in main]
             merged = []
             for item in main:
                 merged.append(item)
             for item in second:
+                # if last record from main satisfaction our date_filter -> cancel put item from second
                 if self.interval == HabitPeriod.MONTHLY:
                     if main[-1]["date"] + relativedelta(months=1) > item["date"]:
                         continue

@@ -12,12 +12,11 @@ from backend.bot.clients.remindme_api import RemindMeApiClient
 from backend.bot.keyboards import reply_kbs, inline_kbs
 from backend.bot.routers import start
 from backend.bot.utils import States
-
 from backend.bot.utils.depends import Depends
 from backend.bot.utils.manual_date_normalize import parse_relative_date
 from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaRequest
 
-add_reminder_router = Router(name="add_reminder")
+new_reminder_router = Router(name="add_reminder")
 
 
 async def add_reminder_process_1(message: Message,
@@ -30,7 +29,7 @@ async def add_reminder_process_1(message: Message,
     await message.answer(text=text)
 
 
-@add_reminder_router.message(StateFilter(States.reminder_menu))
+@new_reminder_router.message(StateFilter(States.reminder_menu))
 async def add_reminder_process_2(message: Message, state: FSMContext):
     if message.text in reply_kbs.REMINDERS_MENU_TEXTS:
         return
@@ -50,7 +49,7 @@ async def add_reminder_process_2(message: Message, state: FSMContext):
                          parse_mode="MarkdownV2")
 
 
-@add_reminder_router.callback_query(StateFilter(States.reminder_menu),
+@new_reminder_router.callback_query(StateFilter(States.reminder_menu),
                                     F.data.startswith("reminder_check_"))
 async def add_reminder_process_3(call: CallbackQuery,
                                  state: FSMContext,

@@ -1,18 +1,13 @@
 from typing import Annotated
-from uuid import UUID
 
-from aiogram import F
+from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-
 from aiogram.types import Message, CallbackQuery
 
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
-
 from backend.bot.keyboards import inline_kbs
-from backend.bot.routers.tags import tags_router
-
 from backend.bot.utils import message_text_tools
 from backend.bot.utils.depends import Depends
 from backend.bot.utils.message_checkers import emoji_check
@@ -26,15 +21,16 @@ async def tags_edit(message: Message,
     data = await state.get_data()
     tags = await client().tags_get(state_data=data)
 
-    text = message_text_tools.get_message_tags(tags=tags)
+    text = message_text_tools.get_tags(tags=tags)
     markup = inline_kbs.tag_menu_get_tags(tags=tags)
     await message.reply(text=text, reply_markup=markup)
 
 
+edit_tag_router = Router()
 
 
-@tags_router.callback_query(StateFilter(States.reminder_menu),
-                            F.data.startswith("tag_edit_id_"))
+@edit_tag_router.callback_query(StateFilter(States.reminder_menu),
+                                F.data.startswith("tag_edit_id_"))
 async def tag_edit_process_0(call: CallbackQuery,
                              state: FSMContext,
                              client=Annotated[
@@ -53,15 +49,15 @@ async def tag_edit_process_0(call: CallbackQuery,
         await state.update_data(tag_edit_process_emoji=tag.emoji)
 
         await call.message.edit_text(text=text,
-                                  parse_mode="MarkdownV2",
-                                  reply_markup=keyboard)
+                                     parse_mode="MarkdownV2",
+                                     reply_markup=keyboard)
 
     except Exception as ex:
         print(f"Ошибка при получении тега:  {str(ex)}")
 
 
-@tags_router.callback_query(StateFilter(States.reminder_menu),
-                            F.data.startswith("tag_edit_action_"))
+@edit_tag_router.callback_query(StateFilter(States.reminder_menu),
+                                F.data.startswith("tag_edit_action_"))
 async def tag_edit_process_1(call: CallbackQuery,
                              state: FSMContext):
     data = await state.get_data()
@@ -78,7 +74,7 @@ async def tag_edit_process_1(call: CallbackQuery,
     await call.message.edit_text(text=text)
 
 
-@tags_router.message(StateFilter(States.reminder_menu))
+@edit_tag_router.message(StateFilter(States.reminder_menu))
 async def tag_edit_process_2(message: Message,
                              state: FSMContext,
                              client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
@@ -115,5 +111,3 @@ async def tag_edit_process_2(message: Message,
         print(f"Ошибка при отправке на сервер: {ex}")
 
     await message.reply(text=text)
-
-

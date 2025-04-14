@@ -8,10 +8,8 @@ from aiogram.types import Message
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
 from backend.bot.keyboards import reply_kbs, inline_kbs
-from backend.bot.utils import States, get_message_habits, message_text_tools
-
+from backend.bot.utils import States, message_text_tools
 from backend.bot.utils.depends import Depends
-from backend.bot.utils.parse_markdown_text import parse_for_markdown
 from backend.bot.utils.state_data_tools import state_data_reset
 
 start_router = Router()
@@ -37,7 +35,7 @@ async def reminders(message: Message,
     tags = await client().tags_get(state_data=data)
     reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
 
-    text = message_text_tools.get_message_reminders(
+    text = message_text_tools.get_reminders(
         reminders=reminders,
         next_coef=data['next_coef'],
         strip=data["strip"],
@@ -64,16 +62,19 @@ async def habits(message: Message,
     await state.set_data({
         "user_id": message.from_user.id,
         "action": None,
-        "access_token": access_token
+        "access_token": access_token,
+        "next_coef": 0
     })
 
     data = await state.get_data()
-    habits = await client().habits_get(state_data=data)
-    text = get_message_habits(habits=habits)
+
+    next_coef = data["next_coef"]
+    habits = sorted((await client().habits_get(state_data=data)), key=lambda x: x.updated_at)
+    text = message_text_tools.get_habits(habits=habits)
 
     await message.answer(text="Вывожу список привычек..", reply_markup=reply_kbs.habits_menu())
     await message.answer(text=text,
-                         reply_markup=inline_kbs.get_habits_buttons(habits=habits),
+                         reply_markup=inline_kbs.get_habits_buttons(habits=habits, next_coef=next_coef),
                          parse_mode="MarkdownV2")
 
 

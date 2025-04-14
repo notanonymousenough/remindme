@@ -3,13 +3,12 @@ from typing import Annotated
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import CallbackQuery
 
 from backend.bot import bot
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
 from backend.bot.utils import States
-
 from backend.bot.utils.depends import Depends
 
 edit_reminder_router = Router(name="edit_reminder_router")

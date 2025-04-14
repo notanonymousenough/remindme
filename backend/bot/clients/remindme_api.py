@@ -13,6 +13,7 @@ from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaReq
 from backend.control_plane.schemas.requests.tag import TagRequestSchema
 from backend.control_plane.schemas.tag import TagSchema
 from backend.control_plane.schemas.user import UserTelegramDataSchema
+from backend.control_plane.service.habit_service import get_habit_service
 from backend.control_plane.service.tag_service import get_tag_service
 
 
@@ -92,7 +93,7 @@ class RemindMeApiClient(AsyncHttpClient):
     async def tag_post(self, access_token: str, request: TagRequestSchema) -> bool:
         await self._create_session()
 
-        endpoint = "/v1/tag/"  # TODO dynamic endpoins from config
+        endpoint = "/v1/tag/"
 
         headers = {
             "Authorization": f"Bearer {access_token}",
@@ -211,7 +212,7 @@ class RemindMeApiClient(AsyncHttpClient):
         habits = [HabitSchemaResponse.model_validate(model) for model in response_json]
         return habits
 
-    async def habits_post(self, state_data: dict, habit_request: HabitSchemaPostRequest) -> bool:
+    async def habit_post(self, state_data: dict, habit_request: HabitSchemaPostRequest) -> bool:
         await self._create_session()
         endpoint = "/v1/habit/"
 
@@ -236,6 +237,12 @@ class RemindMeApiClient(AsyncHttpClient):
 
         await self._close_session()
         return True if response.status == 200 else False
+
+    async def habit_get(self, habit_id: uuid.UUID) -> HabitSchemaResponse:
+        habit_service = get_habit_service()
+        habit = await habit_service.habit_get(habit_id)
+        return habit
+
 
 
 _client = None

@@ -1,29 +1,26 @@
 from typing import Annotated, Union
 
-from aiogram import F
+from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-
 from aiogram.types import Message, CallbackQuery
 
 from backend.bot import bot
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
-
 from backend.bot.keyboards import inline_kbs
 from backend.bot.routers.tag_state_actions.edit_tag import tags_edit
-from backend.bot.routers.tags import tags_router
-
 from backend.bot.utils.depends import Depends
 from backend.bot.utils.message_checkers import emoji_check
 from backend.bot.utils.state_data_tools import state_data_reset
 from backend.bot.utils.states import States
-
 from backend.control_plane.schemas.requests.tag import TagRequestSchema
 
+new_tag_router = Router()
 
-@tags_router.callback_query(StateFilter(States.reminder_menu),
-                            F.data.startswith("tag_new"))
+
+@new_tag_router.callback_query(StateFilter(States.reminder_menu),
+                               F.data.startswith("tag_new"))
 async def new_tag_process_from_callback(call: CallbackQuery,
                                         state: FSMContext,
                                         client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
@@ -31,8 +28,8 @@ async def new_tag_process_from_callback(call: CallbackQuery,
 
 
 async def tags_edit_no_tags(message: Message,  # КОГДА НЕТ ТЭГОВ
-                    state: FSMContext,
-                    client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+                            state: FSMContext,
+                            client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     data = await state.get_data()
     tags = await client().tags_get(state_data=data)
     if not tags:
@@ -59,7 +56,7 @@ async def new_tag_process_0(message_or_call: Union[CallbackQuery, Message],
     return None
 
 
-@tags_router.message(StateFilter(States.reminder_menu))
+@new_tag_router.message(StateFilter(States.reminder_menu))
 async def new_tag_process_1(message: Message,
                             state: FSMContext):
     if not emoji_check(message.text):
@@ -72,7 +69,7 @@ async def new_tag_process_1(message: Message,
     await message.reply(text=text)
 
 
-@tags_router.message(StateFilter(States.reminder_menu))
+@new_tag_router.message(StateFilter(States.reminder_menu))
 async def new_tag_process_2(message: Message,
                             state: FSMContext):
     data = await state.get_data()
@@ -82,8 +79,8 @@ async def new_tag_process_2(message: Message,
     await message.reply(text=text, reply_markup=inline_kbs.get_tag_review_buttons())
 
 
-@tags_router.callback_query(StateFilter(States.reminder_menu),
-                     F.data.startswith("new_tag_process_"))
+@new_tag_router.callback_query(StateFilter(States.reminder_menu),
+                               F.data.startswith("new_tag_process_"))
 async def new_tag_process_3_call(call: CallbackQuery,
                                  state: FSMContext,
                                  client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
