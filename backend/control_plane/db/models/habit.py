@@ -1,13 +1,12 @@
-from calendar import month
 from datetime import datetime, timedelta
 from typing import List
 
 from dateutil.relativedelta import relativedelta
-
-from sqlalchemy import Column, Text, Date, Boolean, ForeignKey, Enum, Integer, UniqueConstraint, DateTime, event, ARRAY
+from sqlalchemy import Column, Text, Date, Boolean, ForeignKey, Enum, Integer, UniqueConstraint, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+
 from .base import BaseModel, HabitPeriod
 
 
@@ -53,25 +52,48 @@ class Habit(BaseModel):
         return cls._current_streak
 
     @hybrid_property
-    def progress(self):
+    def progress(self) -> List[dict]:
         """
-        Динамическое свойство progress, получаемое из таблицы HabitProgress.
-        Возвращает список кортежей (date, completed).
+        Динамическое свойство progress, получаемое из таблицы HabitProgress
         """
 
         # потом можно настроить для custom_interval тоже
-        date_sequence = self.generate_date_sequence()
-        return [{
-                    "date": date,
-                    "completed": True
-                } if date in [progress_record.record_date if progress_record.completed else None
-                              for progress_record in self.progress_records] else
-                {
-                    "date": date,
-                    "completed": False
-                } for date in date_sequence]
+        dates = self.generate_date_sequence()
+        dates_dict = [
+            {
+                "date": date,
+                "completed": False
+            } for date in dates
+        ]
+        records_dict = [
+            {
+                "date": record.record_date,
+                "completed": record.completed
+            }
+            for record in self.progress_records if record.record_date >= dates[0]
+        ]
 
-    def generate_date_sequence(self) -> List[datetime.day]:
+        def merge(main: List[dict], second: List[dict]) -> List[dict]:
+            """
+            Args:
+                main: dates that created with api
+                second: all dates (depends on HabitPeriod and function generate_date_sequence())
+            Returns:
+                list with second dates, but with replace with main list
+            """
+            main_sequence = [item["date"] for item in main]
+            merged = []
+            for item in main:
+                merged.append(item)
+            for item in second:
+                if item["date"] in main_sequence:
+                    continue
+                merged.append(item)
+            return merged
+
+        return sorted(merge(records_dict, dates_dict), key=lambda x: x["date"])
+
+    def generate_date_sequence(self) -> List[datetime.date]:
         """
         Генерирует список дат от date_filter до сегодняшней даты,
         с шагом, зависящим от HabitPeriod (daily, weekly, monthly).
