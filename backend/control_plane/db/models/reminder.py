@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional, List
+from typing import List
 
 from sqlalchemy import Column, Text, DateTime, Boolean, ForeignKey, Enum, Table
 from sqlalchemy.dialects.postgresql import UUID

@@ -4,9 +4,9 @@ from uuid import UUID
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 
-from ..engine import get_async_session
-from ..models.habit import Habit, HabitProgress, HabitPeriod
 from .base import BaseRepository
+from ..engine import get_async_session
+from ..models.habit import Habit, HabitProgress
 from ...schemas.habit import HabitSchemaResponse
 from ...schemas.requests.habit import HabitSchemaPostRequest, HabitSchemaPutRequest, HabitProgressSchemaPostRequest
 

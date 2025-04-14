@@ -10,6 +10,13 @@ from sqlalchemy.orm import relationship
 from .base import BaseModel, HabitPeriod
 
 
+HABIT_PERIOD_DATE_FILTER = {
+    HabitPeriod.DAILY: datetime.now().date() - timedelta(days=30),
+    HabitPeriod.WEEKLY: datetime.now().date() - timedelta(days=180),
+    HabitPeriod.MONTHLY: datetime.now().date() - timedelta(weeks=52)
+}
+
+
 class Habit(BaseModel):
     __tablename__ = "habits"
 
@@ -86,6 +93,13 @@ class Habit(BaseModel):
             for item in main:
                 merged.append(item)
             for item in second:
+                if self.interval == HabitPeriod.MONTHLY:
+                    if main[-1]["date"] + relativedelta(months=1) > item["date"]:
+                        continue
+                elif self.interval == HabitPeriod.WEEKLY:
+                    if main[-1]["date"] + relativedelta(weeks=1) > item["date"]:
+                        continue
+
                 if item["date"] in main_sequence:
                     continue
                 merged.append(item)
@@ -103,21 +117,20 @@ class Habit(BaseModel):
         """
 
         today = datetime.now().date()
-        dates = []
+        date_filter = HABIT_PERIOD_DATE_FILTER[self.interval]
 
         if self.interval == HabitPeriod.DAILY:
-            date_filter = datetime.now().date() - timedelta(days=30)  # прогресс за последние 30 дней
             dates = [date_filter + timedelta(days=i) for i in range((today - date_filter).days + 1)]
         elif self.interval == HabitPeriod.WEEKLY:
-            date_filter = datetime.now().date() - timedelta(days=180)  # прогресс за последние 180 дней, раз в неделю
             dates = [date_filter + timedelta(weeks=i) for i in range(
                 ((today - date_filter).days // 7) + 2)]  # +2 для запаса, чтобы точно захватить последнюю неделю
         elif self.interval == HabitPeriod.MONTHLY:
-            date_filter = datetime.now().date() - timedelta(weeks=52)  # прогресс за последний год, раз в месяц
             dates = [date_filter + relativedelta(months=i) for i in range(
                 ((today.year - date_filter.year) * 12 + (today.month - date_filter.month)) + 2)]  # +2
         else:
             raise ValueError("HabitPeriod должен быть 'daily', 'weekly' или 'monthly'")
+
+        dates = [date for date in dates if date <= datetime.now().date()]
 
         return dates
 
