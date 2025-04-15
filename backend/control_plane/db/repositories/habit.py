@@ -21,7 +21,7 @@ class HabitRepository(BaseRepository[Habit]):
                 and_(
                     getattr(self.model, "user_id") == user_id
                 )
-            ).options(selectinload(self.model.progress_records)) # Добавляем eager load
+            ).options(selectinload(self.model.progress_records))  # Добавляем eager load
             result = await session.execute(stmt)
             response = result.scalars().all()
         return [HabitSchemaResponse.model_validate(obj) for obj in response]
@@ -51,7 +51,8 @@ class HabitRepository(BaseRepository[Habit]):
         return HabitSchemaResponse.model_validate(response)
 
     # habit_progress table
-    async def habit_progress_post(self, request: HabitProgressSchemaPostRequest) -> HabitProgressSchemaPostRequest:
+    @staticmethod
+    async def habit_progress_post(request: HabitProgressSchemaPostRequest) -> HabitProgressSchemaPostRequest:
         async with await get_async_session() as session:
             obj = HabitProgress(**vars(request))
             session.add(obj)
@@ -59,3 +60,20 @@ class HabitRepository(BaseRepository[Habit]):
             await session.flush()
             await session.commit()
             return HabitProgressSchemaPostRequest.model_validate(obj)
+
+    @staticmethod
+    async def habit_progress_delete_last_record(habit_id: UUID) -> bool:
+        async with await get_async_session() as session:
+            last_record = await session.scalar(
+                select(HabitProgress)
+                .where(HabitProgress.habit_id == habit_id)
+                .order_by(HabitProgress.record_date.desc())
+                .limit(1)
+            )
+            if last_record:
+                await session.delete(last_record)
+                await session.flush()
+                await session.commit()
+                return True
+            else:
+                return False

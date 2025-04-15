@@ -11,9 +11,9 @@ def get_habit_edit_buttons(habit: HabitSchemaResponse):
     keyboard = InlineKeyboardBuilder()
 
     if get_last_record_status_bool(habit=habit):
-        keyboard.row(InlineKeyboardButton(text="Отменить выполнение", callback_data=f"habit_complete_{habit.id}"))
+        keyboard.row(InlineKeyboardButton(text="Отменить выполнение", callback_data=f"habit_complete_False_{habit.id}"))
     else:
-        keyboard.row(InlineKeyboardButton(text="Выполнить", callback_data=f"habit_complete_{habit.id}"))
+        keyboard.row(InlineKeyboardButton(text="Выполнить", callback_data=f"habit_complete_True_{habit.id}"))
     keyboard.row(InlineKeyboardButton(text="Переименовать", callback_data=f"habit_edit_name_{habit.id}"))
     keyboard.row(InlineKeyboardButton(text="Удалить", callback_data=f"habit_delete_{habit.id}"))
 

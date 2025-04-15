@@ -11,7 +11,7 @@ from backend.bot.clients.remindme_api import RemindMeApiClient
 from backend.bot.keyboards import inline_kbs, reply_kbs
 from backend.bot.routers.habit_state_actions import habit_add_process_end, habit_add_process_start, \
     habit_add_process_1
-from backend.bot.utils import message_text_tools
+from backend.bot.utils import message_text_tools, habit_tools
 from backend.bot.utils.depends import Depends
 from backend.bot.utils.states import States
 
@@ -66,11 +66,20 @@ async def habit_edit(call: CallbackQuery,
 
 
 @habits_router.callback_query(StateFilter(States.habits_menu),
-                              F.data.startswith("habit_edit_complete_"))
+                              F.data.startswith("habit_complete_"))
 async def habit_change_status(call: CallbackQuery,
                               state: FSMContext,
                               client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
-    pass
+    data = await state.get_data()
+    action = call.dict()["data"].split("_")[-2]
+    access_token = data["access_token"]
+    habit_id = call.dict()["data"].split("_")[-1]
+    if action == "True":
+        await client().habit_progress_post(access_token=access_token, habit_id=habit_id)
+    elif action == "False":
+        await client().habit_progress_delete_last(habit_id=habit_id)
+    await habit_edit(call, state)
+
 
 async def habits_get(message: Message,
                      state: FSMContext,

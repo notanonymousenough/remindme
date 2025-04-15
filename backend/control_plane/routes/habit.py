@@ -2,13 +2,12 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
-from fastapi.params import Path, Body
+from fastapi.params import Body
 
 from backend.control_plane.schemas.requests.habit import HabitSchemaPostRequest, HabitSchemaPutRequest, \
     HabitProgressSchemaPostRequest
 from backend.control_plane.schemas.user import UserSchema
 from backend.control_plane.service.habit_service import HabitService, get_habit_service
-from backend.control_plane.service.tag_service import get_tag_service
 from backend.control_plane.utils.auth import get_authorized_user
 
 habit_router = APIRouter(

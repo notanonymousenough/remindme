@@ -35,7 +35,8 @@ if __name__ == "__main__":
     settings = get_settings()
 
     if settings.DEBUG:
-        start_logging(app)
+        pass
+        # start_logging(app)
 
     uvicorn.run(
         app=app,

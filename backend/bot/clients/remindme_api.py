@@ -1,3 +1,4 @@
+import enum
 import logging
 import uuid
 from datetime import datetime, timedelta
@@ -8,7 +9,7 @@ import aiohttp
 from backend.bot.clients.http_client import AsyncHttpClient
 from backend.control_plane.config import get_settings
 from backend.control_plane.schemas.habit import HabitSchemaResponse
-from backend.control_plane.schemas.requests.habit import HabitSchemaPostRequest
+from backend.control_plane.schemas.requests.habit import HabitSchemaPostRequest, HabitProgressSchemaPostRequest
 from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaRequest
 from backend.control_plane.schemas.requests.tag import TagRequestSchema
 from backend.control_plane.schemas.tag import TagSchema
@@ -17,7 +18,57 @@ from backend.control_plane.service.habit_service import get_habit_service
 from backend.control_plane.service.tag_service import get_tag_service
 
 
+class REQUEST_METHODS(str, enum.Enum):
+    POST = "POST"
+    GET = "GET"
+    PUT = "PUT"
+    DELETE = "DELETE"
+
+
+# REQUEST_METHODS = ["POST", "GET", "PUT", "DELETE"]
+
+
 class RemindMeApiClient(AsyncHttpClient):
+    async def create_request(self, endpoint: str, method: REQUEST_METHODS, access_token: str, request_body=None) -> \
+            Union[dict, None]:
+        await self._create_session()
+        SESSION_REQUEST_METHODS = {
+            key: getattr(self._session, key.lower()) for key in REQUEST_METHODS
+        }
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            'accept': "application/json",
+            "Content-Type": "application/json"
+        }
+
+        request_kwargs = {
+            "url": endpoint,
+            "headers": headers
+        }
+        if request_body:
+            request_kwargs.update(data=request_body.model_dump_json())
+
+        http_method = SESSION_REQUEST_METHODS[method]
+        try:
+            response = await http_method(
+                **request_kwargs
+            )
+
+        except Exception as ex:
+            print(f"api response error: {ex}")
+            await self._close_session()
+            raise ex
+        if response.status != 200:
+            print("api response status ERROR:", (await response.status))
+            await self._close_session()
+            return None
+
+        response_json = await response.json()
+        await self._close_session()
+
+        return response_json
+
     async def get_access_token(self, request: UserTelegramDataSchema) -> Union[str, None]:
         await self._create_session()
         endpoint = get_settings().GET_ACCESS_TOKEN_ENDPOINT
@@ -238,11 +289,26 @@ class RemindMeApiClient(AsyncHttpClient):
         await self._close_session()
         return True if response.status == 200 else False
 
-    async def habit_get(self, habit_id: uuid.UUID) -> HabitSchemaResponse:
+    @staticmethod
+    async def habit_get(habit_id: uuid.UUID) -> HabitSchemaResponse:
         habit_service = get_habit_service()
         habit = await habit_service.habit_get(habit_id)
         return habit
 
+    async def habit_progress_post(self, access_token: str, habit_id: uuid.UUID) -> bool:
+        endpoint = f"/v1/habit/{str(habit_id)}/progress"
+        if await self.create_request(
+                endpoint=endpoint,
+                method=REQUEST_METHODS.POST,
+                access_token=access_token,
+                request_body=HabitProgressSchemaPostRequest.model_validate({'habit_id': habit_id})
+        ):
+            return True
+        return False
+
+    @staticmethod
+    async def habit_progress_delete_last(habit_id: uuid.UUID) -> bool:
+        return await get_habit_service().habit_progress_delete_last_record(habit_id)
 
 
 _client = None

@@ -30,6 +30,9 @@ class HabitService:
     async def habit_progress_post(self, request: HabitProgressSchemaPostRequest) -> HabitProgressSchemaPostRequest:
         return await self.repo.habit_progress_post(request=request)
 
+    async def habit_progress_delete_last_record(self, habit_id: UUID) -> bool:
+        return await self.repo.habit_progress_delete_last_record(habit_id=habit_id)
+
 
 _habit_service = HabitService()
 
