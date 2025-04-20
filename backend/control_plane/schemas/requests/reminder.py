@@ -52,7 +52,7 @@ class ReminderMarkAsCompleteRequestSchema(BaseModel):
 
 class ReminderAddSchemaRequest(BaseModel):
     text: str = Field(..., description="Текст напоминания")
-    time: datetime = Field(..., description="Время напоминания")
+    time: Optional[datetime] = Field(..., description="Время напоминания")
     tags: Optional[List[str]] = Field(..., description="Список тегов")
     status: Optional[str] = Field(ReminderStatus.ACTIVE, description="Статус напоминания")
     created_at: Optional[datetime] = Field(datetime.now(), description="Время создания")

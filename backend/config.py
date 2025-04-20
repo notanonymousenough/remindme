@@ -89,9 +89,8 @@ class DefaultSettings(BaseSettings):
     TELEGRAM_API_URL: str = "https://api.telegram.org/bot"
 
     # Настройки Yandex GPT
-    YANDEX_GPT_API_KEY: str = environ.get("YANDEX_GPT_API_KEY", "")
-    YANDEX_GPT_API_URL: str = "https://api.yacloud.yandex.ru/gpt/v1/generation"
-    YANDEX_GPT_IMAGE_URL: str = "https://api.yacloud.yandex.ru/gpt/v1/image/generation"
+    YANDEX_CLOUD_AI_IAM_TOKEN: str = environ.get("YANDEX_CLOUD_AI_IAM_TOKEN", "")
+    YANDEX_CLOUD_FOLDER: str = environ.get("YANDEX_CLOUD_FOLDER", "")
 
     # Настройки логирования
     LOG_LEVEL: str = environ.get("LOG_LEVEL", "INFO")
