@@ -24,6 +24,13 @@ class RemindersService:
         return await self.repo.delete_model(user_id=user_id, model_id=reminder_id)
 
     async def reminder_create(self, user_id: UUID, reminder: ReminderAddSchemaRequest) -> ReminderSchema:
+        # Missing time in request means that we need an AI help without creation in DB
+        if reminder.time is None:
+            return await self.create_with_ai_predicted_time(user_id=user_id, reminder_text=reminder.text)
+        # Otherwise create reminder in DB and return it
+        user = await self.user_repo.get_user(user_id)
+        reminder.time = timeutils.convert_user_timezone_to_utc(reminder.time, user.timezone_offset)
+
         request = reminder.model_dump(exclude_unset=True, exclude_none=True)
         return await self.repo.reminder_create(user_id=user_id, reminder=request)
 

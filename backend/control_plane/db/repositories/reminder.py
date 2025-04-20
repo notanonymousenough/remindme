@@ -11,6 +11,10 @@ from .tag import get_tag_repo
 from ..engine import get_async_session
 from ..models.reminder import Reminder
 from ...schemas import ReminderSchema
+from ...schemas.requests.reminder import ReminderMarkAsCompleteRequestSchema, ReminderToEditTimeRequestSchema, \
+    ReminderAddSchemaRequest, ReminderToEditRequestSchema
+from ...service.tag_service import TagService, get_tag_service
+from ...utils import timeutils
 
 
 class ReminderRepository(BaseRepository[Reminder]):
@@ -67,7 +71,7 @@ class ReminderRepository(BaseRepository[Reminder]):
                             Reminder.status == ReminderStatus.ACTIVE,
                             Reminder.notification_sent == False,
                             Reminder.removed == False,
-                            Reminder.time <= datetime.now(UTC),
+                            Reminder.time <= timeutils.get_utc_now(),
                         )
                     )
                     .limit(limit)

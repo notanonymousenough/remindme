@@ -15,6 +15,12 @@ class ReminderToEditRequestSchema(BaseModel):
     tags: Optional[List[UUID]] = Field(None, description="Список тегов")
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
 
+    def with_user_time(self):
+        ...
+
+    def with_utc_time(self):
+        ...
+
     class Config:
         from_attributes = True
 
@@ -23,6 +29,12 @@ class ReminderToEditTimeRequestSchema(BaseModel):
     id: UUID = Path(..., description="reminder ID")
     time: datetime = Field(..., description="Новое время напоминания")
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
+
+    def with_user_time(self):
+        ...
+
+    def with_utc_time(self):
+        ...
 
     class Config:
         from_attributes = True
@@ -45,6 +57,12 @@ class ReminderAddSchemaRequest(BaseModel):
     status: Optional[str] = Field(ReminderStatus.ACTIVE, description="Статус напоминания")
     created_at: Optional[datetime] = Field(datetime.now(), description="Время создания")
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
+
+    def with_user_time(self):
+        ...
+
+    def with_utc_time(self):
+        ...
 
     class Config:
         from_attributes = True
