@@ -27,7 +27,8 @@ class User(BaseModel):
     habits = relationship("Habit", back_populates="user", cascade="all, delete-orphan")
     achievements = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")
     neuro_images = relationship("NeuroImage", back_populates="user")
-    statistics = relationship("UserStatistics", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    roles = relationship("UserRole", back_populates="user")
+    quota_usages = relationship("QuotaUsage", back_populates="user")
 
     def __repr__(self):
         return f"<User {self.username} ({self.id})>"

@@ -1,7 +1,7 @@
 """Add test user and reminders
 
 Revision ID: f35b59b53d5e
-Revises: 36db7907d5a7
+Revises:
 Create Date: 2025-04-19 18:11:34.722518
 
 """
@@ -16,8 +16,8 @@ from sqlalchemy.dialects.postgresql import UUID, ENUM
 
 # revision identifiers, used by Alembic.
 revision: str = 'f35b59b53d5e'
-down_revision: Union[str, None] = '36db7907d5a7'
-branch_labels: Union[str, Sequence[str], None] = None
+down_revision: Union[str, None] = None
+branch_labels: Union[str, Sequence[str], None] = ['testdata']
 depends_on: Union[str, Sequence[str], None] = None
 
 
@@ -31,7 +31,7 @@ def upgrade() -> None:
                         column('username', sa.String),
                         column('email', sa.String),
                         column('first_name', sa.String),
-                        column('timezone', sa.String),
+                        column('timezone_offset', sa.Integer),
                         column('level', sa.Integer),
                         column('experience', sa.Integer),
                         column('streak', sa.Integer),
@@ -62,7 +62,7 @@ def upgrade() -> None:
             'username': 'testuser',
             'email': 'test@example.com',
             'first_name': 'Test User',
-            'timezone': 'UTC',
+            'timezone_offset': 180,
             'level': 1,
             'experience': 0,
             'streak': 0,

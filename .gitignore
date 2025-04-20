@@ -311,5 +311,5 @@ dist
 
 # other
 data/
-iam-token.json
-token.json
+*token.json
+*secret.json
