@@ -4,13 +4,16 @@ from typing import Sequence
 from uuid import UUID
 
 from backend.control_plane.db.models import ReminderStatus
+from backend.control_plane.clients.yandex_gpt import RequestType
 from backend.control_plane.db.repositories.reminder import ReminderRepository
 from backend.control_plane.db.repositories.user import UserRepository
 from backend.control_plane.schemas import ReminderSchema
 from backend.control_plane.schemas.requests.reminder import ReminderToEditRequestSchema, \
     ReminderMarkAsCompleteRequestSchema, ReminderToEditTimeRequestSchema, ReminderAddSchemaRequest
+from backend.control_plane.service.quota_service import get_quota_service
 from backend.control_plane.service.tag_service import get_tag_service
-from backend.control_plane.utils import yandex_gpt_client, timeutils
+from backend.control_plane.utils import timeutils
+from backend.control_plane.clients import yandex_gpt_client
 
 logger = logging.getLogger("reminder_service")
 
@@ -18,6 +21,7 @@ class RemindersService:
     def __init__(self):
         self.repo = ReminderRepository()
         self.user_repo = UserRepository()
+        self.quota_service = get_quota_service()
 
     async def reminder_get(self, reminder_id: UUID):
         return await self.repo.get_by_model_id(model_id=reminder_id)
@@ -32,7 +36,6 @@ class RemindersService:
     async def reminder_create(self, user_id: UUID, reminder: ReminderAddSchemaRequest) -> ReminderSchema:
         # Missing time in request means that we need an AI help without creation in DB
         if reminder.time is None:
-            # todo: check global quota (maybe raise exception QuotaExceeded)
             return await self.create_with_ai_predicted_time(user_id=user_id, reminder_text=reminder.text)
         # Otherwise create reminder in DB and return it
         user = await self.user_repo.get_user(user_id)
@@ -44,7 +47,9 @@ class RemindersService:
     async def create_with_ai_predicted_time(self, user_id: UUID, reminder_text: str) -> ReminderSchema:
         user = await self.user_repo.get_user(user_id=user_id)
         try:
-            reminder_time = await yandex_gpt_client.predict_reminder_time(user.timezone_offset, reminder_text)
+            await self.quota_service.check_ai_request_limit(user_id, RequestType.PREDICT_REMINDER_TIME, reminder_text)
+            reminder_time, token_count = await yandex_gpt_client.predict_reminder_time(user.timezone_offset, reminder_text)
+            await self.quota_service.update_ai_request_usage(user_id, RequestType.PREDICT_REMINDER_TIME, token_count)
             return ReminderSchema(
                 user_id=user_id,
                 text=reminder_text,

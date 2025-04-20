@@ -1,7 +1,7 @@
 """User timezone offset
 
 Revision ID: 393612152ff9
-Revises: f35b59b53d5e
+Revises: 36db7907d5a7
 Create Date: 2025-04-20 23:27:58.041707
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '393612152ff9'
-down_revision: Union[str, None] = 'f35b59b53d5e'
+down_revision: Union[str, None] = '36db7907d5a7'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
