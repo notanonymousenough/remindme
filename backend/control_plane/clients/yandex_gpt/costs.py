@@ -1,10 +1,9 @@
 from yandex_cloud_ml_sdk import YCloudML
 
-from backend.config import get_settings
+from backend.control_plane.clients.ai_provider import AIProviderCostCalculator
 from .prompts import RequestType, PromptRegistry
 
-
-class YandexGptCostCalculator:
+class YandexGptCostCalculator(AIProviderCostCalculator):
     def __init__(self, folder_id, auth, model_name, cost):
         self.sdk = YCloudML(
             folder_id=folder_id,
@@ -28,10 +27,3 @@ class YandexGptCostCalculator:
         model = self.sdk.models.completions(self.model_name)
         result = model.tokenize(text)
         return len(result)
-
-yandex_gpt_cost_calculator = YandexGptCostCalculator(
-    get_settings().YANDEX_CLOUD_FOLDER,
-    get_settings().YANDEX_CLOUD_AI_IAM_TOKEN,
-    get_settings().YANDEX_GPT_MODEL_NAME,
-    get_settings().YANDEX_GPT_MODEL_COST
-)
