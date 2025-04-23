@@ -4,8 +4,8 @@ from unittest.mock import patch, AsyncMock
 import asyncio
 import os
 
-from backend.control_plane.clients import yandex_gpt_client
-from backend.control_plane.clients.yandex_gpt import YandexGptAPI, yandex_gpt_cost_calculator, RequestType
+from backend.control_plane.clients import AIProviderFactory
+from backend.control_plane.clients.yandex_gpt import YandexGptProvider, RequestType
 from backend.control_plane.utils import timeutils
 
 
@@ -25,6 +25,7 @@ async def test_predict_reminder_time(use_real_api):
     """
     user_timezone_offset = 180
     fixed_now = datetime.datetime(2025, 4, 19, 12, 0, tzinfo=datetime.timezone.utc)
+    yandex_gpt_provider = AIProviderFactory.get_provider("yandex_gpt")
 
     # Test cases with expected inputs
     test_cases = [
@@ -46,9 +47,9 @@ async def test_predict_reminder_time(use_real_api):
         for case in test_cases:
             if not use_real_api:
                 # Mock the _query method
-                with patch.object(YandexGptAPI, '_query', AsyncMock(return_value=(case['mocked_response'], 0))):
+                with patch.object(YandexGptProvider, '_query', AsyncMock(return_value=(case['mocked_response'], 0))):
                     # Call the function with mocked API
-                    predicted, token_count = await yandex_gpt_client.predict_reminder_time(180, case['prompt'])
+                    predicted, token_count = await yandex_gpt_provider.predict_reminder_time(180, case['prompt'])
 
                     # Calculate expected datetime from the mocked response
                     expected_dt_str = case['mocked_response'].split('"datetime": "')[1].split('"')[0]
@@ -60,15 +61,15 @@ async def test_predict_reminder_time(use_real_api):
                         f"Mock test passed for '{case['prompt']}': {timeutils.format_datetime_for_user(predicted, 180)}")
             else:
                 # Call the actual API
-                predicted, token_count = await yandex_gpt_client.predict_reminder_time(user_timezone_offset, case['prompt'])
+                predicted, token_count = await yandex_gpt_provider.predict_reminder_time(user_timezone_offset, case['prompt'])
 
                 # Validate the result is reasonable
                 assert isinstance(predicted, datetime.datetime), "Result should be a datetime object"
                 assert predicted > fixed_now, "Predicted time should be in the future"
 
                 # Compare token count
-                calculated_api_cost = await yandex_gpt_cost_calculator.calc_cost_per_tokens(token_count)
-                calculated_local_cost = await yandex_gpt_cost_calculator.calc_cost(case['prompt'], RequestType.PREDICT_REMINDER_TIME)
+                calculated_api_cost = await yandex_gpt_provider.cost_calculator.calc_cost_per_tokens(token_count)
+                calculated_local_cost = await yandex_gpt_provider.cost_calculator.calc_cost(case['prompt'], RequestType.PREDICT_REMINDER_TIME)
                 assert calculated_api_cost - calculated_local_cost < 0.002
 
                 # Calculate expected user datetime like the mocked response
