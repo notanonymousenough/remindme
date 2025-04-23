@@ -86,6 +86,48 @@ class QuotaService:
             await self._update_resource_type_usage(user_id, resource_type.value, request_cost)
 
 
+    async def check_and_increment_resource(self, user_id: UUID, resource_type: str, increment: int = 1) -> bool:
+        """
+        Атомарно проверяет и увеличивает счетчик использования ресурса.
+
+        Args:
+            user_id: ID пользователя
+            resource_type: Тип ресурса
+            increment: Количество добавляемых ресурсов
+
+        Returns:
+            bool: True, если операция выполнена успешно
+
+        Raises:
+            QuotaExceededException: Если превышен лимит ресурса
+        """
+        result = await self.repo.check_and_increment_resource_count(user_id, resource_type, increment)
+        if not result:
+            current_usage = await self.repo.get_current_resource_count(user_id, resource_type)
+            raise QuotaExceededException(
+                quota_type=resource_type,
+                user_id=user_id,
+                requested_value=increment,
+                current_usage=current_usage
+            )
+        return True
+
+
+    async def decrement_resource(self, user_id: UUID, resource_type: str, decrement: int = 1) -> bool:
+        """
+        Уменьшает счетчик использования ресурса.
+
+        Args:
+            user_id: ID пользователя
+            resource_type: Тип ресурса
+            decrement: Количество удаляемых ресурсов
+
+        Returns:
+            bool: True, если операция выполнена успешно
+        """
+        return await self.repo.check_and_decrement_resource_count(user_id, resource_type, decrement)
+
+
 _quota_service = QuotaService()
 
 
