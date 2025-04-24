@@ -35,8 +35,22 @@
 }
 .calend
 {
-  width: 150px;
+  width: 170px;
  margin-right: 10px;
+ border: 1px solid rgb(0, 0, 0);
+}
+.table-priv {
+  border: 1px solid white; /* Устанавливаем белую границу для всей таблицы */
+  background-color: #f8f9fa; /* Пример светлого фона */
+}
+td
+{
+  width: 50px;
+}
+.bord-1
+{
+  width: 200px;
+  border: 1px solid rgb(0, 0, 0);
 }
 .delete
 {
@@ -76,15 +90,8 @@
 
 .my-alert 
 {
-  
   width: 230px;
-  height: 150px;
- 
-  margin: 10px;
   border: 3px solid rgb(203, 203, 203);
-  
- 
-  
 }
 
 .pro
@@ -240,7 +247,6 @@
   border-color: #000000;
 }
 
-
 /*main side bar*/
 .msb {
   width: 200px;
@@ -266,6 +272,7 @@
     margin-bottom: 20px;
     background: #fff;
   }
+  
   .navbar-nav {
     .panel {
       border: 0 none;

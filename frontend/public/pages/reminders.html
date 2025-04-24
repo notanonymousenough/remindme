@@ -27,27 +27,27 @@
       <div class="brand-name-wrapper">
         <div class="avatar">
           <img  src="../assets/icons/avatar.jpg" alt="" class="round" width="40" height="40">
-          <a class="navbar-brand" href="../pages/user.html" >
-            <b> Лагорный</b>
+          <a class="navbar-brand" href="/user" >
+            <b> Профиль</b>
           </a>
         </div>
       </div>
       <div class="side-menu-container  ">
         <ul class="nav navbar-nav ">
           <li>
-            <a class="nav-link text-dark item" href="../pages/reminders.html">
+            <a class="nav-link text-dark item" href="/reminders">
               <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"  fill="currentColor" class="bi bi-lightbulb" viewBox="0 0 16 16"><path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1z"/></svg>
               Напоминания
             </a>
           </li>
           <li>
-            <a class="nav-link text-dark item" href="../pages/habits.html">
+            <a class="nav-link text-dark item" href="/habits">
               <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16"><path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/></svg> 
               Привычки
             </a>
           </li>
           <li>
-            <a class="nav-link text-dark item" href="../pages/telegram.html">
+            <a class="nav-link text-dark item" href="/telegram">
               <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-telegram" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/></svg>
               Телеграм-бот
             </a>
@@ -69,28 +69,28 @@
       <div class="navbar navbar-light  d-inline-flex col-8 col-sm-3 col-lg-3" >
         <div class="container-fluid ">
           <form class="d-flex">
-            <input class="form-control me-2 navbar-find" type="search" data-bs-toggle="dropdown" placeholder="Добавить напоминание" aria-label="Поиск">
+            <input class="form-control me-2 navbar-find" type="search" id="reminderInput" data-bs-toggle="dropdown" placeholder="Добавить напоминание" aria-label="Поиск">
             <ul class="dropdown-menu drop-menu">
               <div class="form-check">
-                <input class="form-check-input m-1" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-                <label class="form-check-label" for="flexRadioDefault1">
-                  Работа &#128188
+                <input class="form-check-input m-1" type="radio" name="tag" id="tagWork" value="Работа">
+                <label class="form-check-label" for="tagWork">
+                  Работа &#128188;
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input m-1" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
-                <label class="form-check-label" for="flexRadioDefault2">
-                  Учёба &#9997
+                <input class="form-check-input m-1" type="radio" name="tag" id="tagStudy" value="Учёба" checked>
+                <label class="form-check-label" for="tagStudy">
+                  Учёба &#9997;
                 </label>
-              </div>   
+              </div>
               <div class="form-check">
-                <input class="form-check-input m-1" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
-                <label class="form-check-label" for="flexRadioDefault2">
-                  Дом &#128106
+                <input class="form-check-input m-1" type="radio" name="tag" id="tagHome" value="Дом">
+                <label class="form-check-label" for="tagHome">
+                  Дом &#128106;
                 </label>
-              </div> 
-              <input class="calend form-control m-3" type="datetime-local">
-              <button href="#" class="btn btn-primary m-1 ">Сохранить</button>
+              </div>
+              <input class="calend form-control m-3" id="timeInput" type="datetime-local">
+              <button id="saveButton" class="btn btn-primary m-1 ">Сохранить</button>
             </ul>
           </form>
         </div>
@@ -100,14 +100,14 @@
           <img src="../assets/icons/fire.png" width="50" height="70" />
         </div>
         <div class="progress">
-          <div class="progress-bar progress-bar-striped bg-warning" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+          <div class="progress-bar progress-bar-striped bg-warning" role="progressbar" id="progress-bar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
       </div>
       <div class="col-1 col-md-2"></div>
     </div>
     <div class="row">
-      <div class="col-2 col-sm-2 col-md-2"></div>
-      <div class="btn-filitr col-9 col-sm-4 col-md-3 col-lg-2 m-1">
+      <div class="col-1 col-sm-2 col-md-2"></div>
+      <div class="btn-filitr col-3 col-sm-4 col-md-3 col-lg-2 m-1">
         <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
           Фильтр
         </button>
@@ -128,8 +128,8 @@
           </li>    
         </ul>
       </div>
-      <div class="col-2 col-sm-1"></div>
-      <div class="btn-teg col-4 col-sm-2 col-md-2 col-lg-1 m-1">
+      <div class="col-1 col-sm-1"></div>
+      <div class="btn-teg col-3 col-sm-2 col-md-2 col-lg-1 m-1">
         <form action="">
           <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
             Тэг
@@ -162,7 +162,7 @@
           </ul>
         </form>
       </div>
-      <div class="btn-add col-4 col-sm-2 col-md-3 m-1"> 
+      <div class="btn-add col-2 col-sm-2 col-md-3 m-1"> 
         <button class="btn btn-primary" id="btn-add"  onclick="add_teg()" type="submit">&#10010</button>
         <div class="new-teg" id="add-teg">
           <form>
@@ -179,136 +179,9 @@
       <div class="col-1 col-sm-4"></div>
     </div>
     <div class="row">
-      <div class="col-2"></div>
-        <div class="row col-9">
-            <div class="alert alert-white my-alert " onclick="location.href='../pages/edit_reminders.html'" role="alert">
-          <p> Сходить за хлебом</p>
-          <hr>
-          <div class="row">
-            <div class="col-6">
-              8:00 
-              <p>#Дом </p>
-            </div> 
-            <div class="col-6">
-              15.02.2025
-              <form>
-                <button type="button" class="btn btn-warning btn-sm">Выполнить</button>
-              </form>
-            </div> 
-          </div>
-        </div>
-        <div class="alert alert-white my-alert" onclick="location.href='../pages/edit_reminders.html'" role="alert">
-          <p> Экзамен</p>
-          <hr>
-          <div class="row">
-            <div class="col-6">
-              8:00 
-              <p>#Дом </p>
-            </div> 
-            <div class="col-6">
-              15.02.2025
-              <form>
-                <button type="button" class="btn btn-warning btn-sm">Выполнить</button>
-              </form>
-            </div> 
-          </div>
-        </div>
-        <div class="alert alert-white my-alert " onclick="location.href='../pages/edit_reminders.html'" role="alert">
-          <p> Конференция</p>
-          <hr>
-          <div class="row">
-            <div class="col-6">
-              8:00 
-              <p>#Дом </p>
-            </div> 
-            <div class="col-6">
-              15.02.2025
-              <form>
-                <button type="button" class="btn btn-warning btn-sm">Выполнить</button>
-              </form>
-            </div> 
-          </div>
-        </div>
-        <div class="alert alert-white my-alert " onclick="location.href='../pages/edit_reminders.html'" role="alert">
-          <p> Экзамен</p>
-          <hr>
-          <div class="row">
-            <div class="col-6">
-              8:00 
-              <p>#Дом </p>
-            </div> 
-            <div class="col-6">
-              15.02.2025
-              <form>
-                <button type="button" class="btn btn-warning btn-sm">Выполнить</button>
-              </form>
-            </div> 
-          </div>
-        </div>
-        <div class="alert alert-white my-alert " onclick="location.href='../pages/edit_reminders.html'" role="alert">
-          <p> Экзамен</p>
-          <hr>
-          <div class="row">
-            <div class="col-6">
-              8:00 
-              <p>#Дом </p>
-            </div> 
-            <div class="col-6">
-              15.02.2025
-              <form>
-                <button type="button" class="btn btn-warning btn-sm">Выполнить</button>
-              </form>
-            </div> 
-          </div>
-        </div>
-        <div class="alert alert-white my-alert " onclick="location.href='../pages/edit_reminders.html'" role="alert">
-          <p> Экзамен</p>
-          <hr>
-          <div class="row">
-            <div class="col-6">
-              8:00 
-              <p>#Дом </p>
-            </div> 
-            <div class="col-6">
-              15.02.2025
-              <form>
-                <button type="button" class="btn btn-warning btn-sm">Выполнить</button>
-              </form>
-            </div> 
-          </div>
-        </div>
-        <div class="alert alert-white my-alert " onclick="location.href='../pages/edit_reminders.html'" role="alert">
-          <p> Экзамен</p>
-          <hr>
-          <div class="row">
-            <div class="col-6">
-              8:00 
-              <p>#Дом </p>
-            </div> 
-            <div class="col-6">
-              15.02.2025
-              <form>
-                <button type="button" class="btn btn-warning btn-sm">Выполнить</button>
-              </form>
-            </div> 
-          </div>
-        </div>
-        <div class="alert alert-white my-alert " onclick="location.href='../pages/edit_reminders.html'" role="alert">
-          <p> Экзамен</p>
-          <hr>
-          <div class="row">
-            <div class="col-6">
-              8:00 
-              <p>#Дом </p>
-            </div> 
-            <div class="col-6">
-              15.02.2025
-              <form>
-                <button type="button" class="btn btn-warning btn-sm">Выполнить</button>
-              </form>
-            </div> 
-          </div>
-        </div>
+      <div class="col-1 col-sm-2"></div>
+      <div class="col-10">
+        <div id="reminders" class="row"></div>
       </div>
     </div>
   </div>
@@ -318,6 +191,164 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="../js/components/navbar.js"></script>
   <script src="../js/pages/reminders.js"></script>
-  
+  <script>
+    fetch('/api/reminders')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Сетевой ответ не в порядке');
+      }
+      return response.json();
+    })
+    .then(data => {
+      renderReminders(data);
+    })
+    .catch(error => {
+      console.error('Ошибка получения данных:', error);
+    });
+    function renderReminders(data) {
+      const remindersContainer = document.getElementById('reminders');
+      remindersContainer.innerHTML = '';
+      data.forEach(reminder => {
+        const div = document.createElement('div');
+        div.className = 'alert alert-white my-alert m-3';
+        div.role = "alert";
+        div.addEventListener('click', () => {
+          location.href = '/edit?id=' + reminder.id;
+        });
+        const buttonClass = getButtonClass(reminder.status);
+        const buttonText = getButtonText(reminder.status);
+        const button = document.createElement('button');
+        button.type = "button";
+        button.className = `btn ${buttonClass} btn-sm`;
+        button.innerText = buttonText;
+        button.onclick = (event) => {
+          event.stopPropagation();
+          updateReminderStatus(reminder.id);
+        };
+        div.innerHTML = `
+          <p>${reminder.text}</p>
+          <hr>
+          <div class="row">
+            <div class="col-6">
+              ${new Date(reminder.time).toLocaleString()} 
+            </div> 
+            <div class="col-6">
+              <p>#${reminder.tags.join(', ')}</p>
+            </div> 
+          </div>
+        `;
+        div.querySelector('.col-6:nth-child(2)').appendChild(button); 
+        remindersContainer.appendChild(div);
+      });
+    }
+    function getButtonClass(status) {
+      switch (status) {
+        case 'active':
+          return 'btn-warning';
+        case 'forgotten':
+          return 'btn-secondary';
+        case 'completed':
+          return 'btn-outline-warning';
+        default:
+        return 'btn-default';
+      }
+    }
+    function getButtonText(status) {
+      switch (status) {
+        case 'active':
+          return 'Выполнить';
+        case 'forgotten':
+          return 'Просрочено';
+        case 'completed':
+          return 'Выполнено';
+        default:
+        return 'Ошибка';
+      }
+    }
+    async function updateReminderStatus(reminderId) {
+      try {
+        const response = await fetch(`/api/reminders/${reminderId}/complete`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify({ status: 'completed' })  
+        });
+        if (!response.ok) {
+          throw new Error('Ошибка обновления статуса');
+        }
+        location.reload();
+      } catch (error) {
+        console.error('Ошибка:', error);
+      }
+    }
+  function fetchReminders() {
+    fetch('/api/reminders')
+      .then(response => {
+      if (!response.ok) {
+        throw new Error('Сетевой ответ не в порядке');
+      }
+      return response.json();
+      })
+      .then(data => {
+        renderReminders(data); 
+      })
+      .catch(error => {
+        console.error('Ошибка получения данных:', error);
+      });
+    }
+  </script>
+  <script>
+    document.getElementById('saveButton').addEventListener('click', async function() {
+      var input = document.getElementById('reminderInput');
+      var timeInput = document.getElementById('timeInput');
+      var reminderText = input.value.trim();
+      var timeText = timeInput.value;
+      var selectedTag = Array.from(document.querySelectorAll('input[name="tag"]:checked')).map(tag => tag.value);
+      if (reminderText && timeText) {
+        const response = await fetch('/api/reminders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            text: reminderText,
+            tags: selectedTag,  
+            time: timeText,
+            status: "active"
+          })
+        });
+        if (response.ok) {
+          location.reload();
+          input.value = '';
+          timeInput.value = ''; 
+        } else {
+          alert('Ошибка при сохранении напоминания: ' + response.statusText);
+        }
+      } else {
+        alert('Пожалуйста, введите текст напоминания.');
+      }
+    });
+  </script>
+  <script>
+    async function updateProgressBar() {
+      try {
+        const response = await fetch('/api/progress');
+        const statistics = await response.json();
+        const stats = statistics[0]; 
+        const totalReminders = stats.remindersCompleted + stats.remindersForgotten;
+        let progress = 0;
+        if (totalReminders > 0) {
+          progress = (stats.remindersCompleted / totalReminders) * 100;
+        }
+        const progressBar = document.getElementById('progress-bar');
+        progressBar.style.width = `${progress}%`;
+        progressBar.setAttribute('aria-valuenow', progress);
+      } catch (error) {
+        console.error('Error fetching progress data:', error);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', updateProgressBar);
+  </script>
 </body>  
 </html>
