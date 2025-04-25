@@ -1,7 +1,7 @@
 from yandex_cloud_ml_sdk import YCloudML
 
-from backend.control_plane.clients.ai_provider import AIProviderCostCalculator
-from .prompts import RequestType, PromptRegistry
+from backend.control_plane.ai_clients.ai_provider import AIProviderCostCalculator
+from ..prompts import RequestType, PromptRegistry
 
 class YandexGptCostCalculator(AIProviderCostCalculator):
     def __init__(self, folder_id, auth, model_name, cost):

@@ -1,10 +1,9 @@
-from backend.control_plane.clients.ai_provider import AIProvider
-from backend.control_plane.clients.yandex_gpt import YandexGptProvider
+from backend.control_plane.ai_clients import YandexGptProvider, AIProvider, YandexArtProvider
 
 
 class AIProviderFactory:
     @staticmethod
-    def get_provider(provider_type: str = "yandex_gpt") -> AIProvider:
+    def get_provider(provider_type: str = "yandex_gpt") -> YandexGptProvider | YandexArtProvider:
         """
         Получить экземпляр AI-провайдера
 
@@ -19,9 +18,12 @@ class AIProviderFactory:
         """
         if provider_type == "yandex_gpt":
             return YandexGptProvider()
+        elif provider_type == "yandex_art":
+            return YandexArtProvider()
         else:
             raise ValueError(f"Unknown AI provider: {provider_type}")
 
 
-# Создаем единый экземпляр по умолчанию для использования в проекте
-default_ai_provider = AIProviderFactory.get_provider()
+# Создаем экземпляры провайдеров для использования в проекте
+default_llm_ai_provider = AIProviderFactory.get_provider("yandex_gpt")
+default_art_ai_provider = AIProviderFactory.get_provider("yandex_art")

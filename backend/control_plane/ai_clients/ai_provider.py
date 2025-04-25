@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Tuple, Any
+from typing import Tuple, Any, List
 import datetime
+
+from backend.control_plane.db.models import HabitPeriod
 
 
 class AIProviderCostCalculator(ABC):
@@ -26,6 +28,10 @@ class AIProvider(ABC):
         """Получить калькулятор стоимости для этого провайдера"""
         pass
 
+
+class AILLMProvider(ABC):
+    """Абстрактный класс для AI-LLM-провайдера"""
+
     @abstractmethod
     async def predict_reminder_time(self, timezone_offset: int, query: str) -> Tuple[datetime.datetime, int]:
         """
@@ -33,6 +39,26 @@ class AIProvider(ABC):
 
         Returns:
             Tuple[datetime, int]: Предсказанное время и количество использованных токенов
+        """
+        pass
+
+
+class AIArtProvider(ABC):
+    """Абстрактный класс для AI-Art-провайдера"""
+
+    @property
+    @abstractmethod
+    def cost_calculator(self) -> AIProviderCostCalculator:
+        """Получить калькулятор стоимости для этого провайдера"""
+        pass
+
+    @abstractmethod
+    async def generate_habit_image(self, prompts):#habit_text: str, progress: List[datetime.date], interval: HabitPeriod) -> bytes:
+        """
+        Сгенерировать картинку для привычки
+
+        Returns:
+            bytes: Изображение в байтовом формате
         """
         pass
 

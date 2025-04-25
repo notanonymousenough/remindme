@@ -93,6 +93,7 @@ class DefaultSettings(BaseSettings):
     YANDEX_GPT_MODEL_COST: float = environ.get("YANDEX_GPT_MODEL_COST", 0.2)
     YANDEX_CLOUD_AI_IAM_TOKEN: str = environ.get("YANDEX_CLOUD_AI_IAM_TOKEN", "")
     YANDEX_CLOUD_FOLDER: str = environ.get("YANDEX_CLOUD_FOLDER", "")
+    YANDEX_ART_MODEL_COST: float = 2.2
 
     # Настройки логирования
     LOG_LEVEL: str = environ.get("LOG_LEVEL", "INFO")
