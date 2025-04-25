@@ -8,14 +8,14 @@ from yandex_cloud_ml_sdk import YCloudML
 
 from backend.config import get_settings
 from backend.control_plane.utils import timeutils
-from backend.control_plane.clients.ai_provider import AIProvider
 from .costs import YandexGptCostCalculator
-from .prompts import PromptRegistry, RequestType
+from ..ai_provider import AILLMProvider
+from ..prompts import PromptRegistry, RequestType
 
 logger = logging.getLogger("yandex_gpt")
 
 
-class YandexGptProvider(AIProvider):
+class YandexGptProvider(AILLMProvider):
     def __init__(self, folder_id=None, auth=None, model_name=None):
         self.folder_id = folder_id or get_settings().YANDEX_CLOUD_FOLDER
         self.auth = auth or get_settings().YANDEX_CLOUD_AI_IAM_TOKEN

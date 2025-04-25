@@ -3,10 +3,9 @@ import logging
 from typing import Sequence
 from uuid import UUID
 
-from backend.control_plane.clients import default_ai_provider
-from backend.control_plane.clients.yandex_gpt.prompts import RequestType
+from backend.control_plane.ai_clients import default_llm_ai_provider
+from backend.control_plane.ai_clients.prompts import RequestType
 from backend.control_plane.db.models import ReminderStatus
-from backend.control_plane.clients.yandex_gpt import RequestType
 from backend.control_plane.db.repositories.reminder import ReminderRepository
 from backend.control_plane.db.repositories.user import UserRepository
 from backend.control_plane.exceptions.quota import QuotaExceededException
@@ -25,7 +24,7 @@ class RemindersService:
         self.repo = ReminderRepository()
         self.user_repo = UserRepository()
         self.quota_service = get_quota_service()
-        self.ai_provider = default_ai_provider
+        self.ai_provider = default_llm_ai_provider
 
     async def reminder_get(self, reminder_id: UUID):
         return await self.repo.get_by_model_id(model_id=reminder_id)

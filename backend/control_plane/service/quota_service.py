@@ -1,8 +1,8 @@
 import logging
 from uuid import UUID
 
-from backend.control_plane.clients import default_ai_provider
-from backend.control_plane.clients.yandex_gpt.prompts import RequestType
+from backend.control_plane.ai_clients import default_llm_ai_provider
+from backend.control_plane.ai_clients.prompts import RequestType
 from backend.control_plane.db.repositories.quota import QuotaUsageRepository
 from backend.control_plane.db.types.quotas import get_quotas_for_request_type
 from backend.control_plane.exceptions.quota import QuotaExceededException
@@ -13,7 +13,7 @@ logger = logging.getLogger("quota_service")
 class QuotaService:
     def __init__(self):
         self.repo = QuotaUsageRepository()
-        self.ai_provider = default_ai_provider
+        self.ai_provider = default_llm_ai_provider
 
     async def _check_resource_type_limit(self, user_id: UUID, resource_type: str, usage_diff: float = 1):
         """
