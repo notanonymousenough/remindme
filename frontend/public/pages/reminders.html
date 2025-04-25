@@ -333,21 +333,41 @@
   <script>
     async function updateProgressBar() {
       try {
-        const response = await fetch('/api/progress');
-        const statistics = await response.json();
-        const stats = statistics[0]; 
-        const totalReminders = stats.remindersCompleted + stats.remindersForgotten;
+        const response = await fetch('/api/reminders');
+        const reminders = await response.json(); 
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;  
+        const todaysReminders = reminders.filter(reminder => {
+          if (!reminder.time) return false;
+          return reminder.time.substring(0, 10) === todayStr;
+        });
+  
+        const totalReminders = todaysReminders.length;
+        const completedCount = todaysReminders.filter(r => r.status === 'completed').length;
+        const forgottenCount = todaysReminders.filter(r => r.status === 'forgotten').length;
         let progress = 0;
-        if (totalReminders > 0) {
-          progress = (stats.remindersCompleted / totalReminders) * 100;
+        if (forgottenCount > 0) {
+          progress = (completedCount / (completedCount+forgottenCount)) * 100;
+        } else if (completedCount > 0) {
+          progress = 100;
         }
+
+        progress = Math.min(progress, 100);
         const progressBar = document.getElementById('progress-bar');
-        progressBar.style.width = `${progress}%`;
-        progressBar.setAttribute('aria-valuenow', progress);
+        if (progressBar) {
+          progressBar.style.width = `${progress}%`; 
+          progressBar.setAttribute('aria-valuenow', progress);
+          progressBar.textContent = `${Math.round(progress)}%`; 
+        }
+  
       } catch (error) {
-        console.error('Error fetching progress data:', error);
+        console.error('Error fetching reminders:', error);
       }
     }
+  
     document.addEventListener('DOMContentLoaded', updateProgressBar);
   </script>
 </body>  

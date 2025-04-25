@@ -36,10 +36,15 @@ const habits=[
         ["2025-04-11", true ],
         ["2025-04-12", true ],
         ["2025-04-13", false ],
+        ["2025-04-14", true ],
+        ["2025-04-15", true ],
+        ["2025-04-16", true ],
+        ["2025-04-17", true ],
+        ["2025-04-18", false ],
     ],
     "bestStreak": 3,
     "startDate": "2025-03-31",
-    "endDate": "2025-04-13",
+    "endDate": "2025-04-18",
     "removed": false,
     "createdAt": "2023-09-01T12:00:00Z",
     "updatedAt": "2023-10-01T12:00:00Z"
@@ -102,14 +107,7 @@ const achievement = [
     }
 ];
 
-const statistics=[
-    {
-        "userId": "usr_67890",
-        "remindersCompleted": 0,
-        "remindersForgotten": 0,
-        "lastReset": 0
-    }
-];
+
 
 app.post('/v1/reminders', (req, res) => {
     req.body.id= (Math.random(100000000)).toString();
@@ -122,34 +120,14 @@ app.get('/v1/reminders', (req, res) => {
     const now = new Date();
     const today = now.toISOString().split('T')[0];
 
-    statistics.forEach(stat => {
-        if (stat.lastReset !== today) {
-            stat.remindersCompleted = 0; 
-            stat.remindersForgotten = 0;  
-            stat.lastReset = today; 
-        }
-    });
-
     reminders.forEach(reminder => {
         if (reminder.time && !isNaN(new Date(reminder.time))) {
             const reminderDate = new Date(reminder.time).toISOString().split('T')[0];
             if (today === reminderDate) {
-                if (reminder.status === 'completed' && !reminder.alreadyCounted) {
-                    const userStats = statistics.find(stat => stat.userId === reminder.userId);
-                    if (userStats) {
-                        userStats.remindersCompleted++;
-                        reminder.alreadyCounted = true;
-                    }
-                } 
-                else if (reminder.status !== 'completed') {
+                if (reminder.status !== 'completed') {
                     const reminderTime = new Date(reminder.time);
-                    if (reminderTime <= now && !reminder.alreadyCounted) {
+                    if (reminderTime <= now) {
                         reminder.status = 'forgotten';
-                        const userStats = statistics.find(stat => stat.userId === reminder.userId);
-                        if (userStats) {
-                            userStats.remindersForgotten++;
-                            reminder.alreadyCounted = true; 
-                        }
                     }
                 }
                 
@@ -158,10 +136,6 @@ app.get('/v1/reminders', (req, res) => {
                 const reminderTime = new Date(reminder.time);
                 if (reminderTime <= now) {
                     reminder.status = 'forgotten';
-                    const userStats = statistics.find(stat => stat.userId === reminder.userId);
-                    if (userStats) {
-                        reminder.alreadyCounted = true;
-                    }
                 }
             }
         }
@@ -184,9 +158,6 @@ app.get('/v1/habits/:habitId', (req, res) => {
 
 app.get('/v1/achievement', (req, res) => {
     res.json(achievement);
-});
-app.get('/v1/progress', (req, res) => {
-    res.json(statistics);
 });
 
 app.put('/v1/reminders/:reminderId/complete', (req, res) => {

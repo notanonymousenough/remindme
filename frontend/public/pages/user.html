@@ -156,6 +156,7 @@
           <li class="list-group-item bg-success text-light" aria-current="true">Достижения</li>
           <div id="achievement-list"></div>
       </ul>
+    </div>
   </div>
   <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -169,54 +170,97 @@
             <div class="row">
               <div class="col-3">Токен</div>
               <div class="col-7">
-                <input class="form-control " type="text" placeholder="Токен">
+                <input id="tokenInput" class="form-control " type="text" placeholder="Токен">
               </div>
               <p></p>
               <div class="col-3">URL</div>
               <div class="col-7">
-                <input class="form-control " type="text" placeholder="URL">
+                <input id="urlInput" class="form-control " type="text" placeholder="URL">
               </div>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-            <button type="button" class="btn btn-primary">Синхронизация</button>
+            <button type="button" id="syncBtn" class="btn btn-primary">Синхронизация</button>
           </div>
         </div>
       </form>
     </div>
   </div>
-
+  
 
   <script>
-    // Функция для получения ачивок
     async function fetchAchievements() {
-        try {
-            const response = await fetch('/api/achievement');
-            if (!response.ok) {
-                throw new Error('Ошибка сети');
-            }
-            const achievements = await response.json();
-            const listElement = document.getElementById('achievement-list');
-
-            // Очищаем предыдущие элементы
-            listElement.innerHTML = '';
-
-            // Добавляем достижения в список
-            achievements.forEach(achievement => {
-                const listItem = document.createElement('li');
-                listItem.classList.add('list-group-item');
-                listItem.innerHTML = achievement.description; // Используем описание достижения
-                listElement.appendChild(listItem);
-            });
-        } catch (error) {
-            console.error('Ошибка при получении достижений:', error);
+      try {
+        const response = await fetch('/api/achievement');
+        if (!response.ok) {
+          throw new Error('Ошибка сети');
         }
+        const achievements = await response.json();
+        const listElement = document.getElementById('achievement-list');
+        listElement.innerHTML = '';
+        achievements.forEach(achievement => {
+          const listItem = document.createElement('li');
+          listItem.classList.add('list-group-item');
+          listItem.innerHTML = achievement.description; 
+          listElement.appendChild(listItem);
+        });
+      } catch (error) {
+        console.error('Ошибка при получении достижений:', error);
+      }
     }
-
-    // Вызываем функцию при загрузке страницы
     window.onload = fetchAchievements;
-</script>
+  </script>
+  <script>
+    document.getElementById('syncBtn').addEventListener('click', () => {
+      const token = document.getElementById('tokenInput').value.trim();
+      const url = document.getElementById('urlInput').value.trim();
+  
+      if (!token || !url) {
+        alert('Пожалуйста, заполните оба поля: Токен и URL');
+        return;
+      }
+  
+      // Пример функции для синхронизации, нужно заменить на реальную логику
+      syncReminders(token, url)
+        .then(() => {
+          alert('Синхронизация успешно выполнена');
+        })
+        .catch(err => {
+          console.error('Ошибка при синхронизации:', err);
+          alert('Ошибка при синхронизации. Проверьте консоль для деталей');
+        });
+    });
+  
+    async function syncReminders(token, url) {
+      // Пример: получаем напоминания (замени этот код на реальную логику)
+      const reminders = await getReminders();
+  
+      // Отправляем их на указанный URL с передачей токена в заголовках
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ reminders })
+      });
+  
+      if (!response.ok) {
+        throw new Error('Сервер вернул ошибку: ' + response.status);
+      }
+  
+      // Можно вернуть результат, если нужно
+      return response.json();
+    }
+  
+    // Заглушка для получения напоминаний, замени на свой реальный код
+    async function getReminders() {
+      const response = await fetch('/api/reminders');
+      const reminders = await response.json(); 
+      return reminders;
+    }
+  </script>
   <script src="../js/lib/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
