@@ -82,6 +82,7 @@ class DefaultSettings(BaseSettings):
     TEMPORAL_NAMESPACE: str = environ.get("TEMPORAL_NAMESPACE", "remindme")
     TEMPORAL_TASK_QUEUE: str = environ.get("TEMPORAL_TASK_QUEUE", "remindme-tasks")
     ACTIVE_REMINDERS_LIMIT: int = environ.get("ACTIVE_REMINDERS_LIMIT", 1000)
+    GENERATE_IMAGES_LIMIT: int = environ.get("GENERATE_IMAGES_LIMIT", 100)
     CLEANUP_DAYS_THRESHOLD: int = environ.get("CLEANUP_DAYS_THRESHOLD", 10)
 
     # Настройки Telegram
@@ -91,7 +92,8 @@ class DefaultSettings(BaseSettings):
     # Настройки Yandex GPT
     YANDEX_GPT_MODEL_NAME: str = environ.get("YANDEX_GPT_MODEL_NAME", "yandexgpt-lite")
     YANDEX_GPT_MODEL_COST: float = environ.get("YANDEX_GPT_MODEL_COST", 0.2)
-    YANDEX_CLOUD_AI_IAM_TOKEN: str = environ.get("YANDEX_CLOUD_AI_IAM_TOKEN", "")
+    YANDEX_CLOUD_AI_SECRET: str = environ.get("YANDEX_CLOUD_AI_SECRET", "")
+    YANDEX_CLOUD_S3_SECRET: str = environ.get("YANDEX_CLOUD_S3_SECRET", "")
     YANDEX_CLOUD_FOLDER: str = environ.get("YANDEX_CLOUD_FOLDER", "")
     YANDEX_ART_MODEL_COST: float = 2.2
 

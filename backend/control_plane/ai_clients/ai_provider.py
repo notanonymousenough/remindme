@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Tuple, Any, List
 import datetime
 
-from backend.control_plane.db.models import HabitPeriod
+from backend.control_plane.db.models import HabitInterval
 
 
 class AIProviderCostCalculator(ABC):
@@ -29,7 +29,7 @@ class AIProvider(ABC):
         pass
 
 
-class AILLMProvider(ABC):
+class AILLMProvider(AIProvider):
     """Абстрактный класс для AI-LLM-провайдера"""
 
     @abstractmethod
@@ -43,17 +43,11 @@ class AILLMProvider(ABC):
         pass
 
 
-class AIArtProvider(ABC):
+class AIArtProvider(AIProvider):
     """Абстрактный класс для AI-Art-провайдера"""
 
-    @property
     @abstractmethod
-    def cost_calculator(self) -> AIProviderCostCalculator:
-        """Получить калькулятор стоимости для этого провайдера"""
-        pass
-
-    @abstractmethod
-    async def generate_habit_image(self, prompts):#habit_text: str, progress: List[datetime.date], interval: HabitPeriod) -> bytes:
+    async def generate_habit_image(self, habit_text: str, progress: List[datetime.date], interval: HabitInterval) -> bytes:
         """
         Сгенерировать картинку для привычки
 

@@ -7,6 +7,7 @@ from temporalio.common import RetryPolicy
 from temporalio.exceptions import WorkflowAlreadyStartedError
 
 from backend.config import get_settings
+from backend.data_plane.workflows.habits import StartImagesGenerationWorkflow
 from backend.data_plane.workflows.morning import MorningMessageWorkflow
 from backend.data_plane.workflows.reminders import CheckRemindersWorkflow
 
@@ -31,7 +32,7 @@ async def ensure_workflows_running(client):
         except WorkflowAlreadyStartedError:
             print(f"Workflow {workflow_id} уже запущен")
 
-    async def schedule_if_not_scheduled(workflow_type, workflow_id):
+    async def schedule_if_not_scheduled(workflow_type, workflow_id, schedule_calendar_spec):
         try:
             await client.create_schedule(
                 f"{workflow_id}-schedule",
@@ -42,7 +43,7 @@ async def ensure_workflows_running(client):
                         task_queue=get_settings().TEMPORAL_TASK_QUEUE,
                     ),
                     spec=ScheduleSpec(
-                        calendars=[ScheduleCalendarSpec(hour=(ScheduleRange(6),))]
+                        calendars=[schedule_calendar_spec]
                     ),
                 ),
             )
@@ -52,5 +53,6 @@ async def ensure_workflows_running(client):
 
     await asyncio.gather(
         start_if_not_exists(CheckRemindersWorkflow, "check-reminders"),
-        schedule_if_not_scheduled(MorningMessageWorkflow, "morning-message"),
+        schedule_if_not_scheduled(MorningMessageWorkflow, "morning-message", ScheduleCalendarSpec(hour=(ScheduleRange(6),))),
+        schedule_if_not_scheduled(StartImagesGenerationWorkflow, "start-images-generation", ScheduleCalendarSpec(day_of_month=(ScheduleRange(27),))),
     )

@@ -1,7 +1,7 @@
-from sqlalchemy import Column, String, Text, ForeignKey, Enum
+from sqlalchemy import Column, String, Text, ForeignKey, Enum, Date
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from .base import BaseModel, ImageStatus
+from .base import BaseModel, ImageRate, ImageStatus
 
 
 class NeuroImage(BaseModel):
@@ -12,8 +12,9 @@ class NeuroImage(BaseModel):
     reminder_id = Column(UUID(as_uuid=True), ForeignKey("reminders.id", ondelete="SET NULL"), nullable=True)
     image_url = Column(String(512), nullable=False)
     thumbnail_url = Column(String(512))
-    prompt = Column(Text)
     status = Column(Enum(ImageStatus))
+    rate = Column(Enum(ImageRate))
+    prompt = Column(Text)
 
     # Отношения
     user = relationship("User", back_populates="neuro_images")

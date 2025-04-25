@@ -17,7 +17,7 @@ class ReminderStatus(str, enum.Enum):
     FORGOTTEN = "FORGOTTEN"
 
 
-class HabitPeriod(str, enum.Enum):
+class HabitInterval(str, enum.Enum):
     DAILY = "DAILY"
     WEEKLY = "WEEKLY"
     MONTHLY = "MONTHLY"
@@ -30,10 +30,16 @@ class AchievementCategory(str, enum.Enum):
     SYSTEM = "SYSTEM"
 
 
-class ImageStatus(str, enum.Enum):
+class ImageRate(str, enum.Enum):
     GOOD = "GOOD"
     NEUTRAL = "NEUTRAL"
     BAD = "BAD"
+
+
+class ImageStatus(str, enum.Enum):
+    GENERATING = "GENERATING"
+    GENERATED = "GENERATED"
+    PUBLISHED = "PUBLISHED"
 
 
 # Базовая модель с общими полями

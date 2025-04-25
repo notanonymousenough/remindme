@@ -2,7 +2,8 @@ from .base import (
     BaseModel,
     SexType,
     ReminderStatus,
-    HabitPeriod,
+    HabitInterval,
+    ImageRate,
     AchievementCategory,
     ImageStatus
 )
@@ -19,9 +20,10 @@ __all__ = [
     'BaseModel',
     'SexType',
     'ReminderStatus',
-    'HabitPeriod',
+    'HabitInterval',
     'AchievementCategory',
     'ImageStatus',
+    'ImageRate',
     'User',
     'Tag',
     'Reminder',
