@@ -93,6 +93,8 @@ class DefaultSettings(BaseSettings):
     YANDEX_GPT_MODEL_NAME: str = environ.get("YANDEX_GPT_MODEL_NAME", "yandexgpt-lite")
     YANDEX_GPT_MODEL_COST: float = environ.get("YANDEX_GPT_MODEL_COST", 0.2)
     YANDEX_CLOUD_AI_SECRET: str = environ.get("YANDEX_CLOUD_AI_SECRET", "")
+    YANDEX_CLOUD_S3_BUCKET_NAME: str = environ.get("YANDEX_CLOUD_S3_BUCKET_NAME", "remindme-images-bucket")
+    YANDEX_CLOUD_S3_KEY_ID: str = environ.get("YANDEX_CLOUD_S3_KEY_ID", "")
     YANDEX_CLOUD_S3_SECRET: str = environ.get("YANDEX_CLOUD_S3_SECRET", "")
     YANDEX_CLOUD_FOLDER: str = environ.get("YANDEX_CLOUD_FOLDER", "")
     YANDEX_ART_MODEL_COST: float = 2.2
