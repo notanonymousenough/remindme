@@ -347,11 +347,10 @@
   
         const totalReminders = todaysReminders.length;
         const completedCount = todaysReminders.filter(r => r.status === 'completed').length;
-        const forgottenCount = todaysReminders.filter(r => r.status === 'forgotten').length;
         let progress = 0;
-        if (forgottenCount > 0) {
-          progress = (completedCount / (completedCount+forgottenCount)) * 100;
-        } else if (completedCount > 0) {
+        if (completedCount != totalReminders) {
+          progress = (completedCount / totalReminders) * 100;
+        } else if (totalReminders!=0){
           progress = 100;
         }
 

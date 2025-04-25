@@ -131,7 +131,7 @@
                    </svg>
                 </div>
                 <a class="col-12 col-sm-8 btn-calend" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                  <button type="button"  class="btn btn-primary  btn-calend">Синхронизация с календарём</button>
+                  <button type="button"  id="calendarSyncBtn" class="btn btn-primary  btn-calend">Синхронизация с календарём</button>
                 </a>
               </div>
               <div class="row">
@@ -221,22 +221,28 @@
         return;
       }
   
-      // Пример функции для синхронизации, нужно заменить на реальную логику
+      // Отключаем кнопку "Синхронизация с календарём" и меняем текст
+      const calendarBtn = document.getElementById('calendarSyncBtn');
+      calendarBtn.disabled = true;
+      calendarBtn.textContent = 'Синхронизация запущена';
+  
+      // Асинхронная функция синхронизации
       syncReminders(token, url)
         .then(() => {
-          alert('Синхронизация успешно выполнена');
+          alert('Синхронизация запущена');
         })
         .catch(err => {
           console.error('Ошибка при синхронизации:', err);
           alert('Ошибка при синхронизации. Проверьте консоль для деталей');
+          // В случае ошибки возвращаем кнопку в активное состояние и меняем текст обратно
+          calendarBtn.disabled = false;
+          calendarBtn.textContent = 'Синхронизация с календарём';
         });
     });
   
     async function syncReminders(token, url) {
-  
       const reminders = await getReminders();
   
-      // Отправляем их на указанный URL с передачей токена в заголовках
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -250,14 +256,12 @@
         throw new Error('Сервер вернул ошибку: ' + response.status);
       }
   
-      // Можно вернуть результат, если нужно
       return response.json();
     }
   
-    // Заглушка для получения напоминаний, замени на свой реальный код
     async function getReminders() {
       const response = await fetch('/api/reminders');
-      const reminders = await response.json(); 
+      const reminders = await response.json();
       return reminders;
     }
   </script>
