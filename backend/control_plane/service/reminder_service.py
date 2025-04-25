@@ -51,7 +51,7 @@ class RemindersService:
         user = await self.user_repo.get_user(user_id=user_id)
         try:
             # Проверяем лимиты
-            await self.quota_service.check_ai_request_limit(
+            await self.quota_service.check_ai_llm_request_limit(
                 user_id,
                 RequestType.PREDICT_REMINDER_TIME,
                 reminder_text
@@ -64,7 +64,7 @@ class RemindersService:
             )
 
             # Обновляем использование ресурсов
-            await self.quota_service.update_ai_request_usage(
+            await self.quota_service.update_ai_llm_request_usage(
                 user_id,
                 RequestType.PREDICT_REMINDER_TIME,
                 token_count

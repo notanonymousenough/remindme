@@ -1,7 +1,7 @@
 import logging
 from uuid import UUID
 
-from backend.control_plane.ai_clients import default_llm_ai_provider
+from backend.control_plane.ai_clients import default_llm_ai_provider, default_art_ai_provider
 from backend.control_plane.ai_clients.prompts import RequestType
 from backend.control_plane.db.repositories.quota import QuotaUsageRepository
 from backend.control_plane.db.types.quotas import get_quotas_for_request_type
@@ -13,7 +13,8 @@ logger = logging.getLogger("quota_service")
 class QuotaService:
     def __init__(self):
         self.repo = QuotaUsageRepository()
-        self.ai_provider = default_llm_ai_provider
+        self.ai_llm_provider = default_llm_ai_provider
+        self.ai_art_provider = default_art_ai_provider
 
     async def _check_resource_type_limit(self, user_id: UUID, resource_type: str, usage_diff: float = 1):
         """
@@ -43,7 +44,7 @@ class QuotaService:
         """
         return await self.repo.update_resource_usage(user_id, resource_type, usage_diff)
 
-    async def check_ai_request_limit(self, user_id: UUID, request_type: RequestType, prompt: str):
+    async def check_ai_llm_request_limit(self, user_id: UUID, request_type: RequestType, prompt: str):
         """
         Проверяет, не превышены ли лимиты для запроса к ИИ
 
@@ -55,7 +56,7 @@ class QuotaService:
         Raises:
             QuotaExceededException: Если хотя бы один лимит превышен
         """
-        request_cost = await self.ai_provider.cost_calculator.calc_cost(prompt, request_type)
+        request_cost = await self.ai_llm_provider.cost_calculator.calc_cost(prompt, request_type)
 
         # Получаем список типов ресурсов для проверки
         resource_types = get_quotas_for_request_type(request_type)
@@ -70,7 +71,7 @@ class QuotaService:
                     requested_value=request_cost
                 )
 
-    async def update_ai_request_usage(self, user_id: UUID, request_type: RequestType, token_count: int):
+    async def update_ai_llm_request_usage(self, user_id: UUID, request_type: RequestType, token_count: int):
         """
         Обновляет использование ресурсов после запроса к ИИ
 
@@ -79,7 +80,7 @@ class QuotaService:
             request_type: Тип запроса
             token_count: Количество использованных токенов
         """
-        request_cost = await self.ai_provider.cost_calculator.calc_cost_per_tokens(token_count)
+        request_cost = await self.ai_llm_provider.cost_calculator.calc_cost_per_tokens(token_count)
         resource_types = get_quotas_for_request_type(request_type)
 
         for resource_type in resource_types:
@@ -111,6 +112,22 @@ class QuotaService:
                 current_usage=current_usage
             )
         return True
+
+
+    async def check_and_increment_ai_art_usage(self, user_id: UUID, request_type: RequestType) -> bool:
+        request_cost = await self.ai_art_provider.cost_calculator.calc_cost(request_type)
+        resource_types = get_quotas_for_request_type(request_type)
+        for resource_type in resource_types:
+            result = await self.repo.check_and_increment_resource_count(user_id, resource_type.value, request_cost)
+            if not result:
+                current_usage = await self.repo.get_current_resource_count(user_id, resource_type.value)
+                raise QuotaExceededException(
+                    quota_type=resource_type.value,
+                    user_id=user_id,
+                    requested_value=request_cost,
+                    current_usage=current_usage
+                )
+            return True
 
 
     async def decrement_resource(self, user_id: UUID, resource_type: str, decrement: int = 1) -> bool:

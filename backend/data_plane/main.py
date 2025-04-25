@@ -36,7 +36,9 @@ async def main():
         workflows=[
             workflows.reminders.CheckRemindersWorkflow,
             workflows.reminders.SendReminderNotificationWorkflow,
-            workflows.morning.MorningMessageWorkflow
+            workflows.morning.MorningMessageWorkflow,
+            workflows.habits.StartImagesGenerationWorkflow,
+            workflows.habits.GenerateHabitImageWorkflow
         ],
         activities=[
             activities.reminders.check_active_reminders,
@@ -45,7 +47,11 @@ async def main():
             activities.morning.get_active_users,
             activities.morning.check_today_habits,
             activities.morning.check_today_reminders,
-            activities.morning.send_telegram_message
+            activities.morning.send_telegram_message,
+            activities.habits.check_active_habits,
+            activities.habits.generate_image,
+            activities.habits.save_image_to_s3,
+            activities.habits.save_image_url_to_db,
         ],
     )
 

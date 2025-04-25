@@ -12,8 +12,7 @@ class YandexArtCostCalculator(AIProviderCostCalculator):
 
     async def calc_cost(self, prompt: str, request_type: RequestType) -> float:
         """Рассчитать стоимость запроса на генерацию изображения"""
-        # Для простоты, у нас фиксированная стоимость за одно изображение
-        if request_type == RequestType.GENERATE_IMAGE:
+        if request_type == RequestType.ILLUSTRATE_HABIT:
             return self.cost_per_image
         raise ValueError(f"Unsupported request type for YandexArtCostCalculator: {request_type}")
 

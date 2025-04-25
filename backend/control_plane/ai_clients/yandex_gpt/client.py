@@ -18,7 +18,7 @@ logger = logging.getLogger("yandex_gpt")
 class YandexGptProvider(AILLMProvider):
     def __init__(self, folder_id=None, auth=None, model_name=None):
         self.folder_id = folder_id or get_settings().YANDEX_CLOUD_FOLDER
-        self.auth = auth or get_settings().YANDEX_CLOUD_AI_IAM_TOKEN
+        self.auth = auth or get_settings().YANDEX_CLOUD_AI_SECRET
         self.model_name = model_name or get_settings().YANDEX_GPT_MODEL_NAME
         self.model_version = "rc"
         self.sdk = YCloudML(

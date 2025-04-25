@@ -3,7 +3,7 @@ from enum import Enum
 from textwrap import dedent
 from typing import Dict, Callable, List
 
-from backend.control_plane.db.models import HabitPeriod, Habit
+from backend.control_plane.db.models import HabitInterval, Habit
 from backend.control_plane.utils import timeutils
 
 
@@ -54,17 +54,17 @@ def reminder_prompt(user_timezone_offset: int = 0, dt_format="%Y-%m-%dT%H:%M", *
 def habit_illustration_prompt(
         habit_text: str = "чистить зубы",
         progress: List[date] = None,
-        interval: HabitPeriod = HabitPeriod.DAILY
+        interval: HabitInterval = HabitInterval.DAILY
 ) -> str:
     today = date.today()
     first_of_month = today.replace(day=1)
     if progress is None:
         progress = []
-    if interval == HabitPeriod.DAILY:
+    if interval == HabitInterval.DAILY:
         expected = (today - first_of_month).days + 1
         done = sum(1 for d in progress if first_of_month <= d <= today)
         frequency = f"ежедневно ({done}/{expected} дней выполнения за месяц)"
-    elif interval == HabitPeriod.WEEKLY:
+    elif interval == HabitInterval.WEEKLY:
         week_starts = [first_of_month + timedelta(days=i) for i in range(0, (today - first_of_month).days + 1) if
                        (first_of_month + timedelta(days=i)).weekday() == 0]
         expected = len(week_starts)

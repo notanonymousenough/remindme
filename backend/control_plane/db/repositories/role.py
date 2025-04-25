@@ -34,7 +34,6 @@ class UserRoleRepository(BaseRepository[UserRole]):
 
         if not user_role:
             # Возвращаем базовую роль по умолчанию
-            # TODO: get basic name from types
             stmt = select(Role).where(
                 and_(
                     Role.name == DEFAULT_ROLE

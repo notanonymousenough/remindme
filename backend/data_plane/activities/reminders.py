@@ -39,9 +39,6 @@ async def check_active_reminders() -> List[Dict[str, Any]]:
         }
         reminders_to_send.append(reminder_data)
 
-        # Помечаем, что уведомление было отправлено
-        await reminder_repo.mark_sent(reminder.id)
-
     return reminders_to_send
 
 @activity.defn
