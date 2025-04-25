@@ -18,6 +18,7 @@ from backend.control_plane.db.repositories.user import UserRepository
 from backend.control_plane.db.models.base import ReminderStatus
 from backend.config import get_settings
 from backend.control_plane.service.quota_service import QuotaService
+from backend.data_plane.services.s3_service import YandexStorageService
 from backend.data_plane.services.telegram_service import TelegramService
 
 logger = logging.getLogger("reminder_activities")
@@ -66,8 +67,8 @@ async def generate_image(image: dict) -> bytes:
 
 @activity.defn
 async def save_image_to_s3(image_bytes: bytes) -> str:
-    # TODO: add S3 client
-    pass
+    s3_service = YandexStorageService()
+    return s3_service.save_image(bytearray(image_bytes), "habit_images")
 
 @activity.defn
 async def save_image_url_to_db(image, image_url):
