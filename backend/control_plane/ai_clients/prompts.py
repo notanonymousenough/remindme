@@ -94,7 +94,6 @@ def describe_habit_text_prompt(animal: str = None) -> str:
 def habit_illustration_prompt(
         animal: str = "кот",
         habit_text: str = "заниматься йогой",
-        concrete_action: str = None,  # Новый параметр с конкретным действием от YandexGPT
         progress: List[date] = None,
         interval: HabitInterval = HabitInterval.DAILY
 ) -> list:
@@ -121,12 +120,9 @@ def habit_illustration_prompt(
 
     completion_rate = done / expected if expected else 0
 
-    # Используем конкретное действие, если оно есть
-    action_description = concrete_action if concrete_action else f"активно {habit_text}"
-
     # Сверх-конкретная инструкция с очень высоким весом
     main_action = {
-        "text": f"СЦЕНА: {animal}. {action_description}\n НА ИЗОБРАЖЕНИИ ОБЯЗАТЕЛЬНО ДОЛЖНО БЫТЬ ВИДНО: 1) {animal}а; 2) как он физически выполняет это действие; 3) все необходимые для этого действия предметы. ДЕЙСТВИЕ ДОЛЖНО ПРОИСХОДИТЬ В НАСТОЯЩИЙ МОМЕНТ, а не до или после.",
+        "text": f"СЦЕНА: {animal}. {habit_text}\n НА ИЗОБРАЖЕНИИ ОБЯЗАТЕЛЬНО ДОЛЖНО БЫТЬ ВИДНО: 1) {animal}а; 2) как он физически выполняет это действие; 3) все необходимые для этого действия предметы. ДЕЙСТВИЕ ДОЛЖНО ПРОИСХОДИТЬ В НАСТОЯЩИЙ МОМЕНТ, а не до или после.",
         "weight": 5
     }
 
