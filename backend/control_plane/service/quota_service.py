@@ -120,6 +120,7 @@ class QuotaService:
     async def check_and_increment_ai_art_usage(self, user_id: UUID, request_type: RequestType) -> bool:
         request_cost = await self.ai_art_provider.cost_calculator.calc_cost(request_type)
         resource_types = get_quotas_for_request_type(request_type)
+
         for resource_type in resource_types:
             result = await self.repo.check_and_increment_resource_count(user_id, resource_type.value, request_cost)
             if not result:
@@ -130,7 +131,9 @@ class QuotaService:
                     requested_value=request_cost,
                     current_usage=current_usage
                 )
-            return True
+
+        # Перемещено за пределы цикла для правильной логики
+        return True
 
 
     async def decrement_resource(self, user_id: UUID, resource_type: str, decrement: int = 1) -> bool:

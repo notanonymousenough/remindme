@@ -82,8 +82,8 @@ class DefaultSettings(BaseSettings):
     TEMPORAL_NAMESPACE: str = environ.get("TEMPORAL_NAMESPACE", "remindme")
     TEMPORAL_TASK_QUEUE: str = environ.get("TEMPORAL_TASK_QUEUE", "remindme-tasks")
     ACTIVE_REMINDERS_LIMIT: int = environ.get("ACTIVE_REMINDERS_LIMIT", 1000)
-    GENERATE_IMAGES_LIMIT: int = environ.get("GENERATE_IMAGES_LIMIT", 100)
     CLEANUP_DAYS_THRESHOLD: int = environ.get("CLEANUP_DAYS_THRESHOLD", 10)
+    HABIT_IMAGE_CHARACTER: str = environ.get("HABIT_IMAGE_CHARACTER", "кот")
 
     # Настройки Telegram
     TELEGRAM_BOT_TOKEN: str = environ.get("BOT_TOKEN", "")

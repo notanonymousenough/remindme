@@ -70,13 +70,10 @@ class YandexArtProvider(AIArtProvider):
         # Возвращаем байты изображения и фиктивное количество "токенов" (стоимость всегда фиксирована)
         return result.image_bytes
 
-    async def generate_habit_image(self, habit_text: str, progress: List[datetime.date], interval: HabitInterval, seed=0) -> Tuple[bytes, int]:
-        animal = "кот"
-        described_habit, count_tokens = await self.llm_model.describe_habit_text(habit_text[:100], animal)
+    async def generate_habit_image(self, character: str, habit_text: str, completion_rate: float, seed=0) -> Tuple[bytes, int]:
+        described_habit, count_tokens = await self.llm_model.describe_habit_text(habit_text[:100], character)
         # TODO: в случае цензуры не генерировать совсем?
         if "В интернете есть много сайтов с информацией на эту тему" in described_habit:
             described_habit = "стоит"
-        print(described_habit)
-        habit_prompts = PromptRegistry.get_prompt(RequestType.ILLUSTRATE_HABIT, animal=animal, habit_text=described_habit, progress=progress, interval=interval)
-        print(habit_prompts)
+        habit_prompts = PromptRegistry.get_prompt(RequestType.ILLUSTRATE_HABIT, character=character, habit_text=described_habit, completion_rate=completion_rate)
         return await self._generate_image(habit_prompts, seed=seed), count_tokens

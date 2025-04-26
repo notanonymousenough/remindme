@@ -92,48 +92,23 @@ def describe_habit_text_prompt(animal: str = None) -> str:
 
 @PromptRegistry.register(RequestType.ILLUSTRATE_HABIT)
 def habit_illustration_prompt(
-        animal: str = "кот",
+        character: str = "кот",
         habit_text: str = "заниматься йогой",
-        progress: List[date] = None,
-        interval: HabitInterval = HabitInterval.DAILY
+        completion_rate: float = 1
 ) -> list:
-    today = date.today()
-    first_of_month = today.replace(day=1)
-    if progress is None:
-        progress = []
-
-    # Расчет частоты и прогресса
-    if interval == HabitInterval.DAILY:
-        expected = (today - first_of_month).days + 1
-        done = sum(1 for d in progress if first_of_month <= d <= today)
-        frequency = f"ежедневно ({done}/{expected} дней выполнения)"
-    elif interval == HabitInterval.WEEKLY:
-        week_starts = [first_of_month + timedelta(days=i) for i in range(0, (today - first_of_month).days + 1) if
-                       (first_of_month + timedelta(days=i)).weekday() == 0]
-        expected = len(week_starts)
-        done = sum(1 for d in progress if first_of_month <= d <= today)
-        frequency = f"еженедельно ({done}/{expected} недель выполнения)"
-    else:
-        expected = 1
-        done = sum(1 for d in progress if first_of_month <= d <= today)
-        frequency = f"ежемесячно ({done}/{expected} выполнение)"
-
-    completion_rate = done / expected if expected else 0
-
-    # Сверх-конкретная инструкция с очень высоким весом
     main_action = {
-        "text": f"СЦЕНА: {animal}. {habit_text}\n НА ИЗОБРАЖЕНИИ ОБЯЗАТЕЛЬНО ДОЛЖНО БЫТЬ ВИДНО: 1) {animal}а; 2) как он физически выполняет это действие; 3) все необходимые для этого действия предметы. ДЕЙСТВИЕ ДОЛЖНО ПРОИСХОДИТЬ В НАСТОЯЩИЙ МОМЕНТ, а не до или после.",
+        "text": f"СЦЕНА: {character}. {habit_text}\n НА ИЗОБРАЖЕНИИ ОБЯЗАТЕЛЬНО ДОЛЖНО БЫТЬ ВИДНО: 1) {character}а; 2) как он физически выполняет это действие; 3) все необходимые для этого действия предметы. ДЕЙСТВИЕ ДОЛЖНО ПРОИСХОДИТЬ В НАСТОЯЩИЙ МОМЕНТ, а не до или после.",
         "weight": 5
     }
 
     if completion_rate == 0:
-        mood_description = f"Настроение: {animal} недовольный и несчастный, но всё равно выполняет действие."
+        mood_description = f"Настроение: {character} недовольный и несчастный, но всё равно выполняет действие."
     elif completion_rate < 0.5:
-        mood_description = f"Настроение: {animal} неуверенный и пугливый, но старается правильно выполнить действие."
+        mood_description = f"Настроение: {character} неуверенный и пугливый, но старается правильно выполнить действие."
     elif completion_rate < 0.8:
-        mood_description = f"Настроение: {animal} довольный и милый, выполняет действие с удовольствием."
+        mood_description = f"Настроение: {character} довольный и милый, выполняет действие с удовольствием."
     else:
-        mood_description = f"Настроение: {animal} как профессионал, в крутой позе с чёрными солнцезащитными очками, очень миловидный и серьезный, выполняет действие идеально и с энтузиазмом."
+        mood_description = f"Настроение: {character} как профессионал, в крутой позе с чёрными солнцезащитными очками, очень миловидный и серьезный, выполняет действие идеально и с энтузиазмом."
 
     # Вторичные инструкции с улучшенным описанием стиля
     secondary_instruction = f"""
@@ -141,7 +116,7 @@ def habit_illustration_prompt(
 
 Стиль: высококачественная цифровая иллюстрация в стиле Pixar/Disney. Плавные линии, правильные пропорции, реалистичная анатомия животного с легкой стилизацией. Детализированные предметы с которыми животное взаимодействует. Мягкое объемное освещение с легкими тенями. Яркие, но гармоничные цвета. Четкая композиция с фокусом на действии.
 
-НЕ ПОКАЗЫВАТЬ: просто портрет {animal}а без действия; {animal}а, который смотрит на предметы, но не использует их; {animal}а в человеческой одежде; кривые или диспропорциональные изображения.
+НЕ ПОКАЗЫВАТЬ: просто портрет {character}а без действия; {character}а, который смотрит на предметы, но не использует их; {character}а в человеческой одежде; кривые или диспропорциональные изображения.
 """
 
     return [main_action, secondary_instruction]
