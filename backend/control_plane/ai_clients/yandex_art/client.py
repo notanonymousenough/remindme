@@ -73,5 +73,8 @@ class YandexArtProvider(AIArtProvider):
     async def generate_habit_image(self, habit_text: str, progress: List[datetime.date], interval: HabitInterval, seed=0) -> Tuple[bytes, int]:
         animal = "кот"
         described_habit, count_tokens = await self.llm_model.describe_habit_text(habit_text[:100], animal)
+        # цензура
+        if "В интернете есть много сайтов с информацией на эту тему" in described_habit:
+            described_habit = "стоит"
         habit_prompts = PromptRegistry.get_prompt(RequestType.ILLUSTRATE_HABIT, animal=animal, habit_text=described_habit, progress=progress, interval=interval)
         return await self._generate_image(habit_prompts, seed=seed), count_tokens
