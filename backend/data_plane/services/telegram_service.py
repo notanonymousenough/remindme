@@ -3,10 +3,10 @@
 """
 import aiohttp
 import logging
+import json
 from typing import Dict, Any, Optional
 from backend.config import get_settings
 import certifi
-import aiohttp
 import ssl
 
 logger = logging.getLogger("telegram_service")
@@ -45,7 +45,6 @@ class TelegramService:
         }
 
         if reply_markup:
-            import json
             data["reply_markup"] = json.dumps(reply_markup)
 
         async with aiohttp.ClientSession() as session:
@@ -53,3 +52,5 @@ class TelegramService:
                 if response.status != 200:
                     response_text = await response.text()
                     raise ValueError(f"Ошибка отправки сообщения в Telegram: {response.status} - {response_text}")
+
+                return True

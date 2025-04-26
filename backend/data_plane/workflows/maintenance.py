@@ -10,7 +10,7 @@ from typing import Dict, Any
 from backend.config import get_settings
 
 with workflow.unsafe.imports_passed_through():
-    import logging
+    pass
 
 logger = logging.getLogger("maintenance_workflows")
 
@@ -33,22 +33,8 @@ class CleanupRemovedItemsWorkflow:
         # Определяем порог дней для очистки
         days_threshold = get_settings().CLEANUP_DAYS_THRESHOLD
 
-        # Очищаем удаленные напоминания
-        await workflow.execute_activity(
-            "cleanup_removed_reminders",
-            retry_policy=retry_policy,
-            start_to_close_timeout=timedelta(minutes=30),
-            args=[days_threshold]
-        )
-
-        # Очищаем удаленные привычки
-        await workflow.execute_activity(
-            "cleanup_removed_habits",
-            retry_policy=retry_policy,
-            start_to_close_timeout=timedelta(minutes=30),
-            args=[days_threshold]
-        )
-
+        # TODO: DELETE Removed Reminders
+        # TODO: DELETE Removed Habits
         # TODO: REMOVE OLD HabitProgress
         # TODO: REMOVE OLD UserQuotaUsage
         # TODO: REMOVE OLD UserRole
