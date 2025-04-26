@@ -1,3 +1,4 @@
+import datetime
 from typing import Sequence
 from uuid import UUID
 
@@ -9,7 +10,7 @@ from ..engine import get_async_session
 from ..models.habit import Habit, HabitProgress
 from ...schemas.habit import HabitSchemaResponse
 from ...schemas.requests.habit import HabitProgressSchemaPostRequest
-
+from ...utils import timeutils
 
 class HabitRepository(BaseRepository[Habit]):
     def __init__(self):
@@ -64,3 +65,25 @@ class HabitRepository(BaseRepository[Habit]):
                 return True
             else:
                 return False
+
+    async def take_for_image_generation(self) -> Sequence[Habit]:
+        current_time = timeutils.get_utc_now()
+        two_weeks_ago = current_time - datetime.timedelta(weeks=2)
+        async with await get_async_session() as session:
+            async with session.begin():
+                get_stmt = (
+                    select(Habit)
+                    .where(
+                        and_(
+                            Habit.created_at >= two_weeks_ago,
+                            Habit.removed == False
+                        )
+                    )
+                )
+                result = await session.execute(get_stmt)
+                habits = result.scalars().all()
+
+                if not habits:
+                    return []
+                return habits
+
