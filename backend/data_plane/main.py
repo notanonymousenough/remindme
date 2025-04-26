@@ -49,9 +49,12 @@ async def main():
             activities.morning.check_today_reminders,
             activities.morning.send_telegram_message,
             activities.habits.check_active_habits,
+            activities.habits.update_illustrate_habit_quota,
+            activities.habits.get_habit_completion_rate,
             activities.habits.generate_image,
+            activities.habits.update_describe_habit_text_quota,
             activities.habits.save_image_to_s3,
-            activities.habits.save_image_url_to_db,
+            activities.habits.save_image_to_db,
         ],
     )
 
