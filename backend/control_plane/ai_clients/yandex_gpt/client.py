@@ -69,3 +69,12 @@ class YandexGptProvider(AILLMProvider):
         json_resp = yaml.safe_load(strip_markdown.strip_markdown(response).strip("`"))
         return timeutils.parse_string_in_user_timezone(json_resp["datetime"], user_timezone_offset,
                                                        "%Y-%m-%dT%H:%M"), usage
+
+    async def describe_habit_text(self, habit_text: str, animal: str) -> Tuple[str, int]:
+        system_prompt = PromptRegistry.get_prompt(
+            RequestType.DESCRIBE_HABIT_TEXT,
+            animal=animal
+        )
+        query = "Текст привычки: %s" % habit_text
+        response, usage = await self._query(system_prompt, query)
+        return response, usage

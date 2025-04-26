@@ -42,12 +42,19 @@ class AILLMProvider(AIProvider):
         """
         pass
 
+    @abstractmethod
+    async def describe_habit_text(self, habit_text: str, animal: str) -> Tuple[str, int]:
+        """
+        Генерирует запрос к YandexGPT для конкретизации привычки
+        """
+        pass
+
 
 class AIArtProvider(AIProvider):
     """Абстрактный класс для AI-Art-провайдера"""
 
     @abstractmethod
-    async def generate_habit_image(self, habit_text: str, progress: List[datetime.date], interval: HabitInterval) -> bytes:
+    async def generate_habit_image(self, habit_text: str, progress: List[datetime.date], interval: HabitInterval) -> Tuple[bytes, int]:
         """
         Сгенерировать картинку для привычки
 

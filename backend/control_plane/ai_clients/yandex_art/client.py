@@ -7,9 +7,8 @@ import base64
 from yandex_cloud_ml_sdk import YCloudML
 
 from backend.config import get_settings
-from backend.control_plane.ai_clients.ai_provider import AIArtProvider
+from backend.control_plane.ai_clients.ai_provider import AIArtProvider, AILLMProvider
 from .costs import YandexArtCostCalculator
-from .. import prompts
 from ..prompts import PromptRegistry, RequestType
 from ...db.models import HabitInterval
 
@@ -17,7 +16,7 @@ logger = logging.getLogger("yandex_art")
 
 
 class YandexArtProvider(AIArtProvider):
-    def __init__(self, folder_id=None, auth=None, model_name="yandex-art"):
+    def __init__(self, llm_model: AILLMProvider, folder_id=None, auth=None, model_name="yandex-art"):
         self.folder_id = folder_id or get_settings().YANDEX_CLOUD_FOLDER
         self.auth = auth or get_settings().YANDEX_CLOUD_AI_SECRET
         self.model_name = model_name
@@ -31,6 +30,7 @@ class YandexArtProvider(AIArtProvider):
             self.model_name,
             get_settings().YANDEX_ART_MODEL_COST
         )
+        self.llm_model = llm_model
 
     @property
     def cost_calculator(self) -> YandexArtCostCalculator:
@@ -70,6 +70,7 @@ class YandexArtProvider(AIArtProvider):
         return result.image_bytes
 
     async def generate_habit_image(self, habit_text: str, progress: List[datetime.date], interval: HabitInterval, seed=0):
-        prompt = PromptRegistry.get_prompt(RequestType.ILLUSTRATE_HABIT, habit_text=habit_text, progress=progress, interval=interval)
-        return await self._generate_image(prompt, seed=seed)
-
+        animal = "кот"
+        described_habit, count_tokens = await self.llm_model.describe_habit_text(habit_text, animal)
+        habit_prompts = PromptRegistry.get_prompt(RequestType.ILLUSTRATE_HABIT, animal=animal, habit_text=described_habit, progress=progress, interval=interval)
+        return await self._generate_image(habit_prompts, seed=seed), count_tokens
