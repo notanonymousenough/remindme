@@ -23,7 +23,7 @@ class Quota(BaseModel):
 
     role_id = Column(UUID, ForeignKey('roles.id', ondelete="CASCADE"), nullable=False)
     resource_type_id = Column(UUID, ForeignKey('resource_types.id', ondelete="CASCADE"), nullable=False)
-    max_value = Column(Numeric(10, 2), nullable=False)
+    max_value = Column(Numeric(10, 4), nullable=False)
 
     role = relationship("Role", back_populates="quotas")
     resource_type = relationship("ResourceType", back_populates="quotas")
@@ -42,7 +42,7 @@ class QuotaUsage(BaseModel):
     user_id = Column(UUID, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
     resource_type_id = Column(UUID, ForeignKey('resource_types.id', ondelete="CASCADE"), nullable=False)
     date = Column(Date, nullable=False)
-    usage_value = Column(Numeric(10, 2), nullable=False, default=0)
+    usage_value = Column(Numeric(10, 4), nullable=False, default=0)
 
     user = relationship("User", back_populates="quota_usages")
     resource_type = relationship("ResourceType", back_populates="quota_usages")
