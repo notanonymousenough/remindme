@@ -34,6 +34,7 @@ async def check_today_habits(user_id: UUID) -> List[Dict[str, Any]]:
     Проверяет привычки, которые должны быть выполнены сегодня
     """
     logger.info("Проверка активных привычек")
+    # TODO: actualize with HabitRepository
     # habits_repo = HabitRepository()
     #
     # # Получаем активные напоминания в ближайшем временном окне

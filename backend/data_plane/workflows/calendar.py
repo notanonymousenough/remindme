@@ -1,3 +1,18 @@
+"""
+Рабочие процессы для календаря
+"""
+import logging
+from datetime import timedelta
+from temporalio import workflow
+from temporalio.common import RetryPolicy
+from typing import Dict, Any
+
+from backend.config import get_settings
+
+with workflow.unsafe.imports_passed_through():
+    pass
+
+logger = logging.getLogger("calendar_workflows")
 
 @workflow.defn
 class SyncCalendarWorkflow:
@@ -14,12 +29,6 @@ class SyncCalendarWorkflow:
             maximum_attempts=3
         )
 
-        # Синхронизируем календарь
-        result = await workflow.execute_activity(
-            sync_calendar_events,
-            retry_policy=retry_policy,
-            start_to_close_timeout=timedelta(minutes=10),
-            args=[user_id]
-        )
+        # TODO: Синхронизируем календарь
 
         return result
