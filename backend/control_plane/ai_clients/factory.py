@@ -19,7 +19,7 @@ class AIProviderFactory:
         if provider_type == "yandex_gpt":
             return YandexGptProvider()
         elif provider_type == "yandex_art":
-            return YandexArtProvider()
+            return YandexArtProvider(default_llm_ai_provider)
         else:
             raise ValueError(f"Unknown AI provider: {provider_type}")
 
