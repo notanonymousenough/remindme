@@ -65,8 +65,9 @@ async def generate_image(image: dict) -> Tuple[bytes, int]:
     """
     Генерирует изображение для привычки
     """
+    seed = datetime.now().timestamp()
     logger.info(f"Генерация изображения {image}")
-    im_bytes, count_tokens = art_ai_provider.generate_habit_image(image['habit'].text, image['progress'], image['habit'].interval)
+    im_bytes, count_tokens = art_ai_provider.generate_habit_image(image['habit'].text, image['progress'], image['habit'].interval, seed=seed)
     return im_bytes, count_tokens
 
 
