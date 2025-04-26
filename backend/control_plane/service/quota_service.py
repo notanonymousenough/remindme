@@ -1,7 +1,7 @@
 import logging
 from uuid import UUID
 
-from backend.control_plane.ai_clients import default_llm_ai_provider, default_art_ai_provider
+from backend.control_plane.ai_clients import default_llm_ai_provider, default_art_ai_provider, AIProvider
 from backend.control_plane.ai_clients.prompts import RequestType
 from backend.control_plane.db.repositories.quota import QuotaUsageRepository
 from backend.control_plane.db.types.quotas import get_quotas_for_request_type
@@ -71,7 +71,7 @@ class QuotaService:
                     requested_value=request_cost
                 )
 
-    async def update_ai_llm_request_usage(self, user_id: UUID, request_type: RequestType, token_count: int):
+    async def update_ai_llm_request_usage(self, user_id: UUID, request_type: RequestType, token_count: int, custom_ai_provider: AIProvider = None):
         """
         Обновляет использование ресурсов после запроса к ИИ
 
@@ -80,7 +80,10 @@ class QuotaService:
             request_type: Тип запроса
             token_count: Количество использованных токенов
         """
-        request_cost = await self.ai_llm_provider.cost_calculator.calc_cost_per_tokens(token_count)
+        cost_calculator = self.ai_llm_provider.cost_calculator
+        if custom_ai_provider is not None:
+            cost_calculator = custom_ai_provider.cost_calculator
+        request_cost = await cost_calculator.calc_cost_per_tokens(token_count)
         resource_types = get_quotas_for_request_type(request_type)
 
         for resource_type in resource_types:

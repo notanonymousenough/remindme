@@ -16,8 +16,8 @@ with workflow.unsafe.imports_passed_through():
         check_active_habits,
         generate_image,
         save_image_to_s3,
-        save_image_url_to_db
-)
+        save_image_url_to_db, update_quota
+    )
     import logging
 
 logger = logging.getLogger("habit_workflows")
@@ -80,11 +80,18 @@ class GenerateHabitImageWorkflow:
             non_retryable_error_types=["ValueError", "KeyError"]
         )
 
-        image_bytes = await workflow.execute_activity(
+        image_bytes, count_tokens = await workflow.execute_activity(
             generate_image,
             retry_policy=retry_policy,
             start_to_close_timeout=timedelta(minutes=5),
             args=image
+        )
+
+        await workflow.execute_activity(
+            update_quota,
+            retry_policy=retry_policy,
+            start_to_close_timeout=timedelta(minutes=5),
+            args=(image["habit"].user_id, count_tokens)
         )
 
         image_url = await workflow.execute_activity(

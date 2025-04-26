@@ -4,11 +4,13 @@
 import logging
 import asyncio
 from datetime import datetime, timedelta
+from itertools import count
+
 from temporalio import activity
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from uuid import UUID
 
-from backend.control_plane.ai_clients import prompts, default_art_ai_provider
+from backend.control_plane.ai_clients import prompts, default_art_ai_provider, default_llm_ai_provider
 from backend.control_plane.ai_clients.prompts import RequestType
 from backend.control_plane.db.models import ImageStatus
 from backend.control_plane.db.repositories.habit import HabitRepository, HabitProgressRepository
@@ -24,6 +26,7 @@ from backend.data_plane.services.telegram_service import TelegramService
 logger = logging.getLogger("reminder_activities")
 
 MIN_DAYS_FOR_GENERATING = timedelta(days=14)
+art_ai_provider = default_art_ai_provider
 
 @activity.defn
 async def check_active_habits() -> List[Dict[str, Any]]:
@@ -58,12 +61,20 @@ async def check_active_habits() -> List[Dict[str, Any]]:
     return images_to_generate
 
 @activity.defn
-async def generate_image(image: dict) -> bytes:
+async def generate_image(image: dict) -> Tuple[bytes, int]:
     """
-    Отправляет уведомление о напоминании через Telegram
+    Генерирует изображение для привычки
     """
     logger.info(f"Генерация изображения {image}")
-    return default_art_ai_provider.generate_habit_image(image['habit'].text, image['progress'], image['habit'].interval)
+    im_bytes, count_tokens = art_ai_provider.generate_habit_image(image['habit'].text, image['progress'], image['habit'].interval)
+    return im_bytes, count_tokens
+
+
+@activity.defn
+async def update_quota(user_id: UUID, count_tokes: int):
+    quota_service = QuotaService()
+    await quota_service.update_ai_llm_request_usage(user_id, RequestType.DESCRIBE_HABIT_TEXT, count_tokes, custom_ai_provider=art_ai_provider)
+
 
 @activity.defn
 async def save_image_to_s3(image_bytes: bytes) -> str:

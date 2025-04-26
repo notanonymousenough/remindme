@@ -60,6 +60,7 @@ class AIArtProvider(AIProvider):
 
         Returns:
             bytes: Изображение в байтовом формате
+            int: Количество использованных токенов
         """
         pass
 
