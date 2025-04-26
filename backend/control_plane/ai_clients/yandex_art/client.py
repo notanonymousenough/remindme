@@ -25,6 +25,7 @@ class YandexArtProvider(AIArtProvider):
             auth=self.auth,
         )
         self._cost_calculator = YandexArtCostCalculator(
+            llm_model,
             self.folder_id,
             self.auth,
             self.model_name,
@@ -69,8 +70,8 @@ class YandexArtProvider(AIArtProvider):
         # Возвращаем байты изображения и фиктивное количество "токенов" (стоимость всегда фиксирована)
         return result.image_bytes
 
-    async def generate_habit_image(self, habit_text: str, progress: List[datetime.date], interval: HabitInterval, seed=0):
+    async def generate_habit_image(self, habit_text: str, progress: List[datetime.date], interval: HabitInterval, seed=0) -> Tuple[bytes, int]:
         animal = "кот"
-        described_habit, count_tokens = await self.llm_model.describe_habit_text(habit_text, animal)
+        described_habit, count_tokens = await self.llm_model.describe_habit_text(habit_text[:100], animal)
         habit_prompts = PromptRegistry.get_prompt(RequestType.ILLUSTRATE_HABIT, animal=animal, habit_text=described_habit, progress=progress, interval=interval)
         return await self._generate_image(habit_prompts, seed=seed), count_tokens

@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Dict, List, Set
 
 from backend.config import get_settings
-from .roles import RoleType
+from backend.control_plane.db.types.roles import RoleType
 from backend.control_plane.ai_clients.prompts import RequestType
 
 
@@ -66,10 +66,14 @@ REQUEST_TYPE_TO_QUOTAS: Dict[RequestType, List[ResourceType]] = {
         ResourceType.AI_PREDICT_REMINDER_TIME_DAILY,
         ResourceType.AI_PREDICT_REMINDER_TIME_MONTHLY
     ],
-    RequestType.GENERATE_IMAGE: [
+    RequestType.ILLUSTRATE_HABIT: [
         ResourceType.AI_GENERATE_IMAGE_DAILY,
         ResourceType.AI_GENERATE_IMAGE_MONTHLY
-    ]
+    ],
+    RequestType.DESCRIBE_HABIT_TEXT: [
+        ResourceType.AI_GENERATE_IMAGE_DAILY,
+        ResourceType.AI_GENERATE_IMAGE_MONTHLY
+    ],
 }
 
 
@@ -84,3 +88,35 @@ def get_quotas_for_request_type(request_type: RequestType) -> List[ResourceType]
         List[ResourceType]: Список типов ресурсов для проверки
     """
     return REQUEST_TYPE_TO_QUOTAS.get(request_type, [])
+
+if __name__ == '__main__':
+    basic_count = 1000
+    premium_count = 50
+    admin_count = 1
+
+    total_limit = 0
+
+    basic_limit = 0
+    for resource, limit in DEFAULT_QUOTAS[RoleType.BASIC.value].items():
+        if resource.value.startswith("ai_"):
+            basic_limit += limit
+    premium_limit = 0
+    for resource, limit in DEFAULT_QUOTAS[RoleType.PREMIUM.value].items():
+        if resource.value.startswith("ai_"):
+            premium_limit += limit
+    admin_limit = 0
+    for resource, limit in DEFAULT_QUOTAS[RoleType.ADMIN.value].items():
+        if resource.value.startswith("ai_"):
+            admin_limit += limit
+    total_limit = basic_limit * basic_count + premium_limit * premium_count + admin_limit * admin_count
+    total_no_admin_limit = basic_limit * basic_count + premium_limit * premium_count
+
+    print("AI cost:")
+    print("Basic (1):", basic_limit)
+    print("Premium (1):", premium_limit)
+    print("Admin (1):", admin_limit)
+    print(f"Basic ({basic_count}):", basic_limit * basic_count)
+    print(f"Premium ({premium_count}):", premium_limit * premium_count)
+    print(f"Admin ({admin_count}):", admin_limit * admin_count)
+    print("Total Basic + Premium:", total_no_admin_limit)
+    print("Total:", total_limit)
