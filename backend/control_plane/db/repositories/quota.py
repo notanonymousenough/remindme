@@ -20,7 +20,7 @@ class ResourceTypeRepository(BaseRepository[ResourceType]):
         super().__init__(ResourceType)
 
     async def get_resource_type_by_name(self, session: AsyncSession, name: str) -> ResourceType:
-        stmt = select(self.model).where(ResourceType.name == name)
+        stmt = select(self.model).where(and_(ResourceType.name == name))
         result = await session.execute(stmt)
         return result.scalars().one_or_none()
 
@@ -29,19 +29,20 @@ class QuotaRepository(BaseRepository[Quota]):
     def __init__(self):
         super().__init__(Quota)
 
-    async def get_limit_for_resource(self, session: AsyncSession, role_id: UUID, resource_type_id: UUID) -> int:
-        stmt = select(self.model).where(
+    async def get_limit_for_resource(self, session: AsyncSession, role_id: UUID, resource_type_id: UUID) -> float:
+        """Получение квоты для определенного ресурса"""
+        stmt = select(self.model).where(and_(
             Quota.role_id == role_id,
             Quota.resource_type_id == resource_type_id
-        )
+        ))
         result = await session.execute(stmt)
         quota = result.scalars().one_or_none()
 
         if not quota:
             # Безлимит, если квота не определена
-            return -1
+            return -1.0
 
-        return quota.max_value
+        return float(quota.max_value)
 
 
 class QuotaUsageRepository(BaseRepository[QuotaUsage]):
@@ -51,7 +52,8 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
         self.user_role_repo = UserRoleRepository()
         self.resource_type_repo = ResourceTypeRepository()
 
-    async def update_resource_usage(self, user_id: UUID, resource_type_name: str, increment_value: float = 1):
+    async def update_resource_usage(self, user_id: UUID, resource_type_name: str, increment_value: float = 1.0):
+        """Обновление использования ресурса"""
         today = date.today()
         async with await get_async_session() as session:
             async with session.begin():
@@ -61,11 +63,11 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
                     return False
 
                 existing = await session.execute(
-                    select(QuotaUsage).where(
+                    select(QuotaUsage).where(and_(
                         QuotaUsage.user_id == user_id,
                         QuotaUsage.resource_type_id == resource_type_obj.id,
                         QuotaUsage.date == today
-                    )
+                    ))
                 )
 
                 existing = existing.scalar_one_or_none()
@@ -83,7 +85,7 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
 
                 return True
 
-    async def check_resource_limit(self, user_id: UUID, resource_type_name: str, increment_value: float = 1) -> bool:
+    async def check_resource_limit(self, user_id: UUID, resource_type_name: str, increment_value: float = 1.0) -> bool:
         """Проверка, не превышен ли лимит ресурса"""
         async with await get_async_session() as session:
             role_id = await self.user_role_repo.get_user_active_role(session, user_id)
@@ -95,7 +97,7 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
 
             limit = await self.quota_repo.get_limit_for_resource(session, role_id, resource_type.id)
 
-            if limit == -1:
+            if limit == -1.0:
                 return True
 
             # Проверка различных типов лимитов
@@ -111,43 +113,47 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
 
     async def get_user_daily_usage(self, session: AsyncSession, user_id: UUID, resource_type_id: UUID) -> float:
         """Get user's daily usage for a specific resource type"""
-        stmt = select(func.coalesce(func.sum(QuotaUsage.usage_value), 0)).where(
+        stmt = select(func.coalesce(func.sum(QuotaUsage.usage_value), 0)).where(and_(
             QuotaUsage.user_id == user_id,
             QuotaUsage.resource_type_id == resource_type_id,
             QuotaUsage.date == func.current_date()
-        )
+        ))
         result = await session.execute(stmt)
         return float(result.scalar_one())
 
     async def get_user_monthly_usage(self, session: AsyncSession, user_id: UUID, resource_type_id: UUID) -> float:
         """Get user's monthly usage for a specific resource type"""
-        stmt = select(func.coalesce(func.sum(QuotaUsage.usage_value), 0)).where(
+        stmt = select(func.coalesce(func.sum(QuotaUsage.usage_value), 0)).where(and_(
             QuotaUsage.user_id == user_id,
             QuotaUsage.resource_type_id == resource_type_id,
             func.extract('year', QuotaUsage.date) == func.extract('year', func.current_date()),
             func.extract('month', QuotaUsage.date) == func.extract('month', func.current_date())
-        )
+        ))
         result = await session.execute(stmt)
         return float(result.scalar_one())
 
     async def get_user_resource_usage(self, session: AsyncSession, user_id: UUID, resource_type_id: UUID) -> float:
         """Get user's total usage for a specific resource type (without time constraints)"""
-        stmt = select(func.coalesce(func.sum(QuotaUsage.usage_value), 0)).where(
+        stmt = select(func.coalesce(func.sum(QuotaUsage.usage_value), 0)).where(and_(
             QuotaUsage.user_id == user_id,
             QuotaUsage.resource_type_id == resource_type_id
-        )
+        ))
         result = await session.execute(stmt)
         return float(result.scalar_one())
 
-    async def check_and_increment_resource_count(self, user_id: UUID, resource_type_name: str, increment: int = 1) -> bool:
+    async def check_and_increment_resource_usage(self, user_id: UUID, resource_type_name: str,
+                                                 increment: float = 1.0) -> bool:
+        """
+        Атомарно проверяет, не превышен ли лимит ресурса, и увеличивает счетчик использования.
+        """
         async with await get_async_session() as session:
             try:
                 # Начинаем транзакцию
                 async with session.begin():
-                    # Сначала получаем resource_type_id
-                    resource_type_id = await self.resource_type_repo.get_resource_type_by_name(session, resource_type_name)
+                    # Сначала получаем resource_type
+                    resource_type = await self.resource_type_repo.get_resource_type_by_name(session, resource_type_name)
 
-                    if resource_type_id is None:
+                    if not resource_type:
                         logger.warning(f"Resource type {resource_type_name} not found")
                         return False
 
@@ -155,25 +161,21 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
                     role_id = await self.user_role_repo.get_user_active_role(session, user_id)
 
                     # Получаем максимальное значение квоты для данного типа ресурса
-                    max_value = await self.quota_repo.get_limit_for_resource(session, role_id, resource_type_id)
-
-                    if max_value is None:
-                        logger.warning(f"No quota defined for user {user_id} and resource {resource_type_name}")
-                        return False
+                    max_value = await self.quota_repo.get_limit_for_resource(session, role_id, resource_type.id)
 
                     # Если лимит -1, то он не ограничен
-                    if max_value == -1:
+                    if max_value == -1.0:
                         return True
 
                     # Получаем текущее использование
                     today = date.today()
-                    usage_query = select(QuotaUsage.usage_value).where(
+                    usage_query = select(QuotaUsage.usage_value).where(and_(
                         QuotaUsage.user_id == user_id,
-                        QuotaUsage.resource_type_id == resource_type_id,
+                        QuotaUsage.resource_type_id == resource_type.id,
                         QuotaUsage.date == today
-                    )
+                    ))
                     usage_result = await session.execute(usage_query)
-                    current_usage = usage_result.scalar_one_or_none() or 0
+                    current_usage = usage_result.scalar_one_or_none() or 0.0
 
                     # Проверяем, не будет ли превышен лимит
                     if current_usage + increment > max_value:
@@ -181,11 +183,11 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
 
                     # Обновляем использование атомарно
                     existing_usage = await session.execute(
-                        select(QuotaUsage).where(
+                        select(QuotaUsage).where(and_(
                             QuotaUsage.user_id == user_id,
-                            QuotaUsage.resource_type_id == resource_type_id,
+                            QuotaUsage.resource_type_id == resource_type.id,
                             QuotaUsage.date == today
-                        )
+                        ))
                     )
                     existing_usage = existing_usage.scalar_one_or_none()
 
@@ -195,82 +197,74 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
                         # Создаем новую запись
                         new_usage = QuotaUsage(
                             user_id=user_id,
-                            resource_type_id=resource_type_id,
+                            resource_type_id=resource_type.id,
                             date=today,
                             usage_value=increment
                         )
                         session.add(new_usage)
 
+                    # Изменения сохраняются автоматически при выходе из транзакции
                     return True
 
             except SQLAlchemyError as e:
                 logger.error(f"Error in check_and_increment_resource_count: {e}")
                 return False
 
-    async def check_and_decrement_resource_count(self, user_id: UUID, resource_type: str, decrement: int = 1) -> bool:
+    async def check_and_decrement_resource_usage(self, user_id: UUID, resource_type_name: str,
+                                                 decrement: float = 1.0) -> bool:
         """
         Атомарно уменьшает счетчик использования ресурса.
-        Полезно при удалении ресурсов (напоминаний, привычек).
-
-        Args:
-            user_id: ID пользователя
-            resource_type: Тип ресурса
-            decrement: Количество удаляемых ресурсов
-
-        Returns:
-            bool: True, если операция выполнена успешно
         """
         async with await get_async_session() as session:
             try:
                 async with session.begin():
                     today = date.today()
-                    resource_type_id = await session.execute(
-                        select(ResourceType.id).where(ResourceType.name == resource_type)
-                    )
-                    resource_type_id = resource_type_id.scalar_one()
+                    resource_type = await self.resource_type_repo.get_resource_type_by_name(session, resource_type_name)
+
+                    if not resource_type:
+                        logger.warning(f"Resource type {resource_type_name} not found")
+                        return False
 
                     existing_usage = await session.execute(
-                        select(QuotaUsage).where(
+                        select(QuotaUsage).where(and_(
                             QuotaUsage.user_id == user_id,
-                            QuotaUsage.resource_type_id == resource_type_id,
+                            QuotaUsage.resource_type_id == resource_type.id,
                             QuotaUsage.date == today
-                        )
+                        ))
                     )
                     existing_usage = existing_usage.scalar_one_or_none()
 
                     if existing_usage:
                         # Уменьшаем значение, но не ниже 0
-                        existing_usage.usage_value = max(0, existing_usage.usage_value - decrement)
+                        existing_usage.usage_value = max(0.0, existing_usage.usage_value - decrement)
 
+                    # Изменения сохраняются автоматически при выходе из транзакции
                     return True
 
             except SQLAlchemyError as e:
                 logger.error(f"Error in check_and_decrement_resource_count: {e}")
                 return False
 
-    async def get_current_resource_count(self, user_id: UUID, resource_type: str) -> int:
+    async def get_current_resource_usage(self, user_id: UUID, resource_type_name: str) -> float:
         """
         Получает текущее количество использованных ресурсов.
-
-        Args:
-            user_id: ID пользователя
-            resource_type: Тип ресурса
-
-        Returns:
-            int: Текущее количество использованных ресурсов
         """
         async with await get_async_session() as session:
             try:
                 today = date.today()
-                query = select(QuotaUsage.usage_value).where(
+                resource_type = await self.resource_type_repo.get_resource_type_by_name(session, resource_type_name)
+
+                if not resource_type:
+                    logger.warning(f"Resource type {resource_type_name} not found")
+                    return 0.0
+
+                query = select(QuotaUsage.usage_value).where(and_(
                     QuotaUsage.user_id == user_id,
-                    QuotaUsage.resource_type_id == select(ResourceType.id).where(
-                        ResourceType.name == resource_type
-                    ).scalar_subquery(),
+                    QuotaUsage.resource_type_id == resource_type.id,
                     QuotaUsage.date == today
-                )
+                ))
                 result = await session.execute(query)
-                return result.scalar_one_or_none() or 0
+                return float(result.scalar_one_or_none() or 0.0)
             except SQLAlchemyError as e:
-                logger.error(f"Error in get_current_resource_count: {e}")
-                return 0
+                logger.error(f"Error in get_current_resource_usage: {e}")
+                return 0.0
