@@ -66,32 +66,16 @@
   <div class="mcw">
     <div class="row">
       <div class="col-4 col-sm-3 col-md-2"></div>
-      <div class="navbar navbar-light  d-inline-flex col-8 col-sm-3 col-lg-3" >
-        <div class="container-fluid ">
-          <form class="d-flex">
-            <input class="form-control me-2 navbar-find" type="search" id="reminderInput" data-bs-toggle="dropdown" placeholder="Добавить напоминание" aria-label="Поиск">
-            <ul class="dropdown-menu drop-menu">
-              <div class="form-check">
-                <input class="form-check-input m-1" type="radio" name="tag" id="tagWork" value="Работа">
-                <label class="form-check-label" for="tagWork">
-                  Работа &#128188;
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input m-1" type="radio" name="tag" id="tagStudy" value="Учёба" checked>
-                <label class="form-check-label" for="tagStudy">
-                  Учёба &#9997;
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input m-1" type="radio" name="tag" id="tagHome" value="Дом">
-                <label class="form-check-label" for="tagHome">
-                  Дом &#128106;
-                </label>
-              </div>
-              <input class="calend form-control m-3" id="timeInput" type="datetime-local">
-              <button id="saveButton" class="btn btn-primary m-1 ">Сохранить</button>
-            </ul>
+      <div class="navbar navbar-light d-inline-flex col-8 col-sm-3 col-lg-3">
+        <div class="container-fluid">
+          <form class="d-flex" id="reminderForm">
+            <input class="form-control me-2 navbar-find" type="search" id="reminderInput" placeholder="Добавить напоминание" aria-label="Поиск"
+                   data-bs-toggle="dropdown" aria-expanded="false" autocomplete="off">
+            <div class="dropdown-menu p-3" style="width: 280px;">
+              <ul id="tagsList" class="list-unstyled mb-3" style="max-height: 150px; overflow-y: auto;"></ul>
+              <input type="datetime-local" id="timeInput" class="form-control mb-2" style="width: 100%;">
+              <button type="button" id="saveButton" class="btn btn-primary w-100">Сохранить</button>
+            </div>
           </form>
         </div>
       </div>
@@ -111,22 +95,7 @@
         <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
           Фильтр
         </button>
-        <ul class="dropdown-menu ">
-          <li><a class="dropdown-item" href="#">
-            Дата
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
-              <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
-            </svg>
-            </a>
-          </li>
-          <li><a class="dropdown-item" href="#">
-            Дата
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>
-            </svg>
-            </a>
-          </li>    
-        </ul>
+        <ul id="tagsList" class="list-unstyled mb-3" style="max-height: 150px; overflow-y: auto;"></ul>
       </div>
       <div class="col-1 col-sm-1"></div>
       <div class="btn-teg col-3 col-sm-2 col-md-2 col-lg-1 m-1">
@@ -134,25 +103,7 @@
           <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
             Тэг
           </button>
-          <ul class="dropdown-menu">
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-              <label class="form-check-label" for="flexRadioDefault1">
-                Работа &#128188
-              </label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
-              <label class="form-check-label" for="flexRadioDefault2">
-                Учёба &#9997
-              </label>
-            </div>   
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
-              <label class="form-check-label" for="flexRadioDefault2">
-                Дом &#128106
-              </label>
-            </div> 
+            <ul id="tagsList" class="list-unstyled mb-3 dropdown-menu" style="max-height: 150px; overflow-y: auto;">
             <div class="form-check">
               <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
               <label class="form-check-label" for="flexRadioDefault2">
@@ -163,7 +114,7 @@
         </form>
       </div>
       <div class="btn-add col-2 col-sm-2 col-md-3 m-1"> 
-        <button class="btn btn-primary" id="btn-add"  onclick="add_teg()" type="submit">&#10010</button>
+        <button class="btn btn-primary" id="btn-add"  onclick="add_teg()" type="button">&#10010</button>
         <div class="new-teg" id="add-teg">
           <form>
             <input class="form-control new-teg-text" type="text"  placeholder="Новый тэг"> 
@@ -190,7 +141,58 @@
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="../js/components/navbar.js"></script>
-  <script src="../js/pages/reminders.js"></script>
+  <script>
+      const addTegDiv = document.getElementById('add-teg');
+      const addBtnDiv = document.getElementById('btn-add');
+      const inputTeg = addTegDiv.querySelector('input.new-teg-text');
+      
+      function add_teg() {
+        addTegDiv.style.display = 'block';
+        addBtnDiv.style.display = 'none';
+        inputTeg.focus();
+      }
+      
+      function cancel_teg() {
+        inputTeg.value = '';
+        addTegDiv.style.display = 'none';
+        addBtnDiv.style.display = 'block';
+      }
+      
+      async function save_teg() {
+        const newTagName = inputTeg.value.trim();
+      
+        if (newTagName === "") {
+          alert("Пожалуйста, введите название тэга");
+          return;
+        }
+      
+        try {
+        const response = await fetch(`/api/tags`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify({ name: newTagName })  
+        });
+        if (response.ok) {
+          alert('Тэг успешно добавлен');
+          inputTeg.value = '';
+          addTegDiv.style.display = 'none';
+          addBtnDiv.style.display = 'block';
+        }else {
+          alert('Ошибка при сохранении тэга: ' + response.statusText);
+        }
+        location.reload();
+      }catch (error) {
+        console.error(error);
+          alert('Ошибка сети: ' + error.message);
+        }
+      }
+
+  window.onload = () => {
+  addTegDiv.style.display = 'none';
+};
+  </script>
   <script>
     fetch('/api/reminders')
     .then(response => {
@@ -297,43 +299,51 @@
         console.error('Ошибка получения данных:', error);
       });
     }
+   
   </script>
   <script>
-    document.getElementById('saveButton').addEventListener('click', async function() {
+    document.getElementById('saveButton').addEventListener('click', async function(event) {
+    
       var input = document.getElementById('reminderInput');
       var timeInput = document.getElementById('timeInput');
       var reminderText = input.value.trim();
       var timeText = timeInput.value;
       var selectedTag = Array.from(document.querySelectorAll('input[name="tag"]:checked')).map(tag => tag.value);
+    
       if (reminderText && timeText) {
-        const response = await fetch('/api/reminders', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ 
-            text: reminderText,
-            tags: selectedTag,  
-            time: timeText,
-            status: "active"
-          })
-        });
-        if (response.ok) {
-          location.reload();
-          input.value = '';
-          timeInput.value = ''; 
-        } else {
-          alert('Ошибка при сохранении напоминания: ' + response.statusText);
+        try {
+          const response = await fetch('/api/reminders', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+              text: reminderText,
+              tags: selectedTag,  
+              time: timeText,
+              status: "active"
+            })
+          });
+          
+          if (response.ok) {
+            input.value = '';
+            timeInput.value = '';
+            location.reload();
+          } else {
+            alert('Ошибка при сохранении напоминания: ' + response.statusText);
+          }
+        } catch (error) {
+          alert('Ошибка сети: ' + error.message);
         }
       } else {
-        alert('Пожалуйста, введите текст напоминания.');
+        alert('Пожалуйста, введите текст напоминания и время.');
       }
     });
   </script>
   <script>
     async function updateProgressBar() {
       try {
-        const response = await fetch('/api/reminders');
+        const response = await fetch(`/api/reminders`);
         const reminders = await response.json(); 
         const today = new Date();
         const yyyy = today.getFullYear();
@@ -368,6 +378,55 @@
     }
   
     document.addEventListener('DOMContentLoaded', updateProgressBar);
+  </script>
+  <script>
+    // Функция для загрузки тегов и отрисовки
+    async function loadTags() {
+      try {
+        const response = await fetch('api/tags');
+        const tags = await response.json();
+  
+        const tagsList = document.getElementById('tagsList');
+        tagsList.innerHTML = ''; // очистим текущее содержимое
+  
+        tags.forEach((tag, index) => {
+          // Создаем контейнер
+          const div = document.createElement('div');
+          div.classList.add('form-check');
+  
+          // Создаем input radio
+          const input = document.createElement('input');
+          input.classList.add('form-check-input', 'm-1');
+          input.type = 'radio';
+          input.name = 'tag';
+          input.id = `tag${index}`;
+          input.value = tag.name.replace(/&#\d+;/g, '');  // Очищаем эмодзи из значения, если нужно
+          if (index === 0) input.checked = true; // Первый элемент отмечаем
+  
+          // Создаем label
+          const label = document.createElement('label');
+          label.classList.add('form-check-label');
+          label.setAttribute('for', input.id);
+          label.innerHTML = tag.name; // innerHTML, чтобы отобразить эмодзи
+  
+          // Добавляем input и label внутрь div
+          div.appendChild(input);
+          div.appendChild(label);
+  
+          // Вставляем div в список
+          tagsList.appendChild(div);
+        });
+  
+        // Можно еще добавить input и кнопку, если нужно
+        // К примеру, они уже есть в вашем HTML — если нет, создайте аналогично
+  
+      } catch (error) {
+        console.error('Ошибка загрузки тегов:', error);
+      }
+    }
+  
+    // Загружаем теги при загрузке страницы
+    window.addEventListener('DOMContentLoaded', loadTags);
   </script>
 </body>  
 </html>

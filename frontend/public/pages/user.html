@@ -199,6 +199,7 @@
         const achievements = await response.json();
         const listElement = document.getElementById('achievement-list');
         listElement.innerHTML = '';
+        
         achievements.forEach(achievement => {
           const listItem = document.createElement('li');
           listItem.classList.add('list-group-item');
@@ -215,18 +216,14 @@
     document.getElementById('syncBtn').addEventListener('click', () => {
       const token = document.getElementById('tokenInput').value.trim();
       const url = document.getElementById('urlInput').value.trim();
-  
       if (!token || !url) {
         alert('Пожалуйста, заполните оба поля: Токен и URL');
         return;
       }
   
-      // Отключаем кнопку "Синхронизация с календарём" и меняем текст
       const calendarBtn = document.getElementById('calendarSyncBtn');
       calendarBtn.disabled = true;
       calendarBtn.textContent = 'Синхронизация запущена';
-  
-      // Асинхронная функция синхронизации
       syncReminders(token, url)
         .then(() => {
           alert('Синхронизация запущена');
@@ -234,7 +231,6 @@
         .catch(err => {
           console.error('Ошибка при синхронизации:', err);
           alert('Ошибка при синхронизации. Проверьте консоль для деталей');
-          // В случае ошибки возвращаем кнопку в активное состояние и меняем текст обратно
           calendarBtn.disabled = false;
           calendarBtn.textContent = 'Синхронизация с календарём';
         });
@@ -242,7 +238,6 @@
   
     async function syncReminders(token, url) {
       const reminders = await getReminders();
-  
       const response = await fetch(url, {
         method: 'POST',
         headers: {
