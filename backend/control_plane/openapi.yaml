@@ -331,51 +331,6 @@ paths:
       security:
         - BearerAuth: []
 
-  /habits/{habitId}/statistics:
-    get:
-      summary: Получение статистики по привычке
-      parameters:
-        - name: habitId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: period
-          in: query
-          schema:
-            type: string
-            enum: [week, month, year, all]
-            default: month
-      responses:
-        '200':
-          description: Статистика по привычке
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  total:
-                    type: integer
-                  completed:
-                    type: integer
-                  streak:
-                    type: integer
-                  progress:
-                    type: number
-                    format: float
-                  history:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        date:
-                          type: string
-                          format: date
-                        completed:
-                          type: boolean
-      security:
-        - BearerAuth: []
-
   /tags:
     post:
       summary: Создание нового тега
@@ -480,26 +435,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Achievement'
-      security:
-        - BearerAuth: []
-
-  /statistics:
-    get:
-      summary: Получение статистики пользователя
-      parameters:
-        - name: period
-          in: query
-          schema:
-            type: string
-            enum: [week, month, year, all]
-            default: month
-      responses:
-        '200':
-          description: Статистика пользователя
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Statistics'
       security:
         - BearerAuth: []
 
@@ -658,27 +593,27 @@ components:
           type: string
         text:
           type: string
-        period:
+        interval:
           type: string
           enum: [daily, weekly, monthly, custom]
-        customPeriod:
+        customInterval:
           type: string
           description: Описание пользовательского периода (для period=custom)
         progress:
-          type: integer
-        target:
-          type: integer
-          description: Целевое количество выполнений
+          type: array
+          items:
+            type: date
+          description: Список дат выполнений
         currentStreak:
           type: integer
         bestStreak:
           type: integer
         startDate:
           type: string
-          format: date
+          format: date-time
         endDate:
           type: string
-          format: date
+          format: date-time
         removed:
           type: boolean
         createdAt:
@@ -756,36 +691,6 @@ components:
         generatedAt:
           type: string
           format: date-time
-
-    Statistics:
-      type: object
-      properties:
-        userId:
-          type: string
-        remindersCompleted:
-          type: integer
-        remindersForgotten:
-          type: integer
-        habitsProgress:
-          type: object
-          additionalProperties:
-            type: integer
-        streak:
-          type: integer
-        level:
-          type: integer
-        experience:
-          type: integer
-        dailyActivity:
-          type: array
-          items:
-            type: object
-            properties:
-              date:
-                type: string
-                format: date
-              completedItems:
-                type: integer
 
   securitySchemes:
     BearerAuth:

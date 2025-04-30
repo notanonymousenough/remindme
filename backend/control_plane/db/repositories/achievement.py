@@ -88,7 +88,7 @@ class UserAchievementRepository(BaseRepository[UserAchievement]):
         """Разблокировка достижения"""
         if not unlocked_at:
             unlocked_at = datetime.now()
-        return await self.update(
+        return await self.update_model(
             user_achievement_id,
             unlocked=True,
             unlocked_at=unlocked_at,
@@ -100,7 +100,7 @@ class UserAchievementRepository(BaseRepository[UserAchievement]):
         # Проверяем, что прогресс не превышает 100%
         progress = min(100, max(0, progress))
 
-        achievement = await self.get(user_achievement_id)
+        achievement = await self.get_by_model_id(user_achievement_id)
         if not achievement:
             return None
 
@@ -108,7 +108,7 @@ class UserAchievementRepository(BaseRepository[UserAchievement]):
         if progress == 100 and not achievement.unlocked:
             return await self.unlock(user_achievement_id)
 
-        return await self.update(
+        return await self.update_model(
             user_achievement_id,
             progress=progress
         )

@@ -11,7 +11,7 @@ class User(BaseModel):
     email = Column(String(255), unique=True)
     sex = Column(Enum(SexType))
     first_name = Column(String(255))
-    second_name = Column(String(255))
+    last_name = Column(String(255))
     birth_date = Column(Date)
     telegram_id = Column(String(255), unique=True)
     calendar_integration_key = Column(String(255))
