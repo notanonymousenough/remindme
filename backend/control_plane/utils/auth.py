@@ -27,7 +27,7 @@ async def get_authorized_user(
 
     user = await user_service.get_user(user_id)
     if not user:
-        raise HTTPException(401, "user in None")
+        raise HTTPException(401, "User not found")
 
     return user
 

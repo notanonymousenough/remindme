@@ -46,12 +46,18 @@ class UserAddShema(BaseModel):
     experience: int = Field(0, description="exp user")
     streak: int = Field(0, description="streak user")
 
+    class Config:
+        from_attributes = True
+
 
 class UserTelegramDataSchema(BaseModel):
-    telegram_id: str
+    telegram_id: str = Field(None, description="Телеграм айди")
     first_name: Optional[str] = Field(None, description="first name")
     last_name: Optional[str] = Field(None, description="last name")
-    username: str
+    username: str = Field(..., description="Имя пользователя (логин) для идентификации.")
     photo_url: Optional[str] = Field(None, description="photo url")
-    auth_date: datetime
-    hash: str
+    auth_date: datetime = Field(..., description="дата авторизации")
+    hash: str = Field(..., description="хэш токен")
+
+    class Config:
+        from_attributes = True

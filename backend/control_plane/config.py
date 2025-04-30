@@ -1,4 +1,5 @@
 import hashlib
+from datetime import timedelta, datetime
 from os import environ
 
 from fastapi.security import OAuth2PasswordBearer
@@ -27,7 +28,7 @@ class DefaultSettings(BaseSettings):
     ALGORITHM: str = environ.get("ALGORITHM", "HS256")
 
     # ENDPOINTS
-    GET_ACCESS_TOKEN_ENDPOINT: str = "/v1/auth/telegram"
+    GET_ACCESS_TOKEN_ENDPOINT: str = f"{APP_ADDRESS}:{APP_PORT}{PATH_PREFIX}/auth/telegram"
     GET_REMINDER_ENDPOINT: str = "/v1/.."
     POST_REMINDER_ENDPOINT: str = "/v1/.."
     DELETE_REMINDER_ENDPOINT: str = "/v1/.."
@@ -45,10 +46,11 @@ class DefaultSettings(BaseSettings):
 
     BOT_TOKEN: str = environ.get("BOT_TOKEN", "")
 
+    JWT_TOKEN_LIFETIME: datetime = datetime.now() + timedelta(days=1)
     PWD_CONTEXT: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
     OAUTH2_SCHEME: OAuth2PasswordBearer = OAuth2PasswordBearer(
         scheme_name="TelegramAccessToken",
-        tokenUrl=f"{APP_ADDRESS}:{APP_PORT}{PATH_PREFIX}/auth/telegram"
+        tokenUrl=GET_ACCESS_TOKEN_ENDPOINT
     )
 
     @computed_field  # type: ignore

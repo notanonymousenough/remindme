@@ -1,3 +1,5 @@
+from sys import prefix
+
 import uvicorn
 from fastapi import FastAPI
 
@@ -21,6 +23,7 @@ def get_app() -> FastAPI:
     """
 
     application = FastAPI(
+        prefix="v1",
         title="Remind Me control-plane",
     )
     settings = get_settings()
@@ -35,8 +38,7 @@ if __name__ == "__main__":
     settings = get_settings()
 
     if settings.DEBUG:
-        pass
-        # start_logging(app)
+        start_logging(app)
 
     uvicorn.run(
         app=app,

@@ -14,7 +14,8 @@ class RemindersService:
         self.repo = ReminderRepository()
 
     async def reminder_update(self, reminder: ReminderToEditRequestSchema) -> ReminderSchema:
-        return await self.repo.reminder_update(reminder=reminder, tag_service=get_tag_service())
+        response = reminder.model_dump(exclude_unset=True, exclude_none=True)
+        return await self.repo.reminder_update(response=response)
 
     async def reminder_delete(self, user_id: UUID, reminder_id: UUID) -> bool:
         return await self.repo.reminder_delete(user_id=user_id, reminder_id=reminder_id)

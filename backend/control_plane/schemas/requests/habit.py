@@ -26,13 +26,13 @@ class HabitSchemaPostRequest(BaseModel):
 
 class HabitSchemaPutRequest(BaseModel):  # EDIT Schema
     habit_id: UUID = Path(...)
-    text: str = Field(..., description="Текст привычки")
+    text: Optional[str] = Field(..., description="Текст привычки")
 
-    interval: HabitPeriod = Field(HabitPeriod.DAILY, description="Периодичность привычки")
-    custom_interval: Optional[str] = Field(None, description="Пользовательский период (для period=custom)")
+    interval: Optional[HabitPeriod] = Field(..., description="Периодичность привычки")
+    custom_interval: Optional[str] = Field(..., description="Пользовательский период (для period=custom)")
 
-    end_date: Optional[date] = Field(None, description="Когда привычка станет неактивной")
-    removed: bool = Field(..., description="Признак удаления")
+    end_date: Optional[date] = Field(..., description="Когда привычка станет неактивной")
+    removed: Optional[bool] = Field(..., description="Признак удаления")
 
     class Config:
         from_attributes = True

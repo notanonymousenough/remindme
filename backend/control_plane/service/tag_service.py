@@ -11,33 +11,30 @@ class TagService:
         self.repo = TagRepository()
 
     async def get_tag(self, tag_id: UUID) -> TagSchema:
-        return await self.repo.get_tag(tag_id=tag_id)
+        response = await self.repo.get_by_model_id(model_id=tag_id)
+        return TagSchema.model_validate(response)
 
     async def get_tags(self, user_id: UUID) -> Sequence[TagSchema]:
-        return await self.repo.get_tags(user_id=user_id)
+        response = await self.repo.get_models(user_id=user_id)
+        return [TagSchema.model_validate(tag) for tag in response]
 
     async def update_tag(self, tag_id: UUID, request: TagRequestSchema) -> bool:
         response = await self.repo.update_model(model_id=tag_id, **request.model_dump())
-        try:
-            return True if TagSchema.model_validate(response) else False
-        except Exception as ex:
-            print(f"Ошибка при обновлении тэга: {ex}")
-            return False
+        tag_schema = TagSchema.model_validate(response)
+        if tag_schema:
+            return True
+        return False
 
     async def add_tag(self, user_id: UUID, tag: TagRequestSchema) -> TagSchema:
-        return await self.repo.add_tag(user_id=user_id, tag=tag)
+        tag_model = tag.model_dump(exclude_none=True, exclude_unset=True)
+        response = await self.repo.create(user_id=user_id, **tag_model)
+        return TagSchema.model_validate(response)
 
     async def delete_tag(self, user_id: UUID, tag_id: UUID) -> bool:
-        return await self.repo.delete_tag(user_id=user_id, tag_id=tag_id)
+        return await self.repo.delete_model(user_id=user_id, model_id=tag_id)
 
     async def add_tags_to_reminder(self, tags: Sequence[UUID], reminder_id: UUID) -> bool:
-        for tag_id in tags:
-            try:
-                await self.repo.add_tag_to_reminder(tag_id=tag_id, reminder_id=reminder_id)
-                print(f"Тэг {tag_id} добавлен в reminder {reminder_id}.")
-            except Exception as ex:
-                print(f"Тэг {tag_id} не добавлен: {ex}")
-        return True
+        return await self.repo.add_tags_to_reminder(tags, reminder_id)
 
     async def delete_tag_from_reminder(self, tag_id: UUID, reminder_id: UUID):
         return await self.repo.delete_tag_from_reminder(tag_id=tag_id, reminder_id=reminder_id)
@@ -50,7 +47,7 @@ class TagService:
 
     async def get_tags_info_from_reminder_id(self, reminder_id: UUID) -> Union[Sequence[TagSchema], None]:
         tags_id = await self.get_links_tags_id_from_reminder_id(reminder_id=reminder_id)
-        tags = [await self.repo.get_tag(tag_id=tag_id) for tag_id in tags_id]
+        tags = [await self.repo.get_by_model_id(model_id=tag_id) for tag_id in tags_id]
 
         if tags:
             return [TagSchema.model_validate(tag) for tag in tags]

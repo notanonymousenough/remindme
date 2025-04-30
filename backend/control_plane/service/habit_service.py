@@ -26,6 +26,9 @@ class HabitService:
     async def habit_get(self, model_id: UUID) -> HabitSchemaResponse:
         return await self.repo.habit_get(model_id=model_id)
 
+    async def habit_put_name(self, request: HabitSchemaPutRequest) -> HabitSchemaResponse:
+        return await self.repo.habit_put(request=request)
+
     # habit progress table
     async def habit_progress_post(self, request: HabitProgressSchemaPostRequest) -> HabitProgressSchemaPostRequest:
         return await self.repo.habit_progress_post(request=request)

@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import Depends
 
+from .tag import get_tag_repo
 from ..models.reminder import Reminder, ReminderStatus
 from .base import BaseRepository
 from ...schemas import ReminderSchema
@@ -16,15 +17,13 @@ class ReminderRepository(BaseRepository[Reminder]):
         super().__init__(Reminder)
 
     async def reminder_update(self,
-                              reminder: ReminderToEditRequestSchema,
-                              tag_service: TagService) -> ReminderSchema:
-        reminder = reminder.model_dump(exclude_unset=True, exclude_none=True)
-
-        tags = reminder.pop("tags")
+                              response: dict) -> ReminderSchema:
+        tags = response.pop("tags")
         if tags:
-            await tag_service.add_tags_to_reminder(tags=tags, reminder_id=reminder["id"])
+            tag_repo = get_tag_repo()
+            await tag_repo.add_tags_to_reminder(tags=tags, reminder_id=response["id"])
 
-        response = await self.update_model(model_id=reminder["id"], **reminder)
+        response = await self.update_model(model_id=response["id"], **response)
         return ReminderSchema.model_validate(response)
 
     async def reminder_create(self,

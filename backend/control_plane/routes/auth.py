@@ -11,7 +11,7 @@ from backend.control_plane.service.user_service import get_user_service, UserSer
 from backend.control_plane.utils.auth import has_correct_hash
 
 auth_router = APIRouter(
-    prefix="/v1/auth",
+    prefix="/auth",
     tags=["Auth"],
 )
 
@@ -23,15 +23,18 @@ async def auth_telegram(
         user_service: Annotated[UserService, Depends(get_user_service)],
         request: UserTelegramDataSchema = Body(...)
 ):
-    if not get_settings().DEBUG and not has_correct_hash(request):
+    if not get_settings().DEBUG and not has_correct_hash(request):  # если ДЕБАГ режим – не проверяем хэш.
         raise HTTPException(401, detail="Invalid Telegram hash")
 
+    # создаем или обновляем информацию пользователя, если он существует
     request = UserTelegramDataSchema.model_validate(request)
-    user = await user_service.create_or_update_user_from_telegram_data(request)
+    user = await user_service.create_user_from_telegram_data(request)
 
+    # получаем jwt_token, учитывая лишь user_id (Telegram ID)
+    exp_date = get_settings().jwt_token_lifetime
     jwt_token = jwt.encode(
         {
-            "exp": datetime.now() + timedelta(hours=3),
+            "exp": exp_date,
             "user_id": str(user.id)
         },
         get_settings().SECRET_KEY,

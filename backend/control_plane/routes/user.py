@@ -7,17 +7,17 @@ from backend.control_plane.service.user_service import UserService, get_user_ser
 from backend.control_plane.utils.auth import get_authorized_user
 
 user_router = APIRouter(
-    prefix="/v1/user",
+    prefix="/user",
     tags=["User"],
 )
 
 
-"""@user_router.post("/")  # Зачем эта ручка вообще? :)
-async def add_user(
+@user_router.post("/")
+async def update_user(
         user_service: Annotated[UserService, Depends(get_user_service)],
         user: UserSchema = Depends(get_authorized_user)
 ):
-    return"""
+    return user_service.update_user(request=user)
 
 
 @user_router.get("/")

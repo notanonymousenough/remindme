@@ -23,8 +23,6 @@ class BaseRepository(Generic[T]):
             obj = self.model(**kwargs)
             obj.user_id = user_id
             session.add(obj)
-
-            await session.flush()
             await session.commit()
             return obj
 

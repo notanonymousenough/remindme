@@ -11,7 +11,7 @@ from backend.control_plane.service.habit_service import HabitService, get_habit_
 from backend.control_plane.utils.auth import get_authorized_user
 
 habit_router = APIRouter(
-    prefix="/v1/habit",
+    prefix="/habit",
     tags=["habit"]
 )
 
