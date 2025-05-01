@@ -51,6 +51,14 @@ def upgrade() -> None:
                             column('updated_at', sa.DateTime(timezone=True))
                             )
 
+    calendar_integrations_table = table('calendar_integrations',
+                            column('id', UUID),
+                            column('user_id', UUID),
+                            column('caldav_url', sa.Text),
+                            column('login', sa.String),
+                            column('password', sa.String),
+                            )
+
     # Generate a UUID for the test user
     user_id = uuid.uuid4()
 
@@ -133,8 +141,19 @@ def upgrade() -> None:
         }
     ])
 
+    # Insert test calendar events
+    op.bulk_insert(calendar_integrations_table, [
+        {
+            'id': uuid.uuid4(),
+            'user_id': user_id,
+            'caldav_url': '',
+            'login': '',
+            'password': ''
+        },
+    ])
+
 
 def downgrade() -> None:
     """Remove test user and associated reminders."""
-    # The reminders will be automatically deleted due to the CASCADE constraint
+    # The reminders and calendars will be automatically deleted due to the CASCADE constraint
     op.execute("DELETE FROM users WHERE telegram_id = '313049106'")

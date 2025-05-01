@@ -40,7 +40,9 @@ async def main():
             workflows.habits.StartImagesGenerationWorkflow,
             workflows.habits.GenerateHabitImageWorkflow,
             workflows.achievements.CheckUserAchievementsWorkflow,
-            workflows.achievements.ProcessUserAchievementsWorkflow
+            workflows.achievements.ProcessUserAchievementsWorkflow,
+            workflows.calendar.SyncCalendarsWorkflow,
+            workflows.calendar.UserCalendarSyncWorkflow,
         ],
         activities=[
             activities.reminders.check_active_reminders,
@@ -61,6 +63,10 @@ async def main():
             activities.achievements.get_users_for_achievement_check,
             activities.achievements.check_user_achievements,
             activities.achievements.update_achievement_progress,
+            activities.calendar.get_users_for_calendar_sync,
+            activities.calendar.fetch_calendar_events,
+            activities.calendar.sync_calendar_events,
+            activities.calendar.handle_sync_errors,
         ],
     )
 
