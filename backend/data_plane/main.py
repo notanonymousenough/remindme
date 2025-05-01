@@ -38,7 +38,9 @@ async def main():
             workflows.reminders.SendReminderNotificationWorkflow,
             workflows.morning.MorningMessageWorkflow,
             workflows.habits.StartImagesGenerationWorkflow,
-            workflows.habits.GenerateHabitImageWorkflow
+            workflows.habits.GenerateHabitImageWorkflow,
+            workflows.achievements.CheckUserAchievementsWorkflow,
+            workflows.achievements.ProcessUserAchievementsWorkflow
         ],
         activities=[
             activities.reminders.check_active_reminders,
@@ -55,6 +57,10 @@ async def main():
             activities.habits.update_describe_habit_text_quota,
             activities.habits.save_image_to_s3,
             activities.habits.save_image_to_db,
+            activities.achievements.grant_achievement,
+            activities.achievements.get_users_for_achievement_check,
+            activities.achievements.check_user_achievements,
+            activities.achievements.update_achievement_progress,
         ],
     )
 

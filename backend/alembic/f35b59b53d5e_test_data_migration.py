@@ -1,7 +1,7 @@
 """Add test user and reminders
 
 Revision ID: f35b59b53d5e
-Revises:
+Revises: PREV_REVISION
 Create Date: 2025-04-19 18:11:34.722518
 
 """
@@ -16,7 +16,7 @@ from sqlalchemy.dialects.postgresql import UUID, ENUM
 
 # revision identifiers, used by Alembic.
 revision: str = 'f35b59b53d5e'
-down_revision: Union[str, None] = None
+down_revision: Union[str, None] = "PREV_REVISION"
 branch_labels: Union[str, Sequence[str], None] = ['testdata']
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -95,6 +95,28 @@ def upgrade() -> None:
             'status': 'ACTIVE',
             'removed': False,
             'notification_sent': False,
+            'created_at': now,
+            'updated_at': now
+        },
+        {
+            'id': uuid.uuid4(),
+            'user_id': user_id,
+            'text': 'Submit weekly report',
+            'time': now - timedelta(hours=24),
+            'status': 'ACTIVE',
+            'removed': False,
+            'notification_sent': True,
+            'created_at': now,
+            'updated_at': now
+        },
+        {
+            'id': uuid.uuid4(),
+            'user_id': user_id,
+            'text': 'Submit weekly report',
+            'time': now - timedelta(hours=24),
+            'status': 'ACTIVE',
+            'removed': False,
+            'notification_sent': True,
             'created_at': now,
             'updated_at': now
         },

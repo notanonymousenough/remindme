@@ -62,7 +62,7 @@ class ReminderRepository(BaseRepository[Reminder]):
         return await self.update_model(model_id=reminder_id, notification_sent=sent)
 
     async def take_for_sending(self, limit: int) -> Sequence[Reminder]:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             async with session.begin():
                 get_stmt = (
                     select(Reminder)

@@ -69,7 +69,7 @@ class HabitRepository(BaseRepository[Habit]):
     async def take_for_image_generation(self) -> Sequence[Habit]:
         current_time = timeutils.get_utc_now()
         two_weeks_ago = current_time - datetime.timedelta(weeks=2)
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             async with session.begin():
                 get_stmt = (
                     select(Habit)

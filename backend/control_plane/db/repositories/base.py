@@ -21,7 +21,7 @@ class BaseRepository(Generic[T]):
 
     async def create(self, user_id: UUID, session=None, **kwargs) -> T:
         if not session:
-            async with await get_async_session() as session:
+            async with get_async_session() as session:
                 return await self._create(user_id, session, **kwargs)
         else:
             return await self._create(user_id, session, **kwargs)
@@ -34,7 +34,7 @@ class BaseRepository(Generic[T]):
         return obj
 
     async def get_by_model_id(self, model_id: UUID) -> Optional[T]:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             stmt = select(self.model).where(
                 and_(
                     getattr(self.model, "id") == model_id
@@ -44,7 +44,7 @@ class BaseRepository(Generic[T]):
             return result.scalars().one_or_none()
 
     async def get_models(self, user_id: UUID, **kwargs) -> Sequence[T]:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             stmt = select(self.model).where(
                 and_(
                     getattr(self.model, "user_id") == user_id
@@ -60,7 +60,7 @@ class BaseRepository(Generic[T]):
             return result.scalars().all()
 
     async def get_all_models(self, **kwargs) -> Sequence[T]:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             stmt = select(self.model)
             for key, value in kwargs.items():
                 stmt = stmt.where(
@@ -73,7 +73,7 @@ class BaseRepository(Generic[T]):
 
     async def update_model(self, model_id: UUID, session=None, **kwargs) -> Optional[T]:
         if not session:
-            async with await get_async_session() as session:
+            async with get_async_session() as session:
                 return await self.__update_model(model_id, session, **kwargs)
         else:
             return await self.__update_model(model_id, session, **kwargs)
@@ -89,7 +89,7 @@ class BaseRepository(Generic[T]):
         return result.scalars().first()
 
     async def delete_model(self, user_id: UUID, model_id: UUID) -> bool:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             count_models = await self.count_models(user_id=user_id)
             stmt = delete(self.model).where(
                 and_(
@@ -101,7 +101,7 @@ class BaseRepository(Generic[T]):
             return True if count_models - await self.count_models(user_id=user_id) else False
 
     async def count_models(self, user_id: UUID, **kwargs) -> int:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             stmt = select(func.count()).select_from(self.model).where(
                 and_(
                     getattr(self.model, "user_id") == user_id
