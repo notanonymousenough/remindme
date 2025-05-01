@@ -15,6 +15,7 @@ from .achievement import AchievementTemplate, UserAchievement
 from .neuro_image import NeuroImage
 from .quota import Quota, QuotaUsage, ResourceType
 from .role import Role, UserRole
+from .calendar import CalendarIntegration
 
 __all__ = [
     'BaseModel',
@@ -38,4 +39,5 @@ __all__ = [
     'ResourceType',
     'Role',
     'UserRole',
+    'CalendarIntegration',
 ]

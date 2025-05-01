@@ -50,11 +50,10 @@ class CheckUserAchievementsWorkflow:
 
         # Для каждого пользователя запускаем проверку достижений
         for user in users:
-            now = timeutils.get_utc_now().timestamp()
             await workflow.start_child_workflow(
                 ProcessUserAchievementsWorkflow.run,
                 user,
-                id=f"process_achievements_{user['id']}_{now}",
+                id=f"process_achievements_{user['id']}",
                 retry_policy=RetryPolicy(
                     initial_interval=timedelta(seconds=10),
                     backoff_coefficient=2.0,
