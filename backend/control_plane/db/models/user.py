@@ -15,7 +15,7 @@ class User(BaseModel):
     birth_date = Column(Date)
     telegram_id = Column(String(255), unique=True)
     calendar_integration_key = Column(String(255))
-    timezone_offset = Column(Integer, default="180")
+    timezone_offset = Column(Integer, default=180)
     level = Column(Integer, default=1)
     experience = Column(Integer, default=0)
     streak = Column(Integer, default=0)

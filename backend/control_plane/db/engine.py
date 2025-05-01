@@ -1,4 +1,6 @@
-from dotenv import load_dotenv
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
+
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
 from backend.config import get_settings
@@ -29,6 +31,15 @@ engine, async_session_maker = DatabaseEngine.create(get_settings().DATABASE_URI,
                                                     pool_recycle=get_settings().SQL_POOL_RECYCLE)
 
 
-async def get_async_session() -> AsyncSession:
-    async with async_session_maker() as async_session:
-        return async_session
+@asynccontextmanager
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    """Асинхронный контекстный менеджер для получения сессии."""
+    async with async_session_maker() as session:
+        # Транзакцией можно управлять здесь или в репозитории
+        # async with session.begin(): # Если хотите авто-коммит/роллбек
+        #    yield session
+        try:
+            yield session # Предоставляем сессию
+        except Exception:
+             await session.rollback() # Опционально: откатить при ошибке внутри блока with
+             raise
