@@ -129,11 +129,13 @@ app.post('/v1/reminders', (req, res) => {
     req.body.userId='usr_67890';
     const reminderData = req.body;
     reminders.push(reminderData);
+    res.json({});
 });
 app.post('/v1/tags', (req, res) => {
     req.body.tagId= (Math.random(1000)).toString();
     const tagsData = req.body;
     tags.push(tagsData);
+    res.json({});
 });
 
 app.get('/v1/tags', (req, res) => {
