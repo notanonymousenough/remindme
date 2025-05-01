@@ -24,7 +24,8 @@ class TelegramService:
             self,
             chat_id: str,
             text: str,
-            reply_markup: Optional[Dict[str, Any]] = None
+            reply_markup: Optional[Dict[str, Any]] = None,
+            parse_mode="HTML"
     ) -> bool:
         """
         Отправляет сообщение пользователю через Telegram
@@ -41,7 +42,7 @@ class TelegramService:
         data = {
             "chat_id": chat_id,
             "text": text,
-            "parse_mode": "HTML"
+            "parse_mode": parse_mode
         }
 
         if reply_markup:

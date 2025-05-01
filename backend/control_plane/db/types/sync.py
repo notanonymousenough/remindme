@@ -1,12 +1,18 @@
 import logging
-from typing import Dict, Any, List
+import json
+from typing import Dict, Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.control_plane.db.types.roles import RoleType, ROLE_DESCRIPTIONS
 from backend.control_plane.db.types.quotas import ResourceType, DEFAULT_QUOTAS, RESOURCE_DESCRIPTIONS
-from backend.control_plane.db.models import Role, Quota, ResourceType as ResourceTypeModel
+from backend.control_plane.db.types.achievements import (
+    ACHIEVEMENT_DESCRIPTIONS, ACHIEVEMENT_CONDITIONS, ACHIEVEMENT_ICONS,
+    ACHIEVEMENT_EXPERIENCE, ACHIEVEMENT_CATEGORIES
+)
+from backend.control_plane.db.models import Role, Quota, ResourceType as ResourceTypeModel, AchievementTemplate
+from backend.control_plane.db.models.base import AchievementCategory
 
 logger = logging.getLogger(__name__)
 
@@ -218,8 +224,127 @@ async def sync_roles_and_quotas(session: AsyncSession, dry_run: bool = False) ->
                 "resource_type": resource_name
             })
 
+
+    achievement_changes = await sync_achievements(session, dry_run)
+    changes["achievements"] = achievement_changes["achievements"]
+
     # Применяем изменения
     if not dry_run:
         await session.commit()
 
     return changes
+
+
+async def sync_achievements(session: AsyncSession, dry_run: bool = False) -> Dict[str, Any]:
+    """
+    Синхронизирует шаблоны достижений в базе данных с определениями в модуле types.
+
+    Args:
+        session: Асинхронная сессия SQLAlchemy
+        dry_run: Если True, только выводит изменения, без фактического применения
+
+    Returns:
+        Dict с информацией о внесенных изменениях
+    """
+    changes = {
+        "achievements": {
+            "added": [],
+            "updated": [],
+            "deleted": [],
+            "unchanged": []
+        }
+    }
+
+    # Получаем все существующие шаблоны достижений из БД
+    stmt = select(AchievementTemplate)
+    result = await session.execute(stmt)
+    existing_achievements = {achievement.name: achievement for achievement in result.scalars().all()}
+
+    # Создаем множество ожидаемых достижений для отслеживания удалений
+    expected_achievements = set(ACHIEVEMENT_DESCRIPTIONS.keys())
+
+    # Синхронизация достижений - добавление и обновление
+    for achievement_name, description in ACHIEVEMENT_DESCRIPTIONS.items():
+        icon_url = ACHIEVEMENT_ICONS.get(achievement_name, "")
+        condition = json.dumps(ACHIEVEMENT_CONDITIONS.get(achievement_name, {}))
+        category = ACHIEVEMENT_CATEGORIES.get(achievement_name, "SYSTEM")
+
+        if achievement_name in existing_achievements:
+            existing_achievement = existing_achievements[achievement_name]
+
+            # Проверяем, нужно ли обновлять
+            need_update = False
+            updates = {}
+
+            if existing_achievement.description != description:
+                need_update = True
+                updates["old_description"] = existing_achievement.description
+                updates["new_description"] = description
+                if not dry_run:
+                    existing_achievement.description = description
+
+            if existing_achievement.icon_url != icon_url:
+                need_update = True
+                updates["old_icon_url"] = existing_achievement.icon_url
+                updates["new_icon_url"] = icon_url
+                if not dry_run:
+                    existing_achievement.icon_url = icon_url
+
+            if existing_achievement.condition != condition:
+                need_update = True
+                updates["old_condition"] = existing_achievement.condition
+                updates["new_condition"] = condition
+                if not dry_run:
+                    existing_achievement.condition = condition
+
+            if existing_achievement.category != category:
+                need_update = True
+                updates["old_category"] = existing_achievement.category
+                updates["new_category"] = category
+                if not dry_run:
+                    existing_achievement.category = category
+
+            if need_update:
+                if not dry_run:
+                    await session.flush()
+                changes["achievements"]["updated"].append({
+                    "name": achievement_name,
+                    **updates
+                })
+            else:
+                changes["achievements"]["unchanged"].append(achievement_name)
+        else:
+            # Создаем новое достижение
+            if not dry_run:
+                new_achievement = AchievementTemplate(
+                    name=achievement_name,
+                    description=description,
+                    icon_url=icon_url,
+                    condition=condition,
+                    category=category
+                )
+                session.add(new_achievement)
+                await session.flush()
+
+            changes["achievements"]["added"].append({
+                "name": achievement_name,
+                "description": description,
+                "icon_url": icon_url,
+                "condition": condition,
+                "category": category
+            })
+
+    # Удаляем достижения, которых нет в определениях
+    for name, achievement in existing_achievements.items():
+        if name not in expected_achievements:
+            if not dry_run:
+                await session.delete(achievement)
+                await session.flush()
+            changes["achievements"]["deleted"].append(name)
+
+    # Применяем изменения
+    if not dry_run:
+        await session.commit()
+
+    return changes
+

@@ -17,7 +17,7 @@ def sync_types(dry_run: bool, json_output: bool):
     """Синхронизирует типы ролей и квот в базе данных с определениями из модуля types."""
 
     async def run():
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             if dry_run:
                 click.echo("СУХОЙ ЗАПУСК: изменения не будут применены")
 
@@ -91,3 +91,33 @@ def print_changes(changes):
         click.echo("\n✓ Без изменений:")
         for quota in changes["quotas"]["unchanged"]:
             click.echo(f"  - {quota['role']}.{quota['resource_type']} = {quota['value']}")
+
+    click.echo("\n========== ДОСТИЖЕНИЯ ==========")
+
+    if changes["achievements"]["added"]:
+        click.echo("\n✅ Добавленные достижения:")
+        for achievement in changes["achievements"]["added"]:
+            click.echo(f"  - {achievement['name']}: {achievement['description']} (категория: {achievement['category']})")
+
+    if changes["achievements"]["updated"]:
+        click.echo("\n🔄 Обновленные достижения:")
+        for achievement in changes["achievements"]["updated"]:
+            click.echo(f"  - {achievement['name']}")
+            if "old_description" in achievement:
+                click.echo(f"    • Описание: {achievement['old_description']} → {achievement['new_description']}")
+            if "old_icon_url" in achievement:
+                click.echo(f"    • Иконка: {achievement['old_icon_url']} → {achievement['new_icon_url']}")
+            if "old_condition" in achievement:
+                click.echo(f"    • Условие: {achievement['old_condition']} → {achievement['new_condition']}")
+            if "old_category" in achievement:
+                click.echo(f"    • Категория: {achievement['old_category']} → {achievement['new_category']}")
+
+    if changes["achievements"]["deleted"]:
+        click.echo("\n❌ Удаленные достижения:")
+        for achievement_name in changes["achievements"]["deleted"]:
+            click.echo(f"  - {achievement_name}")
+
+    if changes["achievements"]["unchanged"]:
+        click.echo("\n✓ Без изменений:")
+        for achievement_name in changes["achievements"]["unchanged"]:
+            click.echo(f"  - {achievement_name}")

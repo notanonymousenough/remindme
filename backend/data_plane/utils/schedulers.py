@@ -7,6 +7,7 @@ from temporalio.common import RetryPolicy
 from temporalio.exceptions import WorkflowAlreadyStartedError
 
 from backend.config import get_settings
+from backend.data_plane.workflows.achievements import CheckUserAchievementsWorkflow
 from backend.data_plane.workflows.habits import StartImagesGenerationWorkflow
 from backend.data_plane.workflows.morning import MorningMessageWorkflow
 from backend.data_plane.workflows.reminders import CheckRemindersWorkflow
@@ -54,5 +55,6 @@ async def ensure_workflows_running(client):
     await asyncio.gather(
         start_if_not_exists(CheckRemindersWorkflow, "check-reminders"),
         schedule_if_not_scheduled(MorningMessageWorkflow, "morning-message", ScheduleCalendarSpec(hour=(ScheduleRange(6),))),
+        schedule_if_not_scheduled(CheckUserAchievementsWorkflow, "check-achievements", ScheduleCalendarSpec(minute=(ScheduleRange(0),))),
         schedule_if_not_scheduled(StartImagesGenerationWorkflow, "start-images-generation", ScheduleCalendarSpec(day_of_month=(ScheduleRange(27),))),
     )

@@ -55,7 +55,7 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
     async def update_resource_usage(self, user_id: UUID, resource_type_name: str, increment_value: float = 1.0):
         """Обновление использования ресурса"""
         today = date.today()
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             async with session.begin():
                 resource_type_obj = await self.resource_type_repo.get_resource_type_by_name(session, resource_type_name)
                 if not resource_type_obj:
@@ -87,7 +87,7 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
 
     async def check_resource_limit(self, user_id: UUID, resource_type_name: str, increment_value: float = 1.0) -> bool:
         """Проверка, не превышен ли лимит ресурса"""
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             role_id = await self.user_role_repo.get_user_active_role(session, user_id)
             resource_type = await self.resource_type_repo.get_resource_type_by_name(session, resource_type_name)
 
@@ -146,7 +146,7 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
         """
         Атомарно проверяет, не превышен ли лимит ресурса, и увеличивает счетчик использования.
         """
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             try:
                 # Начинаем транзакцию
                 async with session.begin():
@@ -215,7 +215,7 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
         """
         Атомарно уменьшает счетчик использования ресурса.
         """
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             try:
                 async with session.begin():
                     today = date.today()
@@ -249,7 +249,7 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
         """
         Получает текущее количество использованных ресурсов.
         """
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             try:
                 today = date.today()
                 resource_type = await self.resource_type_repo.get_resource_type_by_name(session, resource_type_name)
