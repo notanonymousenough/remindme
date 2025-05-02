@@ -14,7 +14,7 @@ class TagService:
         response = await self.repo.get_by_model_id(model_id=tag_id)
         return TagSchema.model_validate(response)
 
-    async def get_tags(self, user_id: UUID) -> Sequence[TagSchema]:
+    async def get_tags_by_user_id(self, user_id: UUID) -> Sequence[TagSchema]:
         response = await self.repo.get_models(user_id=user_id)
         return [TagSchema.model_validate(tag) for tag in response]
 

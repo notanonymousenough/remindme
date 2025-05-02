@@ -54,7 +54,7 @@ class DefaultSettings(BaseSettings):
     POSTGRES_PASSWORD: str = environ.get("POSTGRES_PASSWORD", 'postgres')
     POSTGRES_ADDRESS: str = environ.get("POSTGRES_ADDRESS", '127.0.0.1')
     POSTGRES_PORT: int = int(environ.get("POSTGRES_PORT", '5432'))
-    POSTGRES_DB: str = environ.get("POSTGRES_DB", '')
+    POSTGRES_DB: str = environ.get("POSTGRES_DB", 'RemindMe')
 
     # DEBUG MODE
     DEBUG: bool = True

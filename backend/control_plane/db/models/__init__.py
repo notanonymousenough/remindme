@@ -31,5 +31,4 @@ __all__ = [
     'UserAchievement',
     'NeuroImage',
     'UserStatistics',
-    #
 ]

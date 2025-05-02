@@ -11,27 +11,28 @@ class HabitService:
     def __init__(self):
         self.repo = HabitRepository()
 
-    async def habits_get(self, user_id: UUID) -> Sequence[HabitSchemaResponse]:
-        return await self.repo.habits_get(user_id=user_id)
+    async def find_habits_by_user_id(self, user_id: UUID) -> Sequence[HabitSchemaResponse]:
+        return await self.repo.find_habits_by_user_id(user_id=user_id)
 
-    async def habits_post(self, user_id: UUID, request: HabitSchemaPostRequest) -> HabitSchemaResponse:
-        return await self.repo.habits_post(user_id=user_id, request=request)
+    async def create_habit(self, user_id: UUID, request: HabitSchemaPostRequest) -> HabitSchemaResponse:
+        return await self.repo.create_habit(user_id=user_id, request=request.model_dump())
 
-    async def habit_put(self, request: HabitSchemaPutRequest) -> HabitSchemaResponse:
-        return await self.repo.habit_put(request=request)
+    async def habit_update(self, request: HabitSchemaPutRequest) -> HabitSchemaResponse:
+        request = request.model_dump()
+        model_id = request.pop("habit_id")
+        response = await self.repo.update_model(model_id=model_id, **request)
+        return HabitSchemaResponse.model_validate(response)
 
-    async def habit_delete(self, user_id: UUID, model_id: UUID) -> bool:
-        return await self.repo.habit_delete(user_id=user_id, model_id=model_id)
+    async def remove_habit(self, user_id: UUID, model_id: UUID) -> bool:
+        return await self.repo.delete_model(user_id=user_id, model_id=model_id)
 
     async def habit_get(self, model_id: UUID) -> HabitSchemaResponse:
-        return await self.repo.habit_get(model_id=model_id)
-
-    async def habit_put_name(self, request: HabitSchemaPutRequest) -> HabitSchemaResponse:
-        return await self.repo.habit_put(request=request)
+        response = await self.repo.get_by_model_id(model_id=model_id)
+        return HabitSchemaResponse.model_validate(response)
 
     # habit progress table
-    async def habit_progress_post(self, request: HabitProgressSchemaPostRequest) -> HabitProgressSchemaPostRequest:
-        return await self.repo.habit_progress_post(request=request)
+    async def add_habit_progress(self, request: HabitProgressSchemaPostRequest) -> HabitProgressSchemaPostRequest:
+        return await self.repo.add_habit_progress(request=request.model_dump())
 
     async def habit_progress_delete_last_record(self, habit_id: UUID) -> bool:
         return await self.repo.habit_progress_delete_last_record(habit_id=habit_id)

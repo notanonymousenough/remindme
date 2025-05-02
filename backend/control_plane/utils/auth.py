@@ -17,9 +17,16 @@ async def get_authorized_user(
         token: str = Depends(get_settings().OAUTH2_SCHEME)
 ) -> UserSchema:
     try:
-        payload = jwt.decode(token, get_settings().SECRET_KEY, algorithms=[get_settings().ALGORITHM])
+        payload = jwt.decode(
+            token,
+            get_settings().SECRET_KEY,
+            algorithms=[get_settings().ALGORITHM],
+            options={"verify_exp": True}
+        )
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(401, "JWT Token expired!")
     except jwt.InvalidTokenError:
-        raise HTTPException(401, "Invalid jwt token")
+        raise HTTPException(401, "Invalid JWT Token")
 
     user_id = payload.get("user_id")
     if not user_id:

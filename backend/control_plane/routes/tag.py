@@ -25,7 +25,7 @@ async def tag_add(
     request: TagRequestSchema = Body(...),
     user: UserSchema = Depends(get_authorized_user)
 ) -> Union[TagSchema, bool]:
-    if len(await tag_service.get_tags(user.id)) > TAGS_MAX_LENGTH:
+    if len(await tag_service.get_tags_by_user_id(user.id)) > TAGS_MAX_LENGTH:
         raise HTTPException(
             422,
             "Reached max length of tags!"
@@ -41,7 +41,7 @@ async def get_tags(
     tag_service: Annotated[TagService, Depends(get_tag_service)],
     user: UserSchema = Depends(get_authorized_user)
 ) -> Sequence[TagSchema]:
-    return await tag_service.get_tags(user_id=user.id)
+    return await tag_service.get_tags_by_user_id(user_id=user.id)
 
 
 @tag_router.delete(

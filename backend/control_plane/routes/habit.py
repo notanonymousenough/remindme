@@ -23,7 +23,7 @@ async def habits_get(
         habit_service: Annotated[HabitService, Depends(get_habit_service)],
         user: UserSchema = Depends(get_authorized_user)
 ):
-    return await habit_service.habits_get(user_id=user.id)
+    return await habit_service.find_habits_by_user_id(user_id=user.id)
 
 
 @habit_router.post(
@@ -34,7 +34,7 @@ async def habits_post(
         request: HabitSchemaPostRequest = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ):
-    return await habit_service.habits_post(user_id=user.id, request=request)
+    return await habit_service.create_habit(user_id=user.id, request=request)
 
 
 @habit_router.put(
@@ -45,7 +45,7 @@ async def habit_put(
         request: HabitSchemaPutRequest = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ):
-    return await habit_service.habit_put(request=request)
+    return await habit_service.habit_update(request=request)
 
 
 @habit_router.delete(
@@ -61,7 +61,7 @@ async def habit_delete(
         habit_id: UUID,
         user: UserSchema = Depends(get_authorized_user)
 ):
-    return await habit_service.habit_delete(user_id=user.id, model_id=habit_id)
+    return await habit_service.remove_habit(user_id=user.id, model_id=habit_id)
 
 
 @habit_router.post(
@@ -72,5 +72,5 @@ async def habit_progress_post(
         request: HabitProgressSchemaPostRequest = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ):
-    return await habit_service.habit_progress_post(request=request)
+    return await habit_service.add_habit_progress(request=request)
 

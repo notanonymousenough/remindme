@@ -1,16 +1,13 @@
-import enum
 import logging
 import uuid
 from datetime import datetime, timedelta
 from typing import Union, Sequence, Any
 
 import aiohttp
-from aiofiles.os import access
 
 from backend.bot.clients.http_client import AsyncHttpClient, REQUEST_METHODS
 from backend.control_plane.config import get_settings
 from backend.control_plane.db.models import ReminderStatus
-from backend.control_plane.schemas import ReminderSchema
 from backend.control_plane.schemas.habit import HabitSchemaResponse
 from backend.control_plane.schemas.requests.habit import HabitSchemaPostRequest, HabitProgressSchemaPostRequest
 from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaRequest, ReminderToEditTimeRequestSchema, \
@@ -246,8 +243,8 @@ class RemindMeApiClient(AsyncHttpClient):
     @staticmethod
     async def habit_get(habit_id: uuid.UUID) -> HabitSchemaResponse:
         habit_service = get_habit_service()
-        habit = await habit_service.habit_get(habit_id)
-        return habit
+        response = await habit_service.habit_get(model_id=habit_id)
+        return HabitSchemaResponse.model_validate(response)
 
     async def habit_progress_post(self, access_token: str, habit_id: uuid.UUID) -> bool:
         endpoint = get_settings().POST_HABIT_PROGRESS_ENDPOINT.format(habit_id)

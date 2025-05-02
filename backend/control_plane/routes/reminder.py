@@ -54,7 +54,7 @@ async def reminders_get_active(
     return reminders
 
 
-@reminder_router.post(
+@reminder_router.put(
     path="/{reminder_id}",
     responses={
         200: {
@@ -84,12 +84,12 @@ async def reminder_delete(
         reminder_id: UUID,
         user: UserSchema = Depends(get_authorized_user)
 ):
-    if await reminder_service.reminder_delete(user_id=user.id, reminder_id=reminder_id):
+    if await reminder_service.reminder_remove(user_id=user.id, reminder_id=reminder_id):
         return Response(status=204, text=f"Успешно удалено {reminder_id}")
     return Response(status=404, text="Напоминание не удалено")
 
 
-@reminder_router.post(
+@reminder_router.put(
     path="/{reminder_id}/complete",
     responses={
         200: {
@@ -106,7 +106,7 @@ async def reminder_to_complete(
     return reminder
 
 
-@reminder_router.post(
+@reminder_router.put(
     path="/{reminder_id}/postpone",
     responses={
         200: {

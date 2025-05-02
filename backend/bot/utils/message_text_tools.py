@@ -18,7 +18,7 @@ def get_reminder(reminder: ReminderSchema):
     tags_text = None
     if (tags := reminder.tags):
         if len(tags) > 1:
-            tags_text = "Тэги: " + ', '.join(reminder.tags)
+            tags_text = "Тэги: " + " ".join([tag.emoji for tag in reminder.tags])
         else:
             tags_text = "Тэг: " + reminder.tags[0].emoji
     else:

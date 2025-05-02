@@ -7,7 +7,7 @@ from sqlalchemy.future import select
 from ..engine import get_async_session
 from ..models.user import User
 from .base import BaseRepository
-from ...schemas.user import UserTelegramDataSchema, UserSchema
+from ...schemas.user import UserSchema
 
 
 class UserRepository(BaseRepository[User]):
@@ -24,19 +24,19 @@ class UserRepository(BaseRepository[User]):
             result = (await session.execute(state)).scalars().one_or_none()
             return UserSchema.model_validate(result) if result else None
 
-    async def create_user(self, user: UserSchema) -> UserSchema:
+    async def create_user(self, user: dict) -> UserSchema:
         async with await get_async_session() as session:
-            obj = User(**user.model_dump())  # convert user to db model(obj)
+            obj = User(**user)  # convert user to db model(obj)
             session.add(obj)
             await session.commit()
             return UserSchema.model_validate(obj)  # convert db model(obj) to user
 
-    async def update_user(self, user: UserSchema) -> UserSchema:
+    async def update_user(self, user_id: UUID, user: dict) -> UserSchema:
         async with await get_async_session() as session:
-            if not (db_user := await session.get(User, user.id)):
+            if not (db_user := await session.get(User, user_id)):
                 raise HTTPException(404, "User not found")
 
-            for key, value in user.model_dump(exclude_unset=True).items():
+            for key, value in user.items():
                 setattr(db_user, key, value)
 
             await session.commit()

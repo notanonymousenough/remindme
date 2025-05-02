@@ -17,6 +17,7 @@ class BaseRepository(Generic[T]):
 
     def __init__(self, model: Type[T]):
         self.model = model
+        # TODO добавить сюда pydantic model и возвращать ее после выполнения функции
 
     async def create(self, user_id: UUID, **kwargs) -> T:
         async with await get_async_session() as session:

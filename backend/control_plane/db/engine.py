@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 import os
 import logging
@@ -6,18 +5,12 @@ import logging
 from backend.control_plane.config import get_settings
 
 # Настройка логирования SQL запросов
-logging.basicConfig()
 logger = logging.getLogger("sqlalchemy.engine")
 logger.setLevel(logging.ERROR)
 
-# Получение параметров подключения из переменных окружения
-load_dotenv()
-DATABASE_URL = get_settings().DATABASE_URI
-print(DATABASE_URL)
-
 # Создание асинхронного движка SQLAlchemy
 engine = create_async_engine(
-    DATABASE_URL,
+    get_settings().DATABASE_URI,
     echo=os.environ.get("SQL_ECHO", "False").lower() in ("true", "1", "t"),
     pool_size=int(os.environ.get("SQL_POOL_SIZE", "5")),
     max_overflow=int(os.environ.get("SQL_MAX_OVERFLOW", "10")),
