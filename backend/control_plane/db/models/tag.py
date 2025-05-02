@@ -10,16 +10,11 @@ class Tag(BaseModel):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     name = Column(String(255), nullable=False)
     color = Column(String(7), default="#FFFFFF")
-    emoji = Column(String(1), nullable=False)  # Арсен: добавил колонку с эмодзи, потому что для бота это важно
+    emoji = Column(String(5), nullable=False)  # Арсен: добавил колонку с эмодзи, потому что для бота это важно
 
     # Отношения
     user = relationship("User", back_populates="tags")
-    reminders = relationship("Reminder", secondary="reminder_tags", back_populates="tags")
-
-    # Ограничения уникальности
-    __table_args__ = (
-        UniqueConstraint('user_id', 'name', name='uq_user_tag_name'),
-    )
+    reminders = relationship("Reminder", secondary="reminder_tags", back_populates="_tags")
 
     def __repr__(self):
         return f"<Tag {self.name} ({self.id})>"

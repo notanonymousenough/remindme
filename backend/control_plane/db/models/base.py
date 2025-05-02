@@ -2,7 +2,7 @@ import enum
 import uuid
 from sqlalchemy import Column, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
-from ..engine import Base
+from sqlalchemy.orm import DeclarativeBase
 
 
 # Определение перечислений для типов данных
@@ -37,7 +37,7 @@ class ImageStatus(str, enum.Enum):
 
 
 # Базовая модель с общими полями
-class BaseModel(Base):
+class BaseModel(DeclarativeBase):
     __abstract__ = True
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
