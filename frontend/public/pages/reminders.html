@@ -172,19 +172,6 @@
                 },
                 body: JSON.stringify({ name: newTagName })  
               })
-          
-/*.then(function(serverPromise){ 
-                serverPromise.json()
-                  .then(function(j) { 
-                    console.log(j); 
-                  })
-                  .catch(function(e){
-                    console.log(e);
-                  });
-              })
-              .catch(function(e){
-                  console.log(e);
-                });*/
           .then(data => {
             renderTags(data);
           })
@@ -203,37 +190,11 @@
         }else {
           alert('Ошибка при сохранении тэга: ' + data.statusText);
         }
-
-          }
-
-       /* try {
-        const response = await fetch(`/api/tags`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json' 
-          },
-          body: JSON.stringify({ name: newTagName })  
-        });
-        alert(response);
-        if (response.ok) {
-          alert('Тэг успешно добавлен');
-          inputTeg.value = '';
-          addTegDiv.style.display = 'none';
-          addBtnDiv.style.display = 'block';
-          location.reload();
-        }else {
-          alert('Ошибка при сохранении тэга: ' + response.statusText);
-        }
-        
-      }catch (error) {
-        console.error(error);
-          alert('Ошибка сети: ' + error.message);
-        }*/
       }
-
-  window.onload = () => {
-  addTegDiv.style.display = 'none';
-};
+    }
+    window.onload = () => {
+    addTegDiv.style.display = 'none';
+    };
   </script>
   <script>
     fetch('/api/reminders')

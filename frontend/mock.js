@@ -13,6 +13,22 @@ app.post('/v1/auth/telegram', async (req, res) => {
     res.json("{'access_token': '...'}")
 });
 
+const trash=[
+    {
+        "id": "r0k1l2m3n8",
+        "userId": "usr_67890",
+        "text": "Купить хлеб",
+        "time": "2023-12-03T19:45:00Z",
+        "tags": ["Дом"],
+        "status": "active",
+        "removed": false,
+        "createdAt": "2023-11-29T21:30:00Z",
+        "updatedAt": "2023-11-29T21:30:00Z",
+        "completedAt": null,
+        "notificationSent": false
+    },
+]
+
 const tags=[
     {
         "tagId": "12345",
@@ -104,7 +120,7 @@ const reminders = [
         "updatedAt": "2023-11-29T21:30:00Z",
         "completedAt": null,
         "notificationSent": false
-        }
+    }
 ];
 
 const achievement = [
@@ -125,14 +141,14 @@ const achievement = [
 
 
 app.post('/v1/reminders', (req, res) => {
-    req.body.id= (Math.random(1000)).toString();
+    req.body.id = Math.floor(Math.random() * 1000).toString();
     req.body.userId='usr_67890';
     const reminderData = req.body;
     reminders.push(reminderData);
     res.json({});
 });
 app.post('/v1/tags', (req, res) => {
-    req.body.tagId= (Math.random(1000)).toString();
+    req.body.id = Math.floor(Math.random() * 1000).toString();
     const tagsData = req.body;
     tags.push(tagsData);
     res.json({});
@@ -140,6 +156,10 @@ app.post('/v1/tags', (req, res) => {
 
 app.get('/v1/tags', (req, res) => {
     res.json(tags);
+});
+
+app.get('/v1/trash', (req, res) => {
+    res.json(trash);
 });
 
 app.get('/v1/reminders', (req, res) => {

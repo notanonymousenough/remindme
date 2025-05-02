@@ -84,7 +84,11 @@ td
   
 }
 
-
+.my-alert-t 
+{
+  width: 250px;
+  border: 3px solid rgb(203, 203, 203);
+}
 .my-alert 
 {
   width: 230px;
