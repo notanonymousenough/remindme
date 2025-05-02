@@ -3,6 +3,7 @@ from . import morning
 from . import habits
 from . import achievements
 from . import calendar
+from . import maintenance
 
 __all__ = [
     "reminders",
@@ -10,4 +11,5 @@ __all__ = [
     "habits",
     "achievements",
     "calendar",
+    "maintenance",
 ]

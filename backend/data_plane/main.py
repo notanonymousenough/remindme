@@ -43,6 +43,7 @@ async def main():
             workflows.achievements.ProcessUserAchievementsWorkflow,
             workflows.calendar.SyncCalendarsWorkflow,
             workflows.calendar.UserCalendarSyncWorkflow,
+            workflows.maintenance.CleanupRemovedItemsWorkflow,
         ],
         activities=[
             activities.reminders.check_active_reminders,
@@ -67,6 +68,10 @@ async def main():
             activities.calendar.fetch_calendar_events,
             activities.calendar.sync_calendar_events,
             activities.calendar.handle_sync_errors,
+            activities.maintenance.get_removed_habits,
+            activities.maintenance.get_removed_reminders,
+            activities.maintenance.delete_habits,
+            activities.maintenance.delete_reminders,
         ],
     )
 

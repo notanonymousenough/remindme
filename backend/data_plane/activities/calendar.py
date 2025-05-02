@@ -10,6 +10,7 @@ from uuid import UUID
 from backend.control_plane.db.repositories.reminder import ReminderRepository
 from backend.control_plane.db.repositories.calendar import CalendarIntegrationRepository
 from backend.control_plane.db.models.base import ReminderStatus
+from backend.control_plane.db.repositories.user import UserRepository
 from backend.data_plane.services.calendar_service import CalendarService
 from backend.data_plane.services.telegram_service import TelegramService
 
@@ -247,6 +248,7 @@ async def handle_sync_errors(user_id: str, integration_id: str, error: str) -> N
     """
     logger.error(f"Ошибка синхронизации календаря для пользователя {user_id}: {error}")
 
+    user_repo = UserRepository()
     cal_integration_repo = CalendarIntegrationRepository()
     integration_uuid = UUID(integration_id)
 
@@ -258,7 +260,10 @@ async def handle_sync_errors(user_id: str, integration_id: str, error: str) -> N
 
     # Уведомляем пользователя об ошибке
     integration = await cal_integration_repo.get_by_model_id(integration_uuid)
-    if integration and integration.user.telegram_id:
+    if not integration:
+        return
+    user = await user_repo.get_user(integration.user_id)
+    if user and user.telegram_id:
         telegram_service = TelegramService()
         message = (
             f"⚠️ *Ошибка синхронизации календаря*\n\n"
