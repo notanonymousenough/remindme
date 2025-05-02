@@ -122,6 +122,14 @@ const achievement = [
     }
 ];
 
+const image = [
+    {
+        "habitId": "grrgrg",
+        "limit": "2",
+        "offset": "1"
+    }
+]
+
 
 
 app.post('/v1/reminders', (req, res) => {
@@ -140,6 +148,10 @@ app.post('/v1/tags', (req, res) => {
 
 app.get('/v1/tags', (req, res) => {
     res.json(tags);
+});
+
+app.get('/v1/image', (req, res) => {
+    res.json(image);
 });
 
 app.get('/v1/reminders', (req, res) => {
