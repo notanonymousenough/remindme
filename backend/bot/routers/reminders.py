@@ -80,8 +80,11 @@ async def reminders_next(call: CallbackQuery,
 
     data = await state.get_data()
 
+    access_token = data["access_token"]
+
     reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
-    tags = await client().tags_get(state_data=data)
+    tags = await client().tags_get(access_token=access_token)
+
     text = message_text_tools.get_reminders(
         reminders=reminders,
         next_coef=data['next_coef'],
@@ -109,8 +112,9 @@ async def reminders_previous(call: CallbackQuery,
     await state.update_data(next_coef=next_coef)
 
     data = await state.get_data()
+    access_token = data["access_token"]
 
-    tags = await client().tags_get(state_data=data)
+    tags = await client().tags_get(access_token=access_token)
     reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
     text = message_text_tools.get_reminders(
         reminders=reminders,
@@ -141,8 +145,9 @@ async def reminders_day_filter(call: CallbackQuery,
     await state.update_data(next_coef=next_coef)
 
     data = await state.get_data()
+    access_token = data["access_token"]
 
-    tags = await client().tags_get(state_data=data)
+    tags = await client().tags_get(access_token=access_token)
     reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
     text = message_text_tools.get_reminders(
         reminders=reminders,
@@ -171,8 +176,11 @@ async def reminder_tag_filter(call: CallbackQuery,
 
     data = await state.get_data()
 
-    tags = await client().tags_get(state_data=data)
+    access_token = data["access_token"]
+
+    tags = await client().tags_get(access_token=access_token)
     reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
+
     text = message_text_tools.get_reminders(
         reminders=reminders,
         next_coef=data['next_coef'],
@@ -203,8 +211,11 @@ async def reminder_tags_select(call: CallbackQuery,
 
     data = await state.get_data()
 
-    tags = await client().tags_get(state_data=data)
+    access_token = data["access_token"]
+
+    tags = await client().tags_get(access_token=access_token)
     reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
+
     text = message_text_tools.get_reminders(
         reminders=reminders,
         next_coef=data['next_coef'],
@@ -232,7 +243,10 @@ async def reminder_tags_filter_select(call: CallbackQuery,
     await state.update_data(tag_filter=tag_filter)
 
     data = await state.get_data()
-    tags = await client().tags_get(state_data=data)
+
+    access_token = data["access_token"]
+
+    tags = await client().tags_get(access_token=access_token)
     reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
 
     text = message_text_tools.get_reminders(

@@ -1,13 +1,14 @@
-from typing import Annotated, Sequence
+from typing import Annotated, Sequence, Union
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, HTTPException
 
 from backend.control_plane.schemas.requests.tag import TagRequestSchema
 from backend.control_plane.schemas.tag import TagSchema
 from backend.control_plane.schemas.user import UserSchema
 from backend.control_plane.service.tag_service import TagService, get_tag_service
 from backend.control_plane.utils.auth import get_authorized_user
+from backend.control_plane.utils.constants import TAGS_MAX_LENGTH
 
 tag_router = APIRouter(
     prefix="/tag",
@@ -23,7 +24,12 @@ async def tag_add(
     tag_service: Annotated[TagService, Depends(get_tag_service)],
     request: TagRequestSchema = Body(...),
     user: UserSchema = Depends(get_authorized_user)
-):
+) -> Union[TagSchema, bool]:
+    if len(await tag_service.get_tags(user.id)) > TAGS_MAX_LENGTH:
+        raise HTTPException(
+            422,
+            "Reached max length of tags!"
+        )
     return await tag_service.add_tag(user_id=user.id, tag=request)
 
 

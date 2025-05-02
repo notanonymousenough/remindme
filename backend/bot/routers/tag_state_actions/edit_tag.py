@@ -19,10 +19,14 @@ async def tags_edit(message: Message,
                     state: FSMContext,
                     client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     data = await state.get_data()
-    tags = await client().tags_get(state_data=data)
+
+    access_token = data["access_token"]
+
+    tags = await client().tags_get(access_token=access_token)
 
     text = message_text_tools.get_tags(tags=tags)
     markup = inline_kbs.tag_menu_get_tags(tags=tags)
+
     await message.reply(text=text, reply_markup=markup)
 
 

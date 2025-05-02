@@ -14,7 +14,7 @@ def bind_routes(application: FastAPI, setting: DefaultSettings) -> None:
     Bind all routes to application.
     """
     for route in list_of_routes:
-        application.include_router(route, prefix=setting.PATH_PREFIX)
+        application.include_router(route, prefix=setting.PATH_PREFIX)  # in fut. we can set prefix individual for route
 
 
 def get_app() -> FastAPI:
@@ -23,7 +23,6 @@ def get_app() -> FastAPI:
     """
 
     application = FastAPI(
-        prefix="v1",
         title="Remind Me control-plane",
     )
     settings = get_settings()

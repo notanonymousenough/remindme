@@ -4,6 +4,9 @@ from backend.bot.clients import get_client_async
 
 
 async def state_data_reset(state: FSMContext, telegram_id: int, access_token: str):
+    """
+    Reset data in state
+    """
     await state.set_data({
         "day": "today",
         "user_id": telegram_id,
@@ -15,7 +18,9 @@ async def state_data_reset(state: FSMContext, telegram_id: int, access_token: st
         "add_reminder": False,
         "add_reminder_manual": False,
         "add_reminder_manual_reminder_text": None,
-        "access_token": access_token,
-        "new_tag_review": False,
-        "new_tag_emoji": None
+        "access_token": access_token,  # access_token
+        "new_tag_review": False,  # new_tag
+        "new_tag_emoji": None,
+        "reminder_id": None,  # edit_reminder
+        'mode': []
     })

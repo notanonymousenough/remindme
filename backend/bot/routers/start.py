@@ -32,7 +32,10 @@ async def reminders(message: Message,
         await state_data_reset(state=state, telegram_id=message.from_user.id, access_token=access_token)
 
     data = await state.get_data()
-    tags = await client().tags_get(state_data=data)
+
+    access_token = data["access_token"]
+
+    tags = await client().tags_get(access_token=access_token)
     reminders = sorted((await client().reminders_get(state_data=data)), key=lambda x: x["time"])
 
     text = message_text_tools.get_reminders(

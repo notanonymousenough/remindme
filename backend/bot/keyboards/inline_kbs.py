@@ -4,7 +4,52 @@ from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from backend.bot.utils.habit_tools import get_last_record_status_bool
+from backend.control_plane.db.models import ReminderStatus
 from backend.control_plane.schemas.habit import HabitSchemaResponse
+from backend.control_plane.utils import constants
+
+
+def reminder_datetime(reminder):
+    keyboard = InlineKeyboardBuilder()
+    keyboard.add(InlineKeyboardButton(text="Поменять дату", callback_data="reminder_edit_datetime_date_"))
+    keyboard.add(InlineKeyboardButton(text="Изменить время", callback_data="reminder_edit_datetime_time"))
+    keyboard.row(InlineKeyboardButton(text="Назад", callback_data=f"reminder_edit_{reminder.id}"))
+
+    return keyboard.as_markup()
+
+
+def edit_reminder(reminder, mode: List[str], tags: List[dict] = None):
+    if "datetime" in mode:
+        return reminder_datetime(reminder)
+
+    keyboard = InlineKeyboardBuilder()
+    if reminder.status == ReminderStatus.ACTIVE:
+        keyboard.row(InlineKeyboardButton(text="Выполнить", callback_data=f"reminder_edit_complete_{reminder.id}"))
+    if reminder.status == ReminderStatus.COMPLETED:
+        keyboard.row(
+            InlineKeyboardButton(text="Отменить выполнение", callback_data=f"reminder_edit_complete_{reminder.id}"))
+    keyboard.row(
+        InlineKeyboardButton(text="Изменить дату и время", callback_data=f"reminder_edit_datetime_{reminder.id}"))
+
+    if "tag" in mode:
+        reminder_tags_emoji = []
+        if reminder.tags:
+            reminder_tags_emoji = [tag["emoji"] for tag in reminder.tags]
+
+        keyboard.row(InlineKeyboardButton(text="<-", callback_data=f"reminder_edit_{reminder.id}"))
+
+        for tag_id in tags:
+            tag = tags[tag_id]
+
+            if tag['emoji'] in reminder_tags_emoji:
+                keyboard.add(InlineKeyboardButton(text=f"__{tag['emoji']}__", callback_data=f"reminder_edit_tag_change_{tag_id}"))
+            else:
+                keyboard.add(InlineKeyboardButton(text=f"{tag['emoji']}", callback_data=f"reminder_edit_tag_change_{tag_id}"))
+    else:
+        keyboard.row(InlineKeyboardButton(text="Изменить тэг", callback_data=f"reminder_edit_tag_{reminder.id}"))
+    keyboard.row(InlineKeyboardButton(text="Переименовать", callback_data=f"reminder_edit_rename_{reminder.id}"))
+
+    return keyboard.as_markup()
 
 
 def get_habit_edit_buttons(habit: HabitSchemaResponse):
@@ -109,7 +154,8 @@ def tag_menu_get_tags(tags: Sequence[dict]):
     # tag_uuid: {...: ..., ...: ...}
     for i, tag in enumerate(tags):  # for tag in tags.keys()
         keyboard.add(InlineKeyboardButton(text=str(i + 1), callback_data=f"tag_edit_id_{str(tag)}"))
-    keyboard.row(InlineKeyboardButton(text='Добавить новый тэг', callback_data=f"tag_new"))
+    if len(tags) < constants.TAGS_MAX_LENGTH:
+        keyboard.row(InlineKeyboardButton(text='Добавить новый тэг', callback_data=f"tag_new"))
 
     return keyboard.as_markup()
 

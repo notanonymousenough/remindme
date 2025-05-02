@@ -1,15 +1,35 @@
 from typing import List
 
+from backend.bot.utils import date_formatting
 from backend.bot.utils.habit_tools import HABIT_PERIOD_NAMES, get_completed_record_sum, \
     get_last_record_status, HABIT_PERIOD_NAMES_INTERVAL
 from backend.bot.utils.parse_markdown_text import parse_for_markdown
+from backend.control_plane.db.models import ReminderStatus
 from backend.control_plane.schemas import ReminderSchema
 from backend.control_plane.schemas.habit import HabitSchemaResponse
 
+REMINDER_STATUS_TEXT = {
+    ReminderStatus.ACTIVE: "не выполнено ❌",
+    ReminderStatus.COMPLETED: "выполнено ✅"
+}
+
 
 def get_reminder(reminder: ReminderSchema):
-    text = (f"{reminder.text} {reminder.tag}:\n\n"
-            f"   {reminder.time}")
+    tags_text = None
+    if (tags := reminder.tags):
+        if len(tags) > 1:
+            tags_text = "Тэги: " + ', '.join(reminder.tags)
+        else:
+            tags_text = "Тэг: " + reminder.tags[0].emoji
+    else:
+        tags_text = "Тэги: нет."
+
+    reminder_time = date_formatting.get_russian_date(reminder.time)
+    text = (f"*{reminder.text}*\n\n"
+            f"{tags_text}\n"
+            f"Статус: {REMINDER_STATUS_TEXT[reminder.status]}\n"
+            f"{reminder_time}")
+    return text
 
 
 def get_reminders(reminders, next_coef: int, strip: dict, day: str, tag_filter):
@@ -74,7 +94,7 @@ def get_habits(habits: List[HabitSchemaResponse]):
     for index, habit in enumerate(habits):
         text += f"{index + 1}. {habit.text}: ({get_completed_record_sum(habit=habit)} раз за {HABIT_PERIOD_NAMES[habit.interval]})\n"
 
-    text += "Выберите привычку:"
+    text += "\nВыберите привычку:"
     return parse_for_markdown(text)
 
 
