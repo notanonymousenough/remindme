@@ -30,21 +30,27 @@ class TagRepository(BaseRepository[Tag]):
                 await session.rollback()
                 return False
 
-    async def add_tags_to_reminder(self, tag_ids: Sequence[UUID], reminder_id: UUID):
-        async with await get_async_session() as session:
-            for tag_id in tag_ids:
-                stmt = insert(reminder_tags).values(
-                    tag_id=tag_id,
-                    reminder_id=reminder_id
-                )
-                try:
-                    await session.execute(stmt)
-                except Exception as e:
-                    print(f"Error adding tag to reminder: {e}")
-                    await session.rollback()
-                    return False
-            await session.commit()
-            return True
+    async def add_tags_to_reminder(self, tag_ids: Sequence[UUID], reminder_id: UUID, session=None):
+        if not session:
+            async with await get_async_session() as session:
+                return await self.__add_tags_to_reminder(tag_ids, reminder_id, session)
+        else:
+            return await self.__add_tags_to_reminder(tag_ids, reminder_id, session)
+
+    async def __add_tags_to_reminder(self, tag_ids: Sequence[UUID], reminder_id: UUID, session):
+        for tag_id in tag_ids:
+            stmt = insert(reminder_tags).values(
+                tag_id=tag_id,
+                reminder_id=reminder_id
+            )
+            try:
+                await session.execute(stmt)
+            except Exception as e:
+                print(f"Error adding tag to reminder: {e}")
+                await session.rollback()
+                return False
+        await session.commit()
+        return True
 
     async def delete_tag_from_reminder(self, tag_id: UUID, reminder_id: UUID) -> bool:
         async with await get_async_session() as session:

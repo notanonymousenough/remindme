@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import Depends, HTTPException
 
 from .tag import get_tag_repo
+from ..engine import get_async_session
 from ..models.reminder import Reminder, ReminderStatus
 from .base import BaseRepository
 from ...schemas import ReminderSchema
@@ -17,17 +18,18 @@ class ReminderRepository(BaseRepository[Reminder]):
         super().__init__(Reminder)
 
     async def reminder_update(self,
-                              request: dict,
-                              tag_service: TagService) -> ReminderSchema:
+                              request: dict) -> ReminderSchema:
         tags = request.pop("tags")
         reminder_id = request.pop("id")
 
-        response = await self.update_model(model_id=reminder_id, **request)
-        if not response:
-            raise HTTPException(404, "Wrong entity for reminder_update")
+        async with await get_async_session() as session:
+            response = await self.update_model(model_id=reminder_id, session=session, **request)
+            if not response:
+                raise HTTPException(404, "Wrong entity for reminder_update")
 
-        if tags:
-            await tag_service.add_tags_to_reminder(tags=tags, reminder_id=response.id)
+            if tags:
+                tag_repo = get_tag_repo()
+                await tag_repo.add_tags_to_reminder(tags=tags, session=session, reminder_id=response.id)
 
         response.tags = tags
         return ReminderSchema.model_validate(response)

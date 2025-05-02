@@ -53,16 +53,22 @@ class BaseRepository(Generic[T]):
             result = await session.execute(stmt)
             return result.scalars().all()
 
-    async def update_model(self, model_id: UUID, **kwargs) -> Optional[T]:
-        async with await get_async_session() as session:
-            stmt = update(self.model).where(
-                and_(
-                    getattr(self.model, "id") == model_id
-                )
-            ).values(**kwargs).returning(self.model)
-            result = await session.execute(stmt)
-            await session.commit()
-            return result.scalars().first()
+    async def update_model(self, model_id: UUID, session=None, **kwargs) -> Optional[T]:
+        if not session:
+            async with await get_async_session() as session:
+                return await self.__update_model(model_id, session, **kwargs)
+        else:
+            return await self.__update_model(model_id, session, **kwargs)
+
+    async def __update_model(self, model_id: UUID, session, **kwargs):
+        stmt = update(self.model).where(
+            and_(
+                getattr(self.model, "id") == model_id
+            )
+        ).values(**kwargs).returning(self.model)
+        result = await session.execute(stmt)
+        await session.commit()
+        return result.scalars().first()
 
     async def delete_model(self, user_id: UUID, model_id: UUID) -> bool:
         async with await get_async_session() as session:
