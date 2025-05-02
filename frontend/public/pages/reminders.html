@@ -103,13 +103,13 @@
           <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
             Тэг
           </button>
-            <ul id="tagsList" class="list-unstyled mb-3 dropdown-menu" style="max-height: 150px; overflow-y: auto;">
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
+          <ul id="tags" class="list-unstyled dropdown-menu" style="max-height: 150px; overflow-y: auto;">
+            <li class="form-check m-1">
+              <input class="form-check-input " type="radio" name="flexRadioDefault" id="flexRadioDefault2" value="Все" checked>
               <label class="form-check-label" for="flexRadioDefault2">
                 Все
               </label>
-            </div> 
+            </li>
           </ul>
         </form>
       </div>
@@ -173,18 +173,7 @@
                 body: JSON.stringify({ name: newTagName })  
               })
           
-/*.then(function(serverPromise){ 
-                serverPromise.json()
-                  .then(function(j) { 
-                    console.log(j); 
-                  })
-                  .catch(function(e){
-                    console.log(e);
-                  });
-              })
-              .catch(function(e){
-                  console.log(e);
-                });*/
+
           .then(data => {
             renderTags(data);
           })
@@ -205,30 +194,6 @@
         }
 
           }
-
-       /* try {
-        const response = await fetch(`/api/tags`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json' 
-          },
-          body: JSON.stringify({ name: newTagName })  
-        });
-        alert(response);
-        if (response.ok) {
-          alert('Тэг успешно добавлен');
-          inputTeg.value = '';
-          addTegDiv.style.display = 'none';
-          addBtnDiv.style.display = 'block';
-          location.reload();
-        }else {
-          alert('Ошибка при сохранении тэга: ' + response.statusText);
-        }
-        
-      }catch (error) {
-        console.error(error);
-          alert('Ошибка сети: ' + error.message);
-        }*/
       }
 
   window.onload = () => {
@@ -236,79 +201,10 @@
 };
   </script>
   <script>
-    fetch('/api/reminders')
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Сетевой ответ не в порядке');
-      }
-      return response.json();
-    })
-    .then(data => {
-      renderReminders(data);
-    })
-    .catch(error => {
-      console.error('Ошибка получения данных:', error);
-    });
-    function renderReminders(data) {
-      const remindersContainer = document.getElementById('reminders');
-      remindersContainer.innerHTML = '';
-      data.forEach(reminder => {
-        const div = document.createElement('div');
-        div.className = 'alert alert-white my-alert m-3';
-        div.role = "alert";
-        div.addEventListener('click', () => {
-          location.href = '/edit?id=' + reminder.id;
-        });
-        const buttonClass = getButtonClass(reminder.status);
-        const buttonText = getButtonText(reminder.status);
-        const button = document.createElement('button');
-        button.type = "button";
-        button.className = `btn ${buttonClass} btn-sm`;
-        button.innerText = buttonText;
-        button.onclick = (event) => {
-          event.stopPropagation();
-          updateReminderStatus(reminder.id);
-        };
-        div.innerHTML = `
-          <p>${reminder.text}</p>
-          <hr>
-          <div class="row">
-            <div class="col-6">
-              ${new Date(reminder.time).toLocaleString()} 
-            </div> 
-            <div class="col-6">
-              <p>#${reminder.tags.join(', ')}</p>
-            </div> 
-          </div>
-        `;
-        div.querySelector('.col-6:nth-child(2)').appendChild(button); 
-        remindersContainer.appendChild(div);
-      });
-    }
-    function getButtonClass(status) {
-      switch (status) {
-        case 'active':
-          return 'btn-warning';
-        case 'forgotten':
-          return 'btn-secondary';
-        case 'completed':
-          return 'btn-outline-warning';
-        default:
-        return 'btn-default';
-      }
-    }
-    function getButtonText(status) {
-      switch (status) {
-        case 'active':
-          return 'Выполнить';
-        case 'forgotten':
-          return 'Просрочено';
-        case 'completed':
-          return 'Выполнено';
-        default:
-        return 'Ошибка';
-      }
-    }
+    
+  
+    
+    
     async function updateReminderStatus(reminderId) {
       try {
         const response = await fetch(`/api/reminders/${reminderId}/complete`, {
@@ -422,53 +318,192 @@
     document.addEventListener('DOMContentLoaded', updateProgressBar);
   </script>
   <script>
-    // Функция для загрузки тегов и отрисовки
     async function loadTags() {
       try {
         const response = await fetch('api/tags');
         const tags = await response.json();
   
         const tagsList = document.getElementById('tagsList');
-        tagsList.innerHTML = ''; // очистим текущее содержимое
+        tagsList.innerHTML = ''; 
   
         tags.forEach((tag, index) => {
-          // Создаем контейнер
           const div = document.createElement('div');
           div.classList.add('form-check');
-  
-          // Создаем input radio
           const input = document.createElement('input');
           input.classList.add('form-check-input', 'm-1');
           input.type = 'radio';
           input.name = 'tag';
           input.id = `tag${index}`;
-          input.value = tag.name.replace(/&#\d+;/g, '');  // Очищаем эмодзи из значения, если нужно
-          if (index === 0) input.checked = true; // Первый элемент отмечаем
-  
-          // Создаем label
+          input.value = tag.name.replace(/&#\d+;/g, '');  
+          if (index === 0) input.checked = true;
           const label = document.createElement('label');
           label.classList.add('form-check-label');
           label.setAttribute('for', input.id);
-          label.innerHTML = tag.name; // innerHTML, чтобы отобразить эмодзи
-  
-          // Добавляем input и label внутрь div
+          label.innerHTML = tag.name; 
           div.appendChild(input);
           div.appendChild(label);
-  
-          // Вставляем div в список
           tagsList.appendChild(div);
         });
-  
-        // Можно еще добавить input и кнопку, если нужно
-        // К примеру, они уже есть в вашем HTML — если нет, создайте аналогично
-  
       } catch (error) {
         console.error('Ошибка загрузки тегов:', error);
       }
     }
-  
-    // Загружаем теги при загрузке страницы
     window.addEventListener('DOMContentLoaded', loadTags);
   </script>
+  <script>
+   
+      let allReminders = []; // сюда загрузим все напоминания после запроса
+    
+      // Функция загрузки тегов
+      async function loadTagsList() {
+        try {
+          const response = await fetch('/api/tags');
+          if (!response.ok) throw new Error('Ошибка сети при загрузке тегов');
+          const tags = await response.json();
+      
+          const tagsList = document.getElementById('tags');
+      
+          // Очищаем список, оставляем "Все"
+          while (tagsList.children.length > 1) {
+            tagsList.removeChild(tagsList.lastChild);
+          }
+      
+          tags.forEach((tag, index) => {
+            const li = document.createElement('li');
+            li.classList.add('form-check' , 'm-1');
+      
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'flexRadioDefault';
+            input.id = `tag${index}`;
+            input.classList.add('form-check-input');
+            input.value = tag.name;
+      
+            const label = document.createElement('label');
+            label.classList.add('form-check-label');
+            label.setAttribute('for', input.id);
+            label.textContent = tag.name;
+      
+            li.appendChild(input);
+            li.appendChild(label);
+            tagsList.appendChild(li);
+          });
+      
+          // Навешиваем обработчик **один раз** после создания всех радио
+          const radios = document.querySelectorAll('input[name="flexRadioDefault"]');
+          radios.forEach(input => {
+            input.addEventListener('change', () => {
+              if (input.value === 'Все') {
+                renderAllReminders();
+              } else {
+                filterAndRenderReminders(input.value);
+              }
+            });
+          });
+      
+        } catch (error) {
+          console.error('Ошибка загрузки тегов:', error);
+        }
+      }
+    
+      // Функция загрузки напоминаний
+      async function loadReminders() {
+        try {
+          const response = await fetch('/api/reminders');
+          if (!response.ok) throw new Error('Сетевой ответ не в порядке');
+          allReminders = await response.json();
+    
+          // По умолчанию отображаем все
+          filterAndRenderReminders('Все');
+        } catch (error) {
+          console.error('Ошибка получения данных:', error);
+        }
+      }
+    
+      // Функция фильтрации и отображения
+      function filterAndRenderReminders(tag) {
+        if (tag === 'Все') {
+          // показать все без фильтрации
+          renderAllReminders();
+          return;
+        }
+      
+        // иначе фильтрация по тегу
+        const filteredReminders = allReminders.filter(r => r.tags.includes(tag));
+        renderReminders(filteredReminders);
+      }
+      function renderAllReminders() {
+        renderReminders(allReminders);
+      }
+    
+      function renderReminders(data) {
+        const remindersContainer = document.getElementById('reminders');
+        remindersContainer.innerHTML = '';
+        data.forEach(reminder => {
+          const div = document.createElement('div');
+          div.className = 'alert alert-white my-alert m-3';
+          div.role = "alert";
+          div.addEventListener('click', () => {
+            location.href = '/edit?id=' + reminder.id;
+          });
+          const buttonClass = getButtonClass(reminder.status);
+          const buttonText = getButtonText(reminder.status);
+          const button = document.createElement('button');
+          button.type = "button";
+          button.className = `btn ${buttonClass} btn-sm`;
+          button.innerText = buttonText;
+          button.onclick = (event) => {
+            event.stopPropagation();
+            updateReminderStatus(reminder.id);
+          };
+          div.innerHTML = `
+          <p>${reminder.text}</p>
+          <hr>
+          <div class="row">
+            <div class="col-6">
+              ${new Date(reminder.time).toLocaleString()} 
+            </div> 
+            <div class="col-6">
+              <p>#${reminder.tags.join(', ')}</p>
+            </div> 
+          </div>
+        `;
+        div.querySelector('.col-6:nth-child(2)').appendChild(button); 
+        remindersContainer.appendChild(div);
+      });
+      }
+
+  function getButtonClass(status) {
+    switch (status) {
+      case 'active':
+        return 'btn-warning';
+      case 'forgotten':
+        return 'btn-secondary';
+      case 'completed':
+        return 'btn-outline-warning';
+      default:
+        return 'btn-default';
+    }
+  }
+
+  function getButtonText(status) {
+    switch (status) {
+      case 'active':
+        return 'Выполнить';
+      case 'forgotten':
+        return 'Просрочено';
+      case 'completed':
+        return 'Выполнено';
+      default:
+        return 'Ошибка';
+    }
+  }
+
+  // Загрузка данных после загрузки DOM
+  window.addEventListener('DOMContentLoaded', () => {
+    loadTagsList();
+    loadReminders();
+  });
+</script>
 </body>  
 </html>
