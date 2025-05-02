@@ -90,6 +90,9 @@ class UserCalendarSyncWorkflow:
         compensations = []  # Для компенсирующих операций в случае ошибки
 
         try:
+            # Если события не смогут быть получены, добавляем компенсирующую операцию
+            compensations.append(handle_sync_errors)
+
             # Получаем события из календаря
             events = await workflow.execute_activity(
                 fetch_calendar_events,
@@ -98,10 +101,10 @@ class UserCalendarSyncWorkflow:
                 schedule_to_close_timeout=timedelta(minutes=10)
             )
 
-            workflow.logger.info(f"Получено {len(events)} событий из календаря для пользователя {user_data['user_id']}")
+            # Если события получены, убираем компенсирующую операцию
+            compensations = compensations[:-1]
 
-            # Если события успешно получены, добавляем компенсирующую операцию
-            compensations.append(handle_sync_errors)
+            workflow.logger.info(f"Получено {len(events)} событий из календаря для пользователя {user_data['user_id']}")
 
             # Синхронизируем события с напоминаниями
             results = await workflow.execute_activity(

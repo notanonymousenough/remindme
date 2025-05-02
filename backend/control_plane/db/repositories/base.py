@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Type, Optional, Sequence
+from typing import TypeVar, Generic, Type, Optional, Sequence, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -99,6 +99,18 @@ class BaseRepository(Generic[T]):
             await session.execute(stmt)
             await session.commit()
             return True if count_models - await self.count_models(user_id=user_id) else False
+
+    async def delete_models(self, model_ids: List[UUID]) -> bool:
+        async with get_async_session() as session:
+            for model_id in model_ids:
+                stmt = delete(self.model).where(
+                    and_(
+                        getattr(self.model, "id") == model_id
+                    )
+                )
+                await session.execute(stmt)
+            await session.commit()
+            return True
 
     async def count_models(self, user_id: UUID, **kwargs) -> int:
         async with get_async_session() as session:

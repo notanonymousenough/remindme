@@ -10,6 +10,7 @@ from backend.config import get_settings
 from backend.data_plane.workflows.achievements import CheckUserAchievementsWorkflow
 from backend.data_plane.workflows.calendar import SyncCalendarsWorkflow
 from backend.data_plane.workflows.habits import StartImagesGenerationWorkflow
+from backend.data_plane.workflows.maintenance import CleanupRemovedItemsWorkflow
 from backend.data_plane.workflows.morning import MorningMessageWorkflow
 from backend.data_plane.workflows.reminders import CheckRemindersWorkflow
 
@@ -59,4 +60,5 @@ async def ensure_workflows_running(client):
         schedule_if_not_scheduled(MorningMessageWorkflow, "morning-message", ScheduleCalendarSpec(hour=(ScheduleRange(6),))),
         schedule_if_not_scheduled(CheckUserAchievementsWorkflow, "check-achievements", ScheduleCalendarSpec(minute=(ScheduleRange(0),))),
         schedule_if_not_scheduled(StartImagesGenerationWorkflow, "start-images-generation", ScheduleCalendarSpec(day_of_month=(ScheduleRange(27),))),
+        schedule_if_not_scheduled(CleanupRemovedItemsWorkflow, "cleanup-removed-items", ScheduleCalendarSpec(day_of_week=(ScheduleRange(6),))),
     )
