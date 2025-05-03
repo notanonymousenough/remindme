@@ -1,0 +1,699 @@
+openapi: 3.0.0
+info:
+  title: Remind Me
+  description: API для управления напоминаниями, привычками и интеграциями с Telegram и календарем.
+  version: 0.0.1
+servers:
+  - url: https://localhost:9000/v1
+    description: Основной сервер
+
+paths:
+  /auth/telegram:
+    post:
+      summary: Authenticate via Telegram
+      operationId: authViaTelegram
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                username:
+                  type: string
+                photo_url:
+                  type: string
+                auth_date:
+                  type: integer
+                hash:
+                  type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Invalid Telegram hash
+
+  /user:
+    get:
+      summary: Получение информации о текущем пользователе
+      responses:
+        '200':
+          description: Информация о пользователе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      security:
+        - BearerAuth: []
+    put:
+      summary: Обновление информации о текущем пользователе
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Информация о пользователе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      security:
+        - BearerAuth: []
+
+  /reminders:
+    post:
+      summary: Создание нового напоминания
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+      responses:
+        '201':
+          description: Напоминание успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+      security:
+        - BearerAuth: []
+
+    get:
+      summary: Получение списка напоминаний
+      parameters:
+        - name: tag
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, completed, forgotten]
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Список напоминаний
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reminder'
+      security:
+        - BearerAuth: []
+
+  /reminders/{reminderId}:
+    put:
+      summary: Редактирование напоминания
+      parameters:
+        - name: reminderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+      responses:
+        '200':
+          description: Напоминание успешно обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+      security:
+        - BearerAuth: []
+
+    delete:
+      summary: Удаление напоминания
+      parameters:
+        - name: reminderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Напоминание успешно удалено
+      security:
+        - BearerAuth: []
+
+  /reminders/{reminderId}/complete:
+    post:
+      summary: Отметка напоминания как выполненного
+      parameters:
+        - name: reminderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Напоминание отмечено как выполненное
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+      security:
+        - BearerAuth: []
+
+  /reminders/{reminderId}/postpone:
+    post:
+      summary: Откладывание напоминания
+      parameters:
+        - name: reminderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newTime:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Напоминание отложено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+      security:
+        - BearerAuth: []
+
+  /habits:
+    post:
+      summary: Создание новой привычки
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Habit'
+      responses:
+        '201':
+          description: Привычка успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Habit'
+      security:
+        - BearerAuth: []
+
+    get:
+      summary: Получение списка привычек пользователя
+      responses:
+        '200':
+          description: Список привычек
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Habit'
+      security:
+        - BearerAuth: []
+
+  /habits/{habitId}:
+    get:
+      summary: Получение информации о привычке
+      parameters:
+        - name: habitId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Информация о привычке
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Habit'
+      security:
+        - BearerAuth: []
+
+    put:
+      summary: Редактирование привычки
+      parameters:
+        - name: habitId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Habit'
+      responses:
+        '200':
+          description: Привычка успешно обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Habit'
+      security:
+        - BearerAuth: []
+
+    delete:
+      summary: Удаление привычки
+      parameters:
+        - name: habitId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Привычка успешно удалена
+      security:
+        - BearerAuth: []
+
+  /habits/{habitId}/progress:
+    post:
+      summary: Отметка прогресса по привычке
+      parameters:
+        - name: habitId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date
+                completed:
+                  type: boolean
+      responses:
+        '200':
+          description: Прогресс успешно отмечен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Habit'
+      security:
+        - BearerAuth: []
+
+  /tags:
+    post:
+      summary: Создание нового тега
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+        '201':
+          description: Тег успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+      security:
+        - BearerAuth: []
+
+    get:
+      summary: Получение списка тегов
+      responses:
+        '200':
+          description: Список тегов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+      security:
+        - BearerAuth: []
+
+  /tags/{tagId}:
+    delete:
+      summary: Удаление тега
+      parameters:
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: replacementTagId
+          in: query
+          schema:
+            type: string
+          description: ID тега, на который нужно заменить удаляемый
+      responses:
+        '204':
+          description: Тег успешно удален
+      security:
+        - BearerAuth: []
+
+  /removed:
+    get:
+      summary: Получение списка удаленных напоминаний и привычек
+      responses:
+        '200':
+          description: Список напоминаний и привычек
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  habits:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Habit'
+                  reminders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Reminder'
+      security:
+        - BearerAuth: []
+
+    post:
+      summary: Восстановление удаленных напоминаний и привычек
+      parameters:
+        - name: reminderId
+          in: query
+          schema:
+            type: string
+        - name: habitId
+          in: query
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Успешно восстановлено
+      security:
+        - BearerAuth: []
+
+  /achievements:
+    get:
+      summary: Получение списка достижений пользователя
+      responses:
+        '200':
+          description: Список достижений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Achievement'
+      security:
+        - BearerAuth: []
+
+  /calendar/integration:
+    post:
+      summary: Настройка интеграции с календарем
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                calendarType:
+                  type: string
+                  enum: [caldav]
+                integrationData:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Интеграция успешно настроена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  calendarIntegrationKey:
+                    type: string
+      security:
+        - BearerAuth: []
+
+    delete:
+      summary: Удаление интеграции с календарем
+      responses:
+        '204':
+          description: Интеграция успешно удалена
+      security:
+        - BearerAuth: []
+
+  /images:
+    get:
+      summary: Получение списка нейроизображений пользователя
+      parameters:
+        - name: habitId
+          in: query
+          schema:
+            type: string
+          description: ID привычки для фильтрации изображений
+        - name: reminderId
+          in: query
+          schema:
+            type: string
+          description: ID напоминания для фильтрации изображений
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Список нейроизображений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NeuroImage'
+      security:
+        - BearerAuth: []
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        sex:
+          type: string
+          enum: [male, female]
+        firstName:
+          type: string
+        secondName:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        telegramId:
+          type: string
+        calendarIntegrationKey:
+          type: string
+        timezone:
+          type: string
+        level:
+          type: integer
+        experience:
+          type: integer
+        streak:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        lastActive:
+          type: string
+          format: date-time
+
+    Reminder:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        text:
+          type: string
+        time:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [active, completed, forgotten]
+        removed:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        notificationSent:
+          type: boolean
+
+    Habit:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        text:
+          type: string
+        interval:
+          type: string
+          enum: [daily, weekly, monthly, custom]
+        customInterval:
+          type: string
+          description: Описание пользовательского периода (для period=custom)
+        progress:
+          type: array
+          items:
+            type: date
+          description: Список дат выполнений
+        currentStreak:
+          type: integer
+        bestStreak:
+          type: integer
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        removed:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Tag:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+          description: Цвет тега в формате HEX
+        createdAt:
+          type: string
+          format: date-time
+
+    Achievement:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        iconUrl:
+          type: string
+          description: URL изображения для ачивки
+        condition:
+          type: string
+          description: Описание условия получения
+        unlocked:
+          type: boolean
+        unlockedAt:
+          type: string
+          format: date-time
+        progress:
+          type: integer
+          description: Текущий прогресс выполнения условия (в процентах)
+        category:
+          type: string
+          enum: [reminder, habit, system]
+
+    NeuroImage:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        habitId:
+          type: string
+        reminderId:
+          type: string
+        imageUrl:
+          type: string
+        thumbnailUrl:
+          type: string
+        prompt:
+          type: string
+        status:
+          type: string
+          enum: [good, neutral, bad]
+        generatedAt:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
