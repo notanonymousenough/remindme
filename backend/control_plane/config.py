@@ -74,6 +74,9 @@ class DefaultSettings(BaseSettings):
         tokenUrl=GET_ACCESS_TOKEN_ENDPOINT
     )
 
+    # CONSTANTS
+    TAGS_MAX_LENGTH: int = 7  # for bot inline keyboard
+
     @computed_field  # type: ignore
     @property
     def bot_token_hash_bytes(self) -> bytes:

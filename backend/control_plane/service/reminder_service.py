@@ -7,7 +7,6 @@ from backend.control_plane.db.repositories.reminder import ReminderRepository
 from backend.control_plane.schemas import ReminderSchema
 from backend.control_plane.schemas.requests.reminder import ReminderToEditRequestSchema, \
     ReminderMarkAsCompleteRequestSchema, ReminderToEditTimeRequestSchema, ReminderAddSchemaRequest
-from backend.control_plane.service.tag_service import get_tag_service
 
 
 class RemindersService:
