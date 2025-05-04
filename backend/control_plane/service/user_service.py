@@ -15,6 +15,7 @@ class UserService:
         return UserSchema.model_validate(response)
 
     async def update_user(self, request: UserSchema) -> UserSchema:
+        # TODO model dump in repo
         user = request.model_dump(exclude_unset=True)
         user_id = user.pop('id')
         return await self.repo.update_user(user_id=user_id, user=user)
@@ -32,6 +33,7 @@ class UserService:
         Updates modified values.
         """
         telegram_data_only = {"photo_url", "auth_date", "hash"}
+        # TODO model dump in repo
         user = user.model_dump(exclude=telegram_data_only)
 
         if not (user_to_update := await self.get_user_by_telegram_id(user["telegram_id"])):  # If user doesn't exist
@@ -39,6 +41,7 @@ class UserService:
         return await self.update_user_from_telegram_data(user_to_update)
 
     async def update_user_from_telegram_data(self, user_to_update: UserSchema) -> UserSchema:
+        # TODO model dump in repo
         user = user_to_update.model_dump(exclude_unset=True)
         user_id = user.pop('id')
         return UserSchema.model_validate(await self.repo.update_user(user_id, user))

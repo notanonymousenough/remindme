@@ -4,9 +4,9 @@ from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from backend.bot.utils.habit_tools import get_last_record_status_bool
+from backend.control_plane.config import get_settings
 from backend.control_plane.db.models import ReminderStatus
 from backend.control_plane.schemas.habit import HabitSchemaResponse
-from backend.control_plane.utils import constants
 
 
 def reminder_datetime(reminder):
@@ -34,7 +34,7 @@ def edit_reminder(reminder, mode: List[str], tags: List[dict] = None):
     if "tag" in mode:
         reminder_tags_emoji = []
         if reminder.tags:
-            reminder_tags_emoji = [tag["emoji"] for tag in reminder.tags]
+            reminder_tags_emoji = [tag.emoji for tag in reminder.tags]
 
         keyboard.row(InlineKeyboardButton(text="<-", callback_data=f"reminder_edit_{reminder.id}"))
 
@@ -154,7 +154,7 @@ def tag_menu_get_tags(tags: Sequence[dict]):
     # tag_uuid: {...: ..., ...: ...}
     for i, tag in enumerate(tags):  # for tag in tags.keys()
         keyboard.add(InlineKeyboardButton(text=str(i + 1), callback_data=f"tag_edit_id_{str(tag)}"))
-    if len(tags) < constants.TAGS_MAX_LENGTH:
+    if len(tags) < get_settings().TAGS_MAX_LENGTH:
         keyboard.row(InlineKeyboardButton(text='Добавить новый тэг', callback_data=f"tag_new"))
 
     return keyboard.as_markup()

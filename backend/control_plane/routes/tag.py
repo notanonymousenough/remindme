@@ -3,13 +3,12 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Body, HTTPException
 
+from backend.control_plane.config import get_settings
 from backend.control_plane.schemas.requests.tag import TagRequestSchema
 from backend.control_plane.schemas.tag import TagSchema
 from backend.control_plane.schemas.user import UserSchema
 from backend.control_plane.service.tag_service import TagService, get_tag_service
 from backend.control_plane.utils.auth import get_authorized_user
-from backend.control_plane.utils.constants import TAGS_MAX_LENGTH
-
 tag_router = APIRouter(
     prefix="/tag",
     tags=["Tag"]
@@ -25,7 +24,7 @@ async def tag_add(
     request: TagRequestSchema = Body(...),
     user: UserSchema = Depends(get_authorized_user)
 ) -> Union[TagSchema, bool]:
-    if len(await tag_service.get_tags_by_user_id(user.id)) > TAGS_MAX_LENGTH:
+    if len(await tag_service.get_tags_by_user_id(user.id)) > get_settings().TAGS_MAX_LENGTH:
         raise HTTPException(
             422,
             "Reached max length of tags!"
