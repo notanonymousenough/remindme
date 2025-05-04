@@ -1,16 +1,12 @@
-from typing import Sequence, Annotated
 from uuid import UUID
 
-from fastapi import Depends, HTTPException
+from fastapi import HTTPException
 
+from .base import BaseRepository
 from .tag import get_tag_repo
 from ..engine import get_async_session
-from ..models.reminder import Reminder, ReminderStatus
-from .base import BaseRepository
+from ..models.reminder import Reminder
 from ...schemas import ReminderSchema
-from ...schemas.requests.reminder import ReminderMarkAsCompleteRequestSchema, ReminderToEditTimeRequestSchema, \
-    ReminderAddSchemaRequest, ReminderToEditRequestSchema
-from ...service.tag_service import TagService, get_tag_service
 
 
 class ReminderRepository(BaseRepository[Reminder]):

@@ -1,14 +1,13 @@
-from sqlalchemy import insert, delete, and_
-from sqlalchemy.future import select
-from typing import List, Sequence, Any
+from typing import Sequence
 from uuid import UUID
 
+from sqlalchemy import insert, delete, and_
+from sqlalchemy.future import select
+
+from .base import BaseRepository
 from ..engine import get_async_session
 from ..models import reminder_tags
 from ..models.tag import Tag
-from .base import BaseRepository
-from ...schemas.requests.tag import TagRequestSchema
-from ...schemas.tag import TagSchema
 
 
 class TagRepository(BaseRepository[Tag]):
@@ -31,6 +30,7 @@ class TagRepository(BaseRepository[Tag]):
                 return False
 
     async def add_tags_to_reminder(self, tag_ids: Sequence[UUID], reminder_id: UUID, session=None):
+        # TODO: add decorator for session provider or some better solution
         if not session:
             async with await get_async_session() as session:
                 return await self.__add_tags_to_reminder(tag_ids, reminder_id, session)
