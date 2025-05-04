@@ -33,9 +33,6 @@ class TagService:
     async def delete_tag(self, user_id: UUID, tag_id: UUID) -> bool:
         return await self.repo.delete_model(user_id=user_id, model_id=tag_id)
 
-    async def add_tags_to_reminder(self, tags: Sequence[UUID], reminder_id: UUID) -> bool:
-        return await self.repo.add_tags_to_reminder(tags, reminder_id)
-
     async def delete_tag_from_reminder(self, tag_id: UUID, reminder_id: UUID):
         return await self.repo.delete_tag_from_reminder(tag_id=tag_id, reminder_id=reminder_id)
 

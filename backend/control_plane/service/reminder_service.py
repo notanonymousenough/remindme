@@ -26,8 +26,7 @@ class RemindersService:
 
     async def reminder_create(self, user_id: UUID, reminder: ReminderAddSchemaRequest) -> ReminderSchema:
         request = reminder.model_dump(exclude_unset=True, exclude_none=True)
-        tag_service = get_tag_service()
-        return await self.repo.reminder_create(user_id=user_id, reminder=request, tag_service=tag_service)
+        return await self.repo.reminder_create(user_id=user_id, reminder=request)
 
     async def reminders_get_active(self, user_id: UUID) -> Sequence[ReminderSchema]:
         response = await self.repo.get_models(user_id=user_id, status=ReminderStatus.ACTIVE, removed=False)

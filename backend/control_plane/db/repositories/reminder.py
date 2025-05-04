@@ -19,7 +19,7 @@ class ReminderRepository(BaseRepository[Reminder]):
 
     async def reminder_update(self,
                               request: dict) -> ReminderSchema:
-        tags = request.pop("tags")
+        tag_ids = request.pop("tags")
         reminder_id = request.pop("id")
 
         async with await get_async_session() as session:
@@ -27,24 +27,29 @@ class ReminderRepository(BaseRepository[Reminder]):
             if not response:
                 raise HTTPException(404, "Wrong entity for reminder_update")
 
-            if tags:
+            if tag_ids:
                 tag_repo = get_tag_repo()
-                await tag_repo.add_tags_to_reminder(tags=tags, session=session, reminder_id=response.id)
+                await tag_repo.add_tags_to_reminder(tag_ids=tag_ids, session=session, reminder_id=response.id)
 
-        response.tags = tags
+            await session.refresh(response)
+
         return ReminderSchema.model_validate(response)
 
     async def reminder_create(self,
                               user_id: UUID,
-                              reminder: dict,
-                              tag_service: TagService) -> ReminderSchema:
-        tags = reminder.pop("tags")
+                              reminder: dict) -> ReminderSchema:
+        tag_ids = reminder.pop("tags")
 
-        response = await self.create(user_id=user_id, **reminder)
+        async with await get_async_session() as session:
+            response = await self.create(user_id=user_id, session=session, **reminder)
 
-        if tags:
-            await tag_service.add_tags_to_reminder(tags=tags, reminder_id=response.id)
+            if not response:
+                raise HTTPException(404, "Wrong entity for reminder_create")
 
-        response.tags = tags
+            if tag_ids:
+                tag_repo = get_tag_repo()
+                await tag_repo.add_tags_to_reminder(tag_ids=tag_ids, session=session, reminder_id=response.id)
+
+            await session.refresh(response)
 
         return ReminderSchema.model_validate(response)

@@ -1,6 +1,7 @@
 from typing import TypeVar, Generic, Type, Optional, Sequence
 
 from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import update, delete, func, and_
 from uuid import UUID
@@ -19,13 +20,19 @@ class BaseRepository(Generic[T]):
         self.model = model
         # TODO добавить сюда pydantic model и возвращать ее после выполнения функции
 
-    async def create(self, user_id: UUID, **kwargs) -> T:
-        async with await get_async_session() as session:
-            obj = self.model(**kwargs)
-            obj.user_id = user_id
-            session.add(obj)
-            await session.commit()
-            return obj
+    async def create(self, user_id: UUID, session=None, **kwargs) -> T:
+        if not session:
+            async with await get_async_session() as session:
+                return await self._create(user_id, session, **kwargs)
+        else:
+            return await self._create(user_id, session, **kwargs)
+
+    async def _create(self, user_id: UUID, session: AsyncSession, **kwargs):
+        obj = self.model(**kwargs)
+        obj.user_id = user_id
+        session.add(obj)
+        await session.commit()
+        return obj
 
     async def get_by_model_id(self, model_id: UUID) -> Optional[T]:
         async with await get_async_session() as session:

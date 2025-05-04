@@ -7,6 +7,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.util import hybridproperty
 
 from .base import BaseModel, ReminderStatus
+from ...schemas.tag import TagSchema
 
 # Связующая таблица для отношения многие-ко-многим между напоминаниями и тегами
 reminder_tags = Table(
@@ -37,5 +38,5 @@ class Reminder(BaseModel):
         return f"<Reminder {self.text[:20]}... ({self.id})>"
 
     @hybridproperty
-    def tags(self) -> List[uuid.UUID]:
-        return [tag.id for tag in self._tags]
+    def tags(self) -> List[TagSchema]:
+        return [TagSchema.model_validate(tag) for tag in self._tags]

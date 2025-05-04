@@ -9,11 +9,6 @@ from sqlalchemy.orm import relationship
 
 from .base import BaseModel, HabitPeriod
 
-HABIT_PERIOD_DATE_FILTER = {
-    HabitPeriod.DAILY: datetime.now().date() - timedelta(days=30),
-    HabitPeriod.WEEKLY: datetime.now().date() - timedelta(days=180),
-    HabitPeriod.MONTHLY: datetime.now().date() - timedelta(weeks=52)
-}
 
 
 class Habit(BaseModel):
@@ -118,8 +113,16 @@ class Habit(BaseModel):
             list[datetime.date]: Список дат.
         """
 
+        def habit_period_date_start_filter(period: HabitPeriod):
+            if period == HabitPeriod.DAILY:
+                return datetime.now().date() - timedelta(days=30)
+            elif period == HabitPeriod.WEEKLY:
+                return datetime.now().date() - timedelta(days=180)
+            elif period == HabitPeriod.MONTHLY:
+                return datetime.now().date() - timedelta(weeks=52)
+
         today = datetime.now().date()
-        date_filter = HABIT_PERIOD_DATE_FILTER[self.interval]
+        date_filter = habit_period_date_start_filter(self.interval)
 
         if self.interval == HabitPeriod.DAILY:
             dates = [date_filter + timedelta(days=i) for i in range((today - date_filter).days + 1)]

@@ -13,6 +13,7 @@ from backend.bot.routers.habit_state_actions import habit_add_process_end, habit
     habit_add_process_1
 from backend.bot.utils import message_text_tools, habit_tools
 from backend.bot.utils.depends import Depends
+from backend.bot.utils.parse_markdown_text import parse_for_markdown
 from backend.bot.utils.states import States
 
 habits_router = Router()
@@ -42,9 +43,9 @@ async def route_habit_message(message: Message, state: FSMContext):
 async def return_to_menu(message: Message, state: FSMContext):
     await state.set_state(States.start_menu)
 
-    text = "Перемещаемся в главное меню\.\."
+    text = "Перемещаемся в главное меню.."
 
-    await message.answer(text=text,
+    await message.answer(text=parse_for_markdown(text),
                          reply_markup=reply_kbs.main_menu(),
                          parse_mode="MarkdownV2")
 
@@ -61,7 +62,7 @@ async def habit_edit(call: CallbackQuery,
 
     keyboard = inline_kbs.get_habit_edit_buttons(habit)
 
-    await call.message.answer(text=text, reply_markup=keyboard, parse_mode="MarkdownV2")
+    await call.message.answer(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
 
@@ -91,6 +92,6 @@ async def habits_get(message: Message,
     text = message_text_tools.get_habits(habits=habits)
 
     await message.answer(text="Вывожу список привычек..", reply_markup=reply_kbs.habits_menu())
-    await message.answer(text=text,
+    await message.answer(text=parse_for_markdown(text),
                          reply_markup=inline_kbs.get_habits_buttons(habits=habits, next_coef=next_coef),
                          parse_mode="MarkdownV2")

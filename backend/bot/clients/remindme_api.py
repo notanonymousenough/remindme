@@ -50,7 +50,7 @@ class RemindMeApiClient(AsyncHttpClient):
         )
         response = await self.create_request(
             endpoint,
-            REQUEST_METHODS.POST,
+            REQUEST_METHODS.PUT,
             access_token,
             request_body
         )
