@@ -52,7 +52,7 @@ class ReminderAddSchemaRequest(BaseModel):
 
 class ReminderChangeTagsRequest(BaseModel):
     id: UUID = Field(..., description="reminder ID")
-    tags: Optional[List[str]] = Field(..., description="Список тегов")
+    tags: Optional[List[UUID]] = Field(..., description="Список тегов")
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
 
     class Config:
