@@ -13,7 +13,7 @@ from uuid import UUID
 from backend.control_plane.ai_clients import prompts, default_art_ai_provider, default_llm_ai_provider
 from backend.control_plane.ai_clients.prompts import RequestType
 from backend.control_plane.db.models import ImageStatus, HabitInterval, Habit
-from backend.control_plane.db.repositories.habit import HabitRepository, HabitProgressRepository
+from backend.control_plane.db.repositories.habit import HabitRepository
 from backend.control_plane.db.repositories.neuro_image import NeuroImageRepository
 from backend.control_plane.db.repositories.reminder import ReminderRepository
 from backend.control_plane.db.repositories.user import UserRepository
@@ -45,7 +45,7 @@ async def update_illustrate_habit_quota(user_id: UUID):
 
 @activity.defn
 async def get_habit_completion_rate(habit_id: UUID, interval: HabitInterval) -> float:
-    habits_progress_repo = HabitProgressRepository()
+    habits_repo = HabitRepository()
 
     today = timeutils.get_utc_now().date()
     period_start = today - timedelta(weeks=4) # месяц
@@ -54,22 +54,22 @@ async def get_habit_completion_rate(habit_id: UUID, interval: HabitInterval) -> 
     elif interval == HabitInterval.MONTHLY:
         period_start = today - timedelta(weeks=12*4) # год
 
-    progress = await habits_progress_repo.get_progress_for_period(habit_id, period_start, today)
+    progress = await habits_repo.get_progress_for_period(habit_id, period_start, today)
 
     # Расчет прогресса
     if interval == HabitInterval.DAILY:
         expected = (today - period_start).days + 1
-        done = sum(1 for d in progress if period_start <= d.date.python_value <= today)
+        done = sum(1 for d in progress if period_start <= d.record_date.python_value <= today)
     elif interval == HabitInterval.WEEKLY:
         week_starts = [period_start + timedelta(days=i) for i in range(0, (today - period_start).days + 1) if
                        (period_start + timedelta(days=i)).weekday() == 0]
         expected = len(week_starts)
-        done = sum(1 for d in progress if period_start <= d.date.python_value <= today)
+        done = sum(1 for d in progress if period_start <= d.record_date.python_value <= today)
     else:
         month_starts = [period_start + timedelta(days=i) for i in range(0, (today - period_start).days + 1) if
                        (period_start + timedelta(days=i)).day == 1]
         expected = len(month_starts)
-        done = sum(1 for d in progress if period_start <= d.date.python_value <= today)
+        done = sum(1 for d in progress if period_start <= d.record_date.python_value <= today)
 
     completion_rate = done / expected if expected else 0
 

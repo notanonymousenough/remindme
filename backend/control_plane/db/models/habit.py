@@ -77,7 +77,7 @@ class Habit(BaseModel):
             """
             Args:
                 main: dates that created with api
-                second: all dates (depends on HabitPeriod and function generate_date_sequence())
+                second: all dates (depends on HabitInterval and function generate_date_sequence())
             Returns:
                 list with second dates, but with replace with main list
             """
@@ -89,10 +89,10 @@ class Habit(BaseModel):
                 merged.append(item)
             for item in second:
                 # if last record from main satisfaction our date_filter -> cancel put item from second
-                if self.interval == HabitPeriod.MONTHLY:
+                if self.interval == HabitInterval.MONTHLY:
                     if main[-1]["date"] + relativedelta(months=1) > item["date"]:
                         continue
-                elif self.interval == HabitPeriod.WEEKLY:
+                elif self.interval == HabitInterval.WEEKLY:
                     if main[-1]["date"] + relativedelta(weeks=1) > item["date"]:
                         continue
 
@@ -106,33 +106,33 @@ class Habit(BaseModel):
     def generate_date_sequence(self) -> List[datetime.date]:
         """
         Генерирует список дат от date_filter до сегодняшней даты,
-        с шагом, зависящим от HabitPeriod (daily, weekly, monthly).
+        с шагом, зависящим от HabitInterval (daily, weekly, monthly).
 
         Returns:
             list[datetime.date]: Список дат.
         """
 
-        def habit_period_date_start_filter(period: HabitPeriod):
-            if period == HabitPeriod.DAILY:
+        def habit_period_date_start_filter(period: HabitInterval):
+            if period == HabitInterval.DAILY:
                 return datetime.now().date() - timedelta(days=30)
-            elif period == HabitPeriod.WEEKLY:
+            elif period == HabitInterval.WEEKLY:
                 return datetime.now().date() - timedelta(days=180)
-            elif period == HabitPeriod.MONTHLY:
+            elif period == HabitInterval.MONTHLY:
                 return datetime.now().date() - timedelta(weeks=52)
 
         today = datetime.now().date()
         date_filter = habit_period_date_start_filter(self.interval)
 
-        if self.interval == HabitPeriod.DAILY:
+        if self.interval == HabitInterval.DAILY:
             dates = [date_filter + timedelta(days=i) for i in range((today - date_filter).days + 1)]
-        elif self.interval == HabitPeriod.WEEKLY:
+        elif self.interval == HabitInterval.WEEKLY:
             dates = [date_filter + timedelta(weeks=i) for i in range(
                 ((today - date_filter).days // 7) + 2)]  # +2 для запаса, чтобы точно захватить последнюю неделю
-        elif self.interval == HabitPeriod.MONTHLY:
+        elif self.interval == HabitInterval.MONTHLY:
             dates = [date_filter + relativedelta(months=i) for i in range(
                 ((today.year - date_filter.year) * 12 + (today.month - date_filter.month)) + 2)]  # +2
         else:
-            raise ValueError("HabitPeriod должен быть 'daily', 'weekly' или 'monthly'")
+            raise ValueError("HabitInterval должен быть 'daily', 'weekly' или 'monthly'")
 
         dates = [date for date in dates if date <= datetime.now().date()]
 
