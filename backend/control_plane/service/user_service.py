@@ -26,7 +26,7 @@ class UserService:
             return None
         return UserSchema.model_validate(user)
 
-    async def create_user_from_telegram_data(self, user_tg: UserTelegramDataSchema) -> UserSchema:
+    async def check_user(self, user_tg: UserTelegramDataSchema) -> UserSchema:
         """
         User is created if doesn't exist based on telegram_id.
         If exists check whether there are modified values.
