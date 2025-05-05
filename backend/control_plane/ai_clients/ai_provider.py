@@ -10,6 +10,7 @@ class AIProviderCostCalculator(ABC):
 
     @abstractmethod
     async def calc_cost(self, prompt: str, request_type: Any) -> float:
+        # TODO: remove prompt?
         """Рассчитать стоимость запроса, включая системный промпт"""
         pass
 

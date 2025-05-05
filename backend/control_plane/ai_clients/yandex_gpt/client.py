@@ -50,7 +50,7 @@ class YandexGptProvider(AILLMProvider):
         resp = self.sdk.models.completions(model_name=self.model_name, model_version=self.model_version) \
             .configure(temperature=0.5) \
             .run(messages)
-        logger.debug("resp:", resp)
+        logger.debug("resp: %s", str(resp))
 
         usage = resp.usage.total_tokens
         for alternative in resp.alternatives:

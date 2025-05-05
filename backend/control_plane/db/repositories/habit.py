@@ -66,7 +66,7 @@ class HabitRepository(BaseRepository[Habit]):
             else:
                 return False
 
-    async def take_for_image_generation(self) -> Sequence[Habit]:
+    async def take_for_image_generation(self) -> Sequence[HabitSchemaResponse]:
         current_time = timeutils.get_utc_now()
         two_weeks_ago = current_time - datetime.timedelta(weeks=2)
         async with get_async_session() as session:
@@ -78,15 +78,14 @@ class HabitRepository(BaseRepository[Habit]):
                             Habit.created_at >= two_weeks_ago,
                             Habit.removed == False
                         )
-                    )
+                    ).options(selectinload(self.model.progress_records))  # Добавляем eager load
                 )
                 result = await session.execute(get_stmt)
                 habits = result.scalars().all()
 
                 if not habits:
                     return []
-                # TODO: [HabitSchema.model_validate(habit) for habit in habits]
-                return habits
+                return [HabitSchemaResponse.model_validate(habit) for habit in habits]
 
     async def get_progress_for_period(self, habit_id: UUID, start_date: datetime.date, end_date: datetime.date) -> List[HabitProgress]:
         """Получение прогресса привычки за период"""
@@ -102,6 +101,6 @@ class HabitRepository(BaseRepository[Habit]):
             result = await session.execute(stmt)
             return result.scalars().all()
 
-    async def get_active_habits(self, user_id: UUID) -> Sequence[HabitSchemaResponse]:
+    async def get_active_habits(self, user_id: UUID) -> Sequence[Habit]:
         response = await self.get_models(user_id=user_id, removed=False)
-        return [HabitSchemaResponse.model_validate(habit) for habit in response]
+        return response

@@ -20,6 +20,7 @@ from backend.control_plane.db.repositories.user import UserRepository
 from backend.control_plane.db.models.base import ReminderStatus
 from backend.config import get_settings
 from backend.control_plane.exceptions.quota import QuotaExceededException
+from backend.control_plane.schemas.habit import HabitSchemaResponse
 from backend.control_plane.service.quota_service import QuotaService
 from backend.control_plane.utils import timeutils
 from backend.data_plane.services.s3_service import YandexStorageService
@@ -30,17 +31,21 @@ logger = logging.getLogger("reminder_activities")
 art_ai_provider = default_art_ai_provider
 
 @activity.defn
-async def check_active_habits() -> Sequence[Habit]:
+async def check_active_habits() -> Sequence[dict]:
     logger.info("Проверка активных привычек")
     habits_repo = HabitRepository()
     # Получаем активные привычки
     habits = await habits_repo.take_for_image_generation()
-    return habits
+    return [habit.model_dump(exclude={"start_date", "end_date", "created_at", "updated_at", "progress"}) for habit in habits]
 
 @activity.defn
-async def update_illustrate_habit_quota(user_id: UUID):
+async def update_illustrate_habit_quota(user_id: UUID) -> bool:
     quota_service = QuotaService()
-    await quota_service.check_and_increment_ai_art_usage(user_id, RequestType.ILLUSTRATE_HABIT)
+    try:
+        await quota_service.check_and_increment_ai_art_usage(user_id, RequestType.ILLUSTRATE_HABIT)
+        return True
+    except QuotaExceededException:
+        return False
 
 
 @activity.defn
@@ -76,13 +81,14 @@ async def get_habit_completion_rate(habit_id: UUID, interval: HabitInterval) -> 
     return completion_rate
 
 @activity.defn
-async def generate_image(character: str, habit_text: str, completion_rate: float) -> Tuple[bytes, int]:
+async def generate_image(habit_text: str, completion_rate: float) -> Tuple[bytes, int]:
     """
     Генерирует изображение для привычки
     """
     # TODO: можно у каждой привычки делать counter для сида, чтобы еще больше был запас по генерациям
-    seed = datetime.now().timestamp()
-    im_bytes, count_tokens = art_ai_provider.generate_habit_image(character, habit_text, completion_rate, seed=seed)
+    character = get_settings().HABIT_IMAGE_CHARACTER
+    seed = int(datetime.now().timestamp())
+    im_bytes, count_tokens = await art_ai_provider.generate_habit_image(character, habit_text, completion_rate, seed=seed)
     return im_bytes, count_tokens
 
 
