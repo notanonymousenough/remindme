@@ -74,13 +74,13 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
                 existing = existing.scalar_one_or_none()
 
                 if existing:
-                    existing.usage_value += increment_value
+                    existing.usage_value += decimal.Decimal.from_float(increment_value)
                 else:
                     new_usage = QuotaUsage(
                         user_id=user_id,
                         resource_type_id=resource_type_obj.id,
                         date=today,
-                        usage_value=increment_value
+                        usage_value=decimal.Decimal.from_float(increment_value)
                     )
                     session.add(new_usage)
 
@@ -200,7 +200,7 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
                             user_id=user_id,
                             resource_type_id=resource_type.id,
                             date=today,
-                            usage_value=increment
+                            usage_value=decimal.Decimal.from_float(increment)
                         )
                         session.add(new_usage)
 

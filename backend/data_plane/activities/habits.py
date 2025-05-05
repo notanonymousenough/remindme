@@ -81,26 +81,26 @@ async def get_habit_completion_rate(habit_id: UUID, interval: HabitInterval) -> 
     return completion_rate
 
 @activity.defn
-async def generate_image(habit_text: str, completion_rate: float) -> Tuple[bytes, int]:
+async def generate_and_save_image(user_id: UUID, habit_text: str, completion_rate: float) -> Tuple[str, int]:
     """
-    Генерирует изображение для привычки
+    Генерирует изображение и сразу сохраняет его в S3
     """
-    # TODO: можно у каждой привычки делать counter для сида, чтобы еще больше был запас по генерациям
     character = get_settings().HABIT_IMAGE_CHARACTER
     seed = int(datetime.now().timestamp())
-    im_bytes, count_tokens = await art_ai_provider.generate_habit_image(character, habit_text, completion_rate, seed=seed)
-    return im_bytes, count_tokens
+    im_bytes, count_tokens = await art_ai_provider.generate_habit_image(
+        character, habit_text, completion_rate, seed=seed
+    )
 
+    # Сразу сохраняем в S3
+    s3_service = YandexStorageService()
+    image_url = s3_service.save_image(bytearray(im_bytes), f"habit_images/{user_id}")
+
+    return image_url, count_tokens
 
 @activity.defn
 async def update_describe_habit_text_quota(user_id: UUID, count_tokes: int):
     quota_service = QuotaService()
     await quota_service.update_ai_llm_request_usage(user_id, RequestType.DESCRIBE_HABIT_TEXT, count_tokes, custom_ai_provider=art_ai_provider)
-
-@activity.defn
-async def save_image_to_s3(user_id: UUID, image_bytes: bytes) -> str:
-    s3_service = YandexStorageService()
-    return s3_service.save_image(bytearray(image_bytes), f"habit_images/{user_id}")
 
 @activity.defn
 async def save_image_to_db(user_id: UUID, habit_id: UUID, image_url: str):

@@ -19,8 +19,7 @@ from backend.control_plane.exceptions.quota import QuotaExceededException
 with workflow.unsafe.imports_passed_through():
     from backend.data_plane.activities.habits import (
         check_active_habits,
-        generate_image,
-        save_image_to_s3,
+        generate_and_save_image,
         save_image_to_db,
         update_describe_habit_text_quota,
         get_habit_completion_rate,
@@ -102,11 +101,11 @@ class GenerateHabitImageWorkflow:
             non_retryable_error_types=["ValueError", "KeyError"]
         )
 
-        image_bytes, count_tokens = await workflow.execute_activity(
-            generate_image,
+        image_url, count_tokens = await workflow.execute_activity(
+            generate_and_save_image,
             retry_policy=retry_policy,
             start_to_close_timeout=timedelta(minutes=10),
-            args=(habit_text, completion_rate)
+            args=(user_id, habit_text, completion_rate)
         )
 
         await workflow.execute_activity(
@@ -114,13 +113,6 @@ class GenerateHabitImageWorkflow:
             retry_policy=retry_policy,
             start_to_close_timeout=timedelta(minutes=5),
             args=(user_id, count_tokens)
-        )
-
-        image_url = await workflow.execute_activity(
-            save_image_to_s3,
-            retry_policy=retry_policy,
-            start_to_close_timeout=timedelta(minutes=5),
-            args=(user_id, image_bytes)
         )
 
         await workflow.execute_activity(
