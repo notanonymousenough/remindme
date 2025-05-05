@@ -9,8 +9,6 @@ from backend.control_plane.schemas.tag import TagSchema
 from backend.control_plane.schemas.user import UserSchema
 from backend.control_plane.service.tag_service import TagService, get_tag_service
 from backend.control_plane.utils.auth import get_authorized_user
-from backend.control_plane.utils.constants import TAGS_MAX_LENGTH
-
 tag_router = APIRouter(
     prefix="/tag",
     tags=["Tag"]

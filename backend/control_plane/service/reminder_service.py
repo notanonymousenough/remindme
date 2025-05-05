@@ -24,6 +24,7 @@ class RemindersService:
         return await self.repo.delete_model(user_id=user_id, model_id=reminder_id)
 
     async def reminder_create(self, user_id: UUID, reminder: ReminderAddSchemaRequest) -> ReminderSchema:
+        # TODO model dump in repo
         request = reminder.model_dump(exclude_unset=True, exclude_none=True)
         return await self.repo.reminder_create(user_id=user_id, reminder=request)
 
@@ -32,11 +33,13 @@ class RemindersService:
         return [ReminderSchema.model_validate(reminder_response) for reminder_response in response]
 
     async def mark_as_complete(self, reminder: ReminderMarkAsCompleteRequestSchema) -> ReminderSchema:
+        # TODO model dump in repo
         reminder = reminder.model_dump(exclude_unset=True, exclude_none=True)  # delete None fields
         response = await self.repo.update_model(model_id=reminder["id"], **reminder)
         return ReminderSchema.model_validate(response)
 
     async def postpone(self, reminder: ReminderToEditTimeRequestSchema) -> ReminderSchema:
+        # TODO model dump in repo
         reminder = reminder.model_dump(exclude_unset=True, exclude_none=True)  # delete None fields
         response = await self.repo.update_model(model_id=reminder["id"], **reminder)
         return ReminderSchema.model_validate(response)
