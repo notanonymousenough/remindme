@@ -263,7 +263,7 @@ async def handle_sync_errors(user_id: str, integration_id: str, error: str) -> N
     if not integration:
         return
     user = await user_repo.get_user(integration.user_id)
-    if user and user.telegram_id:
+    if user and user.id:
         telegram_service = TelegramService()
         message = (
             f"⚠️ *Ошибка синхронизации календаря*\n\n"
@@ -271,7 +271,7 @@ async def handle_sync_errors(user_id: str, integration_id: str, error: str) -> N
             f"в личном кабинете."
         )
         await telegram_service.send_message(
-            integration.user.telegram_id,
+            integration.user.id,
             message,
             parse_mode="Markdown"
         )

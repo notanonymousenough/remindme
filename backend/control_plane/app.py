@@ -36,7 +36,7 @@ app = get_app()
 if __name__ == "__main__":
     settings = get_settings()
 
-    logging.basicConfig(level=get_settings().LOG_LEVEL.lower())
+    logging.basicConfig(level=getattr(logging, get_settings().LOG_LEVEL))
 
     if settings.DEBUG:
         start_debug_logging(app)
