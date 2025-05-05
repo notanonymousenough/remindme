@@ -35,7 +35,7 @@ class AuthMiddleware(BaseMiddleware):
             print(f"AccessToken не найден в state для пользователя {user.id}. Проверяем API.")
 
         request_data = UserTelegramDataSchema.model_validate({
-            "telegram_id": str(user.id),
+            "id": str(user.id),
             "first_name": user.first_name,
             "last_name": user.last_name,
             "username": user.username,

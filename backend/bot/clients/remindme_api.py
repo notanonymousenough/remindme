@@ -87,13 +87,12 @@ class RemindMeApiClient(AsyncHttpClient):
         if tag_to_add:
             await get_tag_service().add_links(reminder_id, [tag_to_add])
 
-    async def reminder_post(self, access_token: str, reminder_id: UUID,
-                            request: ReminderAddSchemaRequest) -> bool:
-        endpoint = get_settings().PUT_REMINDER_ENDPOINT.format(id=reminder_id)
+    async def reminder_post(self, access_token: str, request: ReminderAddSchemaRequest) -> bool:
+        endpoint = get_settings().POST_REMINDER_ENDPOINT
 
         if await self.create_request(
                 endpoint,
-                REQUEST_METHODS.PUT,
+                REQUEST_METHODS.POST,
                 access_token,
                 request_body=request
         ):
