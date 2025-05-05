@@ -71,7 +71,7 @@ class DefaultSettings(BaseSettings):
     BOT_TOKEN: str = environ.get("BOT_TOKEN", "")
 
     # OAUTH2 SETTINGS
-    JWT_TOKEN_LIFETIME: datetime = timedelta(days=1)
+    JWT_TOKEN_LIFETIME: timedelta = timedelta(days=1)
     PWD_CONTEXT: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     # CONSTANTS

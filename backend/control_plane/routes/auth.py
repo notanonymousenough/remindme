@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, Depends, Body
 from backend.config import get_settings
 from backend.control_plane.schemas.user import UserTelegramDataSchema
 from backend.control_plane.service.user_service import get_user_service, UserService
+from backend.control_plane.utils import timeutils
 from backend.control_plane.utils.auth import has_correct_hash
 
 auth_router = APIRouter(
@@ -30,7 +31,7 @@ async def auth_telegram(
     user = await user_service.create_user_from_telegram_data(request)
 
     # получаем jwt_token, учитывая лишь user_id (Telegram ID)
-    exp_date = get_settings().JWT_TOKEN_LIFETIME
+    exp_date = timeutils.get_utc_now() + get_settings().JWT_TOKEN_LIFETIME
     jwt_token = jwt.encode(
         {
             "exp": exp_date,
