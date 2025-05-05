@@ -18,6 +18,7 @@ class HabitService:
         return await self.repo.create_habit(user_id=user_id, request=request.model_dump())
 
     async def habit_update(self, request: HabitSchemaPutRequest) -> HabitSchemaResponse:
+        # TODO model dump in repo
         request = request.model_dump()
         model_id = request.pop("habit_id")
         response = await self.repo.update_model(model_id=model_id, **request)

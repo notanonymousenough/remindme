@@ -33,6 +33,7 @@ class DefaultSettings(BaseSettings):
     GET_REMINDERS_ENDPOINT: str = "reminder/"
     GET_REMINDER_ENDPOINT: str = "reminder/{id}/"
     POST_REMINDER_ENDPOINT: str = "reminder/"
+    PUT_REMINDER_ENDPOINT: str = "reminder/{id}"
     DELETE_REMINDER_ENDPOINT: str = "reminder/{id}"
     COMPLETE_REMINDER_ENDPOINT: str = "reminder/{id}/complete"
     POSTPONE_REMINDER_ENDPOINT: str = "reminder/{id}/postpone"

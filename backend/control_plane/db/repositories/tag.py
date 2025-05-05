@@ -1,4 +1,5 @@
-from typing import Sequence
+import logging
+from typing import Sequence, List
 from uuid import UUID
 
 from sqlalchemy import insert, delete, and_
@@ -6,7 +7,7 @@ from sqlalchemy.future import select
 
 from .base import BaseRepository
 from ..engine import get_async_session
-from ..models import reminder_tags
+from ..models import reminder_tags, Reminder
 from ..models.tag import Tag
 
 
@@ -39,12 +40,12 @@ class TagRepository(BaseRepository[Tag]):
 
     async def __add_tags_to_reminder(self, tag_ids: Sequence[UUID], reminder_id: UUID, session):
         for tag_id in tag_ids:
-            stmt = insert(reminder_tags).values(
-                tag_id=tag_id,
-                reminder_id=reminder_id
-            )
             try:
-                await session.execute(stmt)
+                reminder = await session.get(Reminder, reminder_id)
+                tag = await session.get(Tag, tag_id)
+                reminder._tags.append(tag)
+                await session.commit()
+                session.refresh(reminder)
             except Exception as e:
                 print(f"Error adding tag to reminder: {e}")
                 await session.rollback()
@@ -52,22 +53,19 @@ class TagRepository(BaseRepository[Tag]):
         await session.commit()
         return True
 
-    async def delete_tag_from_reminder(self, tag_id: UUID, reminder_id: UUID) -> bool:
+    async def delete_tags_from_reminder(self, tag_ids_to_delete: List[UUID], reminder_id: UUID) -> bool:
         async with await get_async_session() as session:
-            stmt = delete(reminder_tags).where(
-                and_(
-                    getattr(reminder_tags, "reminder_id") == reminder_id,
-                    getattr(reminder_tags, "tag_id") == tag_id,
-                )
-            )
             try:
-                await session.execute(stmt)
-                await session.commit()
-                return True
-            except Exception as e:
-                print(f"Error deleting tag from reminder: {e}")
-                await session.rollback()
+                for tag_id in tag_ids_to_delete:
+                    reminder = await session.get(Reminder, reminder_id)
+                    tag = await session.get(Tag, tag_id)
+
+                    reminder._tags.remove(tag)
+                    await session.commit()
+            except Exception as ex:
+                logging.ERROR(ex)
                 return False
+        return True
 
     async def get_links_tags_id_from_reminder_id(self, reminder_id: UUID) -> Sequence[UUID]:
         async with await get_async_session() as session:
