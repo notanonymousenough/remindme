@@ -77,9 +77,10 @@ class QuotaService:
         """
         Проверяет и увеличивает использование ресурсов AI Art.
         """
-        request_cost = await self.ai_art_provider.cost_calculator.calc_cost(request_type)
+        request_cost = await self.ai_art_provider.cost_calculator.calc_cost("", request_type)
         resource_types = get_quotas_for_request_type(request_type)
 
+        # TODO: fix monthly quota updates before daily and then gets QuotaException
         for resource_type in resource_types:
             result = await self.repo.check_and_increment_resource_usage(user_id, resource_type.value, request_cost)
             if not result:

@@ -42,13 +42,10 @@ async def check_today_habits(user_id: UUID) -> List[Dict[str, Any]]:
     # Формируем список напоминаний для отправки
     habits_to_send = []
     for habit in active_habits:
-        if habit.time.date() != datetime.now().date():
-            continue
         habit_data = {
             "id": str(habit.id),
             "user_id": str(habit.user_id),
-            "text": habit.text,
-            "time": habit.time.isoformat()
+            "text": habit.text
         }
         habits_to_send.append(habit_data)
 
@@ -95,7 +92,7 @@ async def send_telegram_message(user_id: str, reminders: List[Dict[str, Any]], h
     reminders_string = ""
     habits_string = ""
     if len(reminders):
-        reminders_string = "🎯 Задачи на сегодня:"
+        reminders_string = "🎯 Задачи на сегодня:\n"
         for reminder in reminders:
             # TODO: зачеркивать если выполнено
             reminders_string += f"– {reminder["text"]}\n"

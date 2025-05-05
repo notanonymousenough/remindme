@@ -1,3 +1,4 @@
+import decimal
 import logging
 from datetime import date
 from uuid import UUID
@@ -178,7 +179,7 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
                     current_usage = usage_result.scalar_one_or_none() or 0.0
 
                     # Проверяем, не будет ли превышен лимит
-                    if current_usage + increment > max_value:
+                    if float(current_usage) + increment > max_value:
                         return False
 
                     # Обновляем использование атомарно
@@ -192,7 +193,7 @@ class QuotaUsageRepository(BaseRepository[QuotaUsage]):
                     existing_usage = existing_usage.scalar_one_or_none()
 
                     if existing_usage:
-                        existing_usage.usage_value += increment
+                        existing_usage.usage_value += decimal.Decimal.from_float(increment)
                     else:
                         # Создаем новую запись
                         new_usage = QuotaUsage(

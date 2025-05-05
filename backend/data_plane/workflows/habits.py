@@ -14,7 +14,6 @@ from typing import List, Dict, Any
 from temporalio.exceptions import ActivityError
 from temporalio.workflow import ParentClosePolicy
 
-from backend.config import get_settings
 from backend.control_plane.exceptions.quota import QuotaExceededException
 
 with workflow.unsafe.imports_passed_through():
@@ -57,27 +56,26 @@ class StartImagesGenerationWorkflow:
             return active_habits
 
         for active_habit in active_habits:
-            try:
-                await workflow.execute_activity(
-                    update_illustrate_habit_quota,
-                    retry_policy=retry_policy,
-                    start_to_close_timeout=timedelta(minutes=5),
-                    args=active_habit
-                )
-            except QuotaExceededException:
+            updated = await workflow.execute_activity(
+                update_illustrate_habit_quota,
+                retry_policy=retry_policy,
+                start_to_close_timeout=timedelta(minutes=5),
+                args=(active_habit["user_id"],)
+            )
+            if not updated:
                 continue
 
             completion_rate = await workflow.execute_activity(
                 get_habit_completion_rate,
                 retry_policy=retry_policy,
                 start_to_close_timeout=timedelta(minutes=5),
-                args=(active_habit.id, active_habit.interval)
+                args=(active_habit["id"], active_habit["interval"])
             )
 
             await workflow.start_child_workflow(
                 GenerateHabitImageWorkflow.run,
-                (active_habit.user_id, active_habit.id, active_habit.text, completion_rate),
-                id=f"generate_image_for_habit_{active_habit.id}",
+                args=(active_habit["user_id"], active_habit["id"], active_habit["text"], completion_rate),
+                id=f"generate_image_for_habit_{active_habit["id"]}",
                 retry_policy=RetryPolicy(
                     initial_interval=timedelta(seconds=10),
                     backoff_coefficient=2.0,
@@ -104,13 +102,11 @@ class GenerateHabitImageWorkflow:
             non_retryable_error_types=["ValueError", "KeyError"]
         )
 
-        character = get_settings().HABIT_IMAGE_CHARACTER
-
         image_bytes, count_tokens = await workflow.execute_activity(
             generate_image,
             retry_policy=retry_policy,
             start_to_close_timeout=timedelta(minutes=10),
-            args=(character, habit_text, completion_rate)
+            args=(habit_text, completion_rate)
         )
 
         await workflow.execute_activity(

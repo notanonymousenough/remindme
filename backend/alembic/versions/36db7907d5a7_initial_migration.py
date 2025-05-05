@@ -111,14 +111,14 @@ def upgrade() -> None:
     )
     op.create_table('habit_progress',
     sa.Column('habit_id', sa.UUID(), nullable=False),
-    sa.Column('date', sa.Date(), nullable=False),
+    sa.Column('record_date', sa.Date(), nullable=False),
     sa.Column('completed', sa.Boolean(), nullable=True),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['habit_id'], ['habits.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('habit_id', 'date', name='uq_habit_date')
+    sa.UniqueConstraint('habit_id', 'record_date', name='uq_habit_date')
     )
     op.create_table('neuro_images',
     sa.Column('user_id', sa.UUID(), nullable=False),

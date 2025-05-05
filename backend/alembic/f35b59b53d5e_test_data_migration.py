@@ -59,6 +59,7 @@ def upgrade() -> None:
                             column('interval', sa.Enum(HabitInterval)),
                             column('created_at', sa.DateTime(timezone=True)),
                             column('start_date', sa.DateTime(timezone=True)),
+                            column('removed', sa.Boolean),
                             column('updated_at', sa.DateTime(timezone=True))
                             )
 
@@ -101,6 +102,7 @@ def upgrade() -> None:
             'user_id': user_id,
             'text': 'smoke weed every day',
             'removed': False,
+            'interval': HabitInterval.DAILY,
             'created_at': now,
             'start_date': now - timedelta(weeks=5),
             'updated_at': now
