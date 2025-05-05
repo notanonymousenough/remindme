@@ -3,7 +3,7 @@ import logging
 import uvicorn
 from fastapi import FastAPI
 
-from backend.control_plane.config import get_settings, DefaultSettings
+from backend.config import get_settings, DefaultSettings
 from backend.control_plane.middlewares.log_request import start_debug_logging
 from backend.control_plane.routes import list_of_routes
 from backend.control_plane.utils.openapi_schema import custom_openapi
@@ -36,7 +36,7 @@ app = get_app()
 if __name__ == "__main__":
     settings = get_settings()
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=get_settings().LOG_LEVEL.lower())
 
     if settings.DEBUG:
         start_debug_logging(app)

@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import Field, BaseModel
 
-from backend.control_plane.db.models import HabitPeriod
+from backend.control_plane.db.models import HabitInterval
 
 
 class HabitSchemaResponse(BaseModel):
@@ -12,7 +12,7 @@ class HabitSchemaResponse(BaseModel):
     user_id: UUID = Field(..., description="ID пользователя")
     text: str = Field(..., description="Текст привычки")
 
-    interval: HabitPeriod = Field(..., description="Периодичность привычки")
+    interval: HabitInterval = Field(..., description="Периодичность привычки")
     custom_interval: Optional[str] = Field(None, description="Пользовательский период (для period=custom)")
 
     progress: Optional[List] = Field(..., description="Прогресс выполнения array")  # из habit_progress

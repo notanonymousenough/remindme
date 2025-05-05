@@ -1,1 +1,0 @@
-TAGS_MAX_LENGTH = 7

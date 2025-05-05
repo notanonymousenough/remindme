@@ -1,6 +1,6 @@
 import logging
 import json
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

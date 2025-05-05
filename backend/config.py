@@ -1,5 +1,5 @@
 import hashlib
-from datetime import timedelta
+from datetime import timedelta, datetime
 from os import environ
 
 from passlib.context import CryptContext
@@ -120,7 +120,7 @@ class DefaultSettings(BaseSettings):
         from fastapi.security import OAuth2PasswordBearer
         return OAuth2PasswordBearer(
             scheme_name="TelegramAccessToken",
-            tokenUrl=GET_ACCESS_TOKEN_ENDPOINT
+            tokenUrl=self.GET_ACCESS_TOKEN_ENDPOINT
         )
 
 
