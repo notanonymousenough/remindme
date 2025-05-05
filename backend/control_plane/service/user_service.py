@@ -1,7 +1,5 @@
 from uuid import UUID
 
-from fastapi import HTTPException
-
 from backend.control_plane.db.repositories.user import UserRepository
 from backend.control_plane.schemas.user import UserTelegramDataSchema, UserSchema
 
