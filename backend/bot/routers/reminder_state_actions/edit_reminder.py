@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from aiogram import F, Router
 from aiogram.filters import StateFilter
@@ -25,13 +26,13 @@ async def reminder_edit_complete(call: CallbackQuery,
     data = await state.get_data()
     access_token = data['access_token']
 
-    mode = data['mode']
+    modes = data['mode']
     new_mode = [call.model_dump()['data'].split("_")[-2]]
-    await state.update_data(mode=data['mode']+new_mode)
-    mode = new_mode + mode
+    await state.update_data(mode=data['mode'] + new_mode)
+    modes = new_mode + modes
 
     tags = [None]
-    if "tag" in mode:
+    if "tag" in modes:
         tags = await client().tags_get(access_token=access_token)
 
     reminder_id = call.model_dump()['data'].split("_")[-1]
@@ -42,7 +43,7 @@ async def reminder_edit_complete(call: CallbackQuery,
     reminder = await client().reminder_get(access_token=access_token, reminder_id=reminder_id)
 
     text = message_text_tools.get_reminder(reminder)
-    keyboard = inline_kbs.edit_reminder(reminder, mode=mode, tags=tags)
+    keyboard = inline_kbs.edit_reminder(reminder, modes=modes, tags=tags)
 
     await call.message.edit_text(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
@@ -112,25 +113,38 @@ async def reminder_edit_tag(call: CallbackQuery,
     await state.update_data(mode=data['mode'] + new_mode)
     mode = new_mode + mode
 
-    tag_id = call.model_dump()()['data'].split("_")[-1]
-    reminder_id = call.model_dump()['data'].split("_")[-2]
-    reminder = await client().reminder_get(access_token=access_token, reminder_id=reminder_id)
-    reminder_tag_ids = reminder.tags + [tag_id]
+    tag_id_to_delete = None
+    new_tag_id = UUID(call.model_dump()['data'].split("_")[-1])
+    reminder_id = data['reminder_edit_id']
 
-    request = ReminderChangeTagsRequest.model_validate(
-        {
-            'id': reminder_id,
-            'tags': reminder_tag_ids
-        }
+    reminder = await client().reminder_get(access_token=access_token, reminder_id=reminder_id)
+
+    reminder_tags = []
+    if reminder.tags:
+        reminder_tags = [tag.id for tag in reminder.tags]
+    if new_tag_id in reminder_tags:
+        tag_id_to_delete = new_tag_id
+        new_tag_id = None
+
+    # TODO сделать return reminder schema (для этого сделать доп ручку в апи)
+    await client().change_reminder_tags(
+        access_token=access_token,
+        reminder_id=reminder_id,
+        tag_to_add=new_tag_id,
+        tag_to_delete=tag_id_to_delete
     )
-    await client().reminder_post(access_token=access_token, request=request)
+    reminder = await client().reminder_get(
+        access_token=access_token,
+        reminder_id=reminder_id
+    )
 
-    reminder = await client().reminder_get(access_token=access_token, reminder_id=reminder_id)
     text = message_text_tools.get_reminder(reminder)
 
-    keyboard = inline_kbs.edit_reminder(reminder, mode)
+    tags = await client().tags_get(access_token)
 
-    await call.message.edit_text(text=text, reply_markup=keyboard, parse_mode="MarkdownV2")
+    keyboard = inline_kbs.edit_reminder(reminder=reminder, tags=tags, modes=mode)
+
+    await call.message.edit_text(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
 
@@ -147,7 +161,7 @@ async def reminder_edit_tag(call: CallbackQuery,
     await state.update_data(mode=data['mode'] + new_mode)
     mode = new_mode + mode
 
-    reminder_id = data['reminder_id']
+    reminder_id = data['reminder_edit_id']
     reminder = await client().reminder_get(access_token=access_token, reminder_id=reminder_id)
 
     tags = await client().tags_get(access_token=access_token)
@@ -168,18 +182,18 @@ async def reminder_edit(call: CallbackQuery,
 
     async def reset_mode_state():
         new_mode = ['edit']
-        await state.update_data(mode=new_mode)
+        await state.update_data(modes=new_mode)
         return new_mode
 
     mode = await reset_mode_state()
 
     reminder_id = call.model_dump()['data'].split("_")[-1]
-    await state.update_data(reminder_id=reminder_id)  # set reminder_id in state data
+    await state.update_data(reminder_edit_id=reminder_id)  # set reminder_id in state data
 
     reminder = await client().reminder_get(access_token=access_token, reminder_id=reminder_id)
 
     text = message_text_tools.get_reminder(reminder)
-    keyboard = inline_kbs.edit_reminder(reminder, mode=mode)
+    keyboard = inline_kbs.edit_reminder(reminder, modes=mode)
 
     await call.message.edit_text(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)

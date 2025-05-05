@@ -79,7 +79,7 @@ def get_tags(tags, new_tag: bool = False):
     text = "🔍 Ваши тэги:\n\n"
 
     for i, tag in enumerate(tags):
-        text += f"{i + 1}) {tags[tag]["emoji"]}  – {tags[tag]["name"]}\n"
+        text += f"{i + 1}) {tag.emoji}  – {tag.name}\n"
     if new_tag:
         text += "\nКакое эмодзи будет у нового тэга?"
     else:

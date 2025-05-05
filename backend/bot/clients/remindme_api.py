@@ -1,7 +1,7 @@
 import logging
-import uuid
+from uuid import UUID
 from datetime import datetime, timedelta
-from typing import Union, Sequence, Any
+from typing import Union, Sequence, Any, List
 
 import aiohttp
 
@@ -31,7 +31,7 @@ class RemindMeApiClient(AsyncHttpClient):
         access_token = response['access_token']
         return access_token
 
-    async def reminder_complete(self, access_token: str, reminder_id: uuid.UUID, status: ReminderStatus) -> bool:
+    async def reminder_complete(self, access_token: str, reminder_id: UUID, status: ReminderStatus) -> bool:
         """
         МЕНЯЕТ СТАТУС У НАПОМИНАНИЯ
         """
@@ -59,7 +59,7 @@ class RemindMeApiClient(AsyncHttpClient):
         return False
 
     @staticmethod
-    async def reminder_get(access_token: str, reminder_id: uuid.UUID) -> Any:
+    async def reminder_get(access_token: str, reminder_id: UUID) -> Any:
         """endpoint = get_settings().GET_REMINDER_ENDPOINT.format(id=reminder_id)
         response = await self.create_request(
             endpoint,
@@ -75,16 +75,30 @@ class RemindMeApiClient(AsyncHttpClient):
 
         return reminder
 
-    async def reminder_post(self, access_token: str, request: Union[ReminderAddSchemaRequest, ReminderChangeTagsRequest]) -> bool:
-        endpoint = get_settings().POST_REMINDER_ENDPOINT
+    async def change_reminder_tags(
+            self,
+            access_token: str,
+            reminder_id: UUID,
+            tag_to_add: UUID = None,
+            tag_to_delete: UUID = None
+    ):
+        if tag_to_delete:
+            await get_tag_service().delete_tags_from_reminder(reminder_id=reminder_id, tag_ids_to_delete=[tag_to_delete])
+        if tag_to_add:
+            await get_tag_service().add_links(reminder_id, [tag_to_add])
+
+    async def reminder_post(self, access_token: str, reminder_id: UUID,
+                            request: ReminderAddSchemaRequest) -> bool:
+        endpoint = get_settings().PUT_REMINDER_ENDPOINT.format(id=reminder_id)
 
         if await self.create_request(
                 endpoint,
-                REQUEST_METHODS.POST,
+                REQUEST_METHODS.PUT,
                 access_token,
                 request_body=request
         ):
             return True
+        logging.info(f"request: {request} \nReminder Post failed")
         return False
 
     async def reminder_postpone(self, access_token: str, request: ReminderToEditTimeRequestSchema) -> bool:
@@ -105,7 +119,7 @@ class RemindMeApiClient(AsyncHttpClient):
     @staticmethod
     async def tag_get(tag_id: str) -> Union[TagSchema, bool]:
         try:
-            tag = await get_tag_service().tag_get(uuid.UUID(tag_id))
+            tag = await get_tag_service().tag_get(UUID(tag_id))
             return tag
         except Exception as ex:
             print(f"Ошибка: {ex}")
@@ -172,22 +186,15 @@ class RemindMeApiClient(AsyncHttpClient):
         ]
         return reminders
 
-    async def tags_get(self, access_token: str) -> Union[Sequence[dict], None]:
+    async def tags_get(self, access_token: str) -> Union[Sequence[TagSchema], None]:
         endpoint = get_settings().GET_TAGS_ENDPOINT
         response = await self.create_request(
             endpoint,
             REQUEST_METHODS.GET,
             access_token=access_token,
         )
-
-        tags = {
-            tag["id"]: {
-                "name": tag["name"],
-                "emoji": tag['emoji']
-            } for tag in response
-        }
-
-        return tags
+        tag_schema = [TagSchema.model_validate(tag) for tag in response]
+        return tag_schema
 
     async def habits_get(self, state_data: dict):
         await self._create_session()
@@ -241,12 +248,12 @@ class RemindMeApiClient(AsyncHttpClient):
         return True if response.status == 200 else False
 
     @staticmethod
-    async def habit_get(habit_id: uuid.UUID) -> HabitSchemaResponse:
+    async def habit_get(habit_id: UUID) -> HabitSchemaResponse:
         habit_service = get_habit_service()
         response = await habit_service.habit_get(model_id=habit_id)
         return HabitSchemaResponse.model_validate(response)
 
-    async def habit_progress_post(self, access_token: str, habit_id: uuid.UUID) -> bool:
+    async def habit_progress_post(self, access_token: str, habit_id: UUID) -> bool:
         endpoint = get_settings().POST_HABIT_PROGRESS_ENDPOINT.format(habit_id)
         if await self.create_request(
                 endpoint=endpoint,
@@ -258,7 +265,7 @@ class RemindMeApiClient(AsyncHttpClient):
         return False
 
     @staticmethod
-    async def habit_progress_delete_last(habit_id: uuid.UUID) -> bool:
+    async def habit_progress_delete_last(habit_id: UUID) -> bool:
         return await get_habit_service().habit_progress_delete_last_record(habit_id)
 
 
