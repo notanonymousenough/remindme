@@ -102,7 +102,6 @@ class HabitRepository(BaseRepository[Habit]):
             result = await session.execute(stmt)
             return result.scalars().all()
 
-    async def get_active_habits(self, user_id: UUID) -> Sequence[Habit]:
+    async def get_active_habits(self, user_id: UUID) -> Sequence[HabitSchemaResponse]:
         response = await self.get_models(user_id=user_id, removed=False)
-        # TODO: [HabitSchema.model_validate(habit) for habit in response]
-        return response
+        return [HabitSchemaResponse.model_validate(habit) for habit in response]

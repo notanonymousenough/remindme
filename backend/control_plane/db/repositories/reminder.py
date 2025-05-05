@@ -39,6 +39,11 @@ class ReminderRepository(BaseRepository[Reminder]):
 
         return ReminderSchema.model_validate(response)
 
+    async def get_active_reminders(self, user_id: UUID) -> Sequence[ReminderSchema]:
+        response = await self.get_models(user_id=user_id, status=ReminderStatus.ACTIVE, removed=False)
+        return [ReminderSchema.model_validate(reminder_response) for reminder_response in response]
+
+
     async def reminder_create(self,
                               user_id: UUID,
                               reminder: dict) -> ReminderSchema:

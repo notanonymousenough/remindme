@@ -14,6 +14,8 @@ import sqlalchemy as sa
 from sqlalchemy.sql import table, column
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 
+from backend.control_plane.db.models import HabitInterval
+
 # revision identifiers, used by Alembic.
 revision: str = 'f35b59b53d5e'
 down_revision: Union[str, None] = "PREV_REVISION"
@@ -50,6 +52,15 @@ def upgrade() -> None:
                             column('created_at', sa.DateTime(timezone=True)),
                             column('updated_at', sa.DateTime(timezone=True))
                             )
+    habits_table = table('habits',
+                            column('id', UUID),
+                            column('user_id', UUID),
+                            column('text', sa.Text),
+                            column('interval', sa.Enum(HabitInterval)),
+                            column('created_at', sa.DateTime(timezone=True)),
+                            column('start_date', sa.DateTime(timezone=True)),
+                            column('updated_at', sa.DateTime(timezone=True))
+                            )
 
     calendar_integrations_table = table('calendar_integrations',
                             column('id', UUID),
@@ -57,6 +68,7 @@ def upgrade() -> None:
                             column('caldav_url', sa.Text),
                             column('login', sa.String),
                             column('password', sa.String),
+                            column('active', sa.Boolean),
                             )
 
     # Generate a UUID for the test user
@@ -81,6 +93,19 @@ def upgrade() -> None:
 
     # Current time for reminders
     now = datetime.now(timezone.utc)
+
+    # Insert test habit
+    op.bulk_insert(habits_table, [
+        {
+            'id': uuid.uuid4(),
+            'user_id': user_id,
+            'text': 'smoke weed every day',
+            'removed': False,
+            'created_at': now,
+            'start_date': now - timedelta(weeks=5),
+            'updated_at': now
+        },
+    ])
 
     # Insert test reminders
     op.bulk_insert(reminders_table, [
@@ -148,7 +173,8 @@ def upgrade() -> None:
             'user_id': user_id,
             'caldav_url': '',
             'login': '',
-            'password': ''
+            'password': '',
+            'active': True
         },
     ])
 

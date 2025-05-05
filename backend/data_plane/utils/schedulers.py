@@ -57,8 +57,12 @@ async def ensure_workflows_running(client):
     await asyncio.gather(
         start_if_not_exists(CheckRemindersWorkflow, "check-reminders"),
         start_if_not_exists(SyncCalendarsWorkflow, "sync-calendars"),
-        schedule_if_not_scheduled(MorningMessageWorkflow, "morning-message", ScheduleCalendarSpec(hour=(ScheduleRange(6),))),
-        schedule_if_not_scheduled(CheckUserAchievementsWorkflow, "check-achievements", ScheduleCalendarSpec(minute=(ScheduleRange(0),))),
-        schedule_if_not_scheduled(StartImagesGenerationWorkflow, "start-images-generation", ScheduleCalendarSpec(day_of_month=(ScheduleRange(27),))),
-        schedule_if_not_scheduled(CleanupRemovedItemsWorkflow, "cleanup-removed-items", ScheduleCalendarSpec(day_of_week=(ScheduleRange(6),))),
+        # schedule_if_not_scheduled(MorningMessageWorkflow, "morning-message", ScheduleCalendarSpec(hour=(ScheduleRange(6),))),
+        # schedule_if_not_scheduled(CheckUserAchievementsWorkflow, "check-achievements", ScheduleCalendarSpec(minute=(ScheduleRange(0),))),
+        # schedule_if_not_scheduled(StartImagesGenerationWorkflow, "start-images-generation", ScheduleCalendarSpec(day_of_month=(ScheduleRange(27),))),
+        # schedule_if_not_scheduled(CleanupRemovedItemsWorkflow, "cleanup-removed-items", ScheduleCalendarSpec(day_of_week=(ScheduleRange(6),))),
+        start_if_not_exists(MorningMessageWorkflow, "morning-message"),
+        start_if_not_exists(CheckUserAchievementsWorkflow, "check-achievements"),
+        start_if_not_exists(StartImagesGenerationWorkflow, "start-images-generation"),
+        start_if_not_exists(CleanupRemovedItemsWorkflow, "cleanup-removed-items"),
     )

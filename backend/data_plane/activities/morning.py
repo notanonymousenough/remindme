@@ -34,27 +34,25 @@ async def check_today_habits(user_id: UUID) -> List[Dict[str, Any]]:
     Проверяет привычки, которые должны быть выполнены сегодня
     """
     logger.info("Проверка активных привычек")
-    # TODO: actualize with HabitRepository
-    # habits_repo = HabitRepository()
-    #
-    # # Получаем активные напоминания в ближайшем временном окне
-    # active_habits = await habits_repo.get_active_habits(user_id=user_id)
-    #
-    # # Формируем список напоминаний для отправки
-    # habits_to_send = []
-    # for habit in active_habits:
-    #     if habit.time.date() != datetime.now().date():
-    #         continue
-    #     habit_data = {
-    #         "id": str(habit.id),
-    #         "user_id": str(habit.user_id),
-    #         "text": habit.text,
-    #         "time": habit.time.isoformat()
-    #     }
-    #     habits_to_send.append(habit_data)
-    #
-    # return habits_to_send
-    return []
+    habits_repo = HabitRepository()
+
+    # Получаем активные напоминания в ближайшем временном окне
+    active_habits = await habits_repo.get_active_habits(user_id=user_id)
+
+    # Формируем список напоминаний для отправки
+    habits_to_send = []
+    for habit in active_habits:
+        if habit.time.date() != datetime.now().date():
+            continue
+        habit_data = {
+            "id": str(habit.id),
+            "user_id": str(habit.user_id),
+            "text": habit.text,
+            "time": habit.time.isoformat()
+        }
+        habits_to_send.append(habit_data)
+
+    return habits_to_send
 
 
 @activity.defn
