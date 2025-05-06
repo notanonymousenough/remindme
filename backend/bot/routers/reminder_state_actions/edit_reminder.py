@@ -56,6 +56,8 @@ async def reminder_edit_datetime_time(call: CallbackQuery,
                                       client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     text = "Введи новое время, например 14:00 или 2 часа дня"
 
+    await state.update_data(action="reminder_change_time")
+
     await call.message.edit_text(text=text)
     await bot.answer_callback_query(call.id)
 

@@ -11,6 +11,7 @@ from backend.bot.clients.remindme_api import RemindMeApiClient
 from backend.bot.keyboards import inline_kbs, reply_kbs
 from backend.bot.routers.reminder_state_actions import add_reminder_process_1, add_reminder_process_2, \
     new_reminder_manual_process_1, new_reminder_manual_process_2, new_reminder_manual_process_3
+from backend.bot.routers.reminder_state_actions.edit_reminder import reminder_edit_datetime_time_check
 from backend.bot.routers.tag_state_actions import new_tag_process_1, new_tag_process_2, tag_edit_process_2
 from backend.bot.routers.tag_state_actions.edit_tag import tags_edit
 from backend.bot.utils import message_text_tools
@@ -23,46 +24,46 @@ reminders_router = Router()
 @reminders_router.message(StateFilter(States.reminder_menu))
 async def route_reminder_message(message: Message, state: FSMContext):
     """
-    Общий обработчик для состояния reminder_menu, который маршрутизирует
-    сообщение в зависимости от данных в state.
+    Общий обработчик для States.reminder_menu (не только для этого роутера)
     """
     state_data = await state.get_data()
     action_type = state_data.get("action")
-    # TODO прибраться здесь
+    message_answer = message.text
 
-    if action_type == "create_tag":
-        pass
-    elif action_type == "edit_tag":
-        pass
+    match action_type:
+        case "create_tag":
+            pass
+        case "edit_tag":
+            pass
+        case "reminder_change_time":
+            await reminder_edit_datetime_time_check(message, state)
+        case "new_tag_process_1":
+            await new_tag_process_1(message=message, state=state)
+        case "new_tag_process_2":
+            await new_tag_process_2(message=message, state=state)
+        case "tag_edit_process_2":
+            await tag_edit_process_2(message=message, state=state)
+        case "reminder_add":
+            await add_reminder_process_2(message=message, state=state)
+        case "new_reminder_manual_process_1":
+            await new_reminder_manual_process_1(message=message, state=state)
+        case "new_reminder_manual_process_2":
+            await new_reminder_manual_process_2(message=message, state=state)
+        case "new_reminder_manual_process_3":
+            await new_reminder_manual_process_3(message=message, state=state)
 
-    elif message.text == "Назад":
-        await state.update_data(action=None)
-        await return_to_menu(message=message, state=state)
-    elif message.text == "Редактировать тэги":
-        await state.update_data(action=None)
-        await tags_edit(message=message, state=state)
-    elif message.text == "Добавить напоминание":
-        await state.update_data(action=None)
-        await add_reminder_process_1(message=message, state=state)
-
-    elif action_type == "new_tag_process_1":
-        await new_tag_process_1(message=message, state=state)
-    elif action_type == "new_tag_process_2":
-        await new_tag_process_2(message=message, state=state)
-
-    elif action_type == "tag_edit_process_2":
-        await tag_edit_process_2(message=message, state=state)
-
-    elif action_type == "reminder_add":
-        await add_reminder_process_2(message=message, state=state)
-    elif action_type == "new_reminder_manual_process_1":
-        await new_reminder_manual_process_1(message=message, state=state)
-    elif action_type == "new_reminder_manual_process_2":
-        await new_reminder_manual_process_2(message=message, state=state)
-    elif action_type == 'new_reminder_manual_process_3':
-        await new_reminder_manual_process_3(message=message, state=state)
-    else:
-        await message.answer("Не понимаю, что вы хотите сделать. Пожалуйста, выберите действие из меню.")
+    match message_answer:
+        case "Назад":
+            await state.update_data(action=None)
+            await return_to_menu(message=message, state=state)
+        case "Редактировать тэги":
+            await state.update_data(action=None)
+            await tags_edit(message=message, state=state)
+        case "Добавить напоминание":
+            await state.update_data(action=None)
+            await add_reminder_process_1(message=message, state=state)
+        case _:
+            await message.answer("Не понимаю, что вы хотите сделать. Пожалуйста, выберите действие из меню.")
 
 
 async def return_to_menu(message: Message, state: FSMContext):
