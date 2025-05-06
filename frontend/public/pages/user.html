@@ -173,9 +173,14 @@
                 <input id="tokenInput" class="form-control " type="text" placeholder="Токен">
               </div>
               <p></p>
-              <div class="col-3">URL</div>
+              <div class="col-3">Логин</div>
               <div class="col-7">
-                <input id="urlInput" class="form-control " type="text" placeholder="URL">
+                <input id="loginInput" class="form-control " type="text" placeholder="Логин">
+              </div>
+              <p></p>
+              <div class="col-3">Пароль</div>
+              <div class="col-7">
+                <input id="passwordInput" class="form-control " type="text" placeholder="Пароль">
               </div>
             </div>
           </div>
@@ -214,42 +219,42 @@
   <script>
     document.getElementById('syncBtn').addEventListener('click', () => {
       const token = document.getElementById('tokenInput').value.trim();
-      const url = document.getElementById('urlInput').value.trim();
+      const login = document.getElementById('loginInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
   
-      if (!token || !url) {
-        alert('Пожалуйста, заполните оба поля: Токен и URL');
+      if (!token || !login || !password) {
+        alert('Пожалуйста, заполните три поля: Токен, логин и пароль');
         return;
       }
   
-      // Отключаем кнопку "Синхронизация с календарём" и меняем текст
       const calendarBtn = document.getElementById('calendarSyncBtn');
       calendarBtn.disabled = true;
       calendarBtn.textContent = 'Синхронизация запущена';
   
-      // Асинхронная функция синхронизации
-      syncReminders(token, url)
+      syncReminders(token, login, password)
         .then(() => {
-          alert('Синхронизация запущена');
+          alert('Синхронизация успешно завершена');
         })
         .catch(err => {
           console.error('Ошибка при синхронизации:', err);
           alert('Ошибка при синхронизации. Проверьте консоль для деталей');
-          // В случае ошибки возвращаем кнопку в активное состояние и меняем текст обратно
+        })
+        .finally(() => {
           calendarBtn.disabled = false;
           calendarBtn.textContent = 'Синхронизация с календарём';
         });
     });
   
-    async function syncReminders(token, url) {
+    async function syncReminders(token, login, password) {
       const reminders = await getReminders();
   
-      const response = await fetch(url, {
+      const response = await fetch('/api/syncReminders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ reminders })
+        body: JSON.stringify({ login, password, reminders })
       });
   
       if (!response.ok) {
@@ -261,8 +266,10 @@
   
     async function getReminders() {
       const response = await fetch('/api/reminders');
-      const reminders = await response.json();
-      return reminders;
+      if (!response.ok) {
+        throw new Error('Ошибка получения напоминаний: ' + response.status);
+      }
+      return response.json();
     }
   </script>
   <script src="../js/lib/bootstrap.bundle.min.js"></script>
