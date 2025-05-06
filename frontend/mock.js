@@ -122,11 +122,14 @@ const achievement = [
     }
 ];
 
-const image = [
+const neuroimage = [
     {
-        "habitId": "grrgrg",
-        "limit": "2",
-        "offset": "1"
+        "id": "grrgrg",
+        "userId": "2",
+        "habitId": "1",
+        "imageUrl": "5464",
+        "status": ["good"],
+        "generatedAt": "2023-12-03T19:45:00Z"
     }
 ]
 
@@ -151,7 +154,7 @@ app.get('/v1/tags', (req, res) => {
 });
 
 app.get('/v1/image', (req, res) => {
-    res.json(image);
+    res.json(neuroimage);
 });
 
 app.get('/v1/reminders', (req, res) => {
