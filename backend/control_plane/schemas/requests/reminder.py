@@ -21,7 +21,7 @@ class ReminderToEditRequestSchema(BaseModel):
 
 class ReminderToEditTimeRequestSchema(BaseModel):
     id: UUID = Path(..., description="reminder ID")
-    time: datetime = Field(..., description="Новое время напоминания")
+    time: datetime = Field(..., description="Новое время напоминания и дата")
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")
 
     class Config:

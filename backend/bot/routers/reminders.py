@@ -11,7 +11,8 @@ from backend.bot.clients.remindme_api import RemindMeApiClient
 from backend.bot.keyboards import inline_kbs, reply_kbs
 from backend.bot.routers.reminder_state_actions import add_reminder_process_1, add_reminder_process_2, \
     new_reminder_manual_process_1, new_reminder_manual_process_2, new_reminder_manual_process_3
-from backend.bot.routers.reminder_state_actions.edit_reminder import reminder_edit_datetime_time_check
+from backend.bot.routers.reminder_state_actions.edit_reminder import reminder_edit_datetime_time_check, \
+    reminder_edit_datetime_date_check, reminder_edit, _reminder_edit
 from backend.bot.routers.tag_state_actions import new_tag_process_1, new_tag_process_2, tag_edit_process_2
 from backend.bot.routers.tag_state_actions.edit_tag import tags_edit
 from backend.bot.utils import message_text_tools
@@ -35,22 +36,33 @@ async def route_reminder_message(message: Message, state: FSMContext):
             pass
         case "edit_tag":
             pass
-        case "reminder_change_time":
+        case "reminder_edit_time":
             await reminder_edit_datetime_time_check(message, state)
+            return
+        case "reminder_edit_date":
+            await reminder_edit_datetime_date_check(message, state)
+            return
         case "new_tag_process_1":
             await new_tag_process_1(message=message, state=state)
+            return
         case "new_tag_process_2":
             await new_tag_process_2(message=message, state=state)
+            return
         case "tag_edit_process_2":
             await tag_edit_process_2(message=message, state=state)
+            return
         case "reminder_add":
             await add_reminder_process_2(message=message, state=state)
+            return
         case "new_reminder_manual_process_1":
             await new_reminder_manual_process_1(message=message, state=state)
+            return
         case "new_reminder_manual_process_2":
             await new_reminder_manual_process_2(message=message, state=state)
+            return
         case "new_reminder_manual_process_3":
             await new_reminder_manual_process_3(message=message, state=state)
+            return
 
     match message_answer:
         case "Назад":

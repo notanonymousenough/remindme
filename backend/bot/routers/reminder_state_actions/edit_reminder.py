@@ -1,4 +1,6 @@
-from typing import Annotated
+import logging
+from datetime import datetime
+from typing import Annotated, Union
 from uuid import UUID
 
 from aiogram import F, Router
@@ -56,7 +58,20 @@ async def reminder_edit_datetime_time(call: CallbackQuery,
                                       client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     text = "Введи новое время, например 14:00 или 2 часа дня"
 
-    await state.update_data(action="reminder_change_time")
+    await state.update_data(action="reminder_edit_time")
+
+    await call.message.edit_text(text=text)
+    await bot.answer_callback_query(call.id)
+
+
+@edit_reminder_router.callback_query(StateFilter(States.reminder_menu),
+                                     F.data.startswith("reminder_edit_datetime_date"))
+async def reminder_edit_datetime_date(call: CallbackQuery,
+                                      state: FSMContext,
+                                      client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+    text = "Введи новую дату в любом формате"
+
+    await state.update_data(action="reminder_edit_date")
 
     await call.message.edit_text(text=text)
     await bot.answer_callback_query(call.id)
@@ -67,22 +82,62 @@ async def reminder_edit_datetime_time_check(message: Message,
                                             state: FSMContext,
                                             client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     data = await state.get_data()
+    reminder_id = data["reminder_edit_id"]
     access_token = data["access_token"]
 
+    text = "Время напоминания НЕ обновлено."
     try:
-        reminder_time = date_formatting.get_correct_time(message.text)
+        reminder = await client().reminder_get(access_token, reminder_id)
+
+        old_datetime = reminder.time
+        new_time = date_formatting.get_correct_time(message.text)
+        new_datetime = datetime.combine(date=old_datetime.date(), time=new_time)
+
         request = ReminderToEditTimeRequestSchema.model_validate(
             {
-                "id": data["reminder_id"],
-                "time": reminder_time,
+                "id": reminder_id,
+                "time": new_datetime,
             }
         )
         await client().reminder_postpone(access_token=access_token, request=request)
+
         text = "Время напоминания обновлено!"
-    except:
+    except Exception as ex:
+        print(ex)
         text = "Неверный формат времени"
+    finally:
+        await message.answer(text=text)
+        await _reminder_edit(message, state)
+
+
+@edit_reminder_router.message(StateFilter(States.reminder_menu))
+async def reminder_edit_datetime_date_check(message: Message,
+                                            state: FSMContext,
+                                            client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+    data = await state.get_data()
+    access_token = data["access_token"]
+    reminder_id = data['reminder_edit_id']
+
+    try:
+        reminder = await client().reminder_get(access_token, reminder_id)
+        reminder_old_datetime = reminder.time
+        new_date = date_formatting.get_correct_date(message.text)
+        new_datetime = datetime.combine(date=new_date, time=reminder_old_datetime.time())
+
+        request = ReminderToEditTimeRequestSchema.model_validate(
+            {
+                "id": reminder_id,
+                "time": new_datetime,
+            }
+        )
+        await client().reminder_postpone(access_token=access_token, request=request)
+        text = "Дата напоминания обновлена!"
+    except Exception as ec:
+        print(ec)
+        text = "Неверный формат даты"
 
     await message.answer(text=text)
+    await _reminder_edit(message, state)
 
 
 @edit_reminder_router.callback_query(StateFilter(States.reminder_menu),
@@ -179,23 +234,40 @@ async def reminder_edit_tag(call: CallbackQuery,
 async def reminder_edit(call: CallbackQuery,
                         state: FSMContext,
                         client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+    await _reminder_edit(call, state, client)
+
+
+async def _reminder_edit(message: Union[Message, CallbackQuery],
+                         state: FSMContext,
+                         client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     data = await state.get_data()
     access_token = data['access_token']
 
+    if type(message) == CallbackQuery:
+        reminder_id = message.model_dump()['data'].split("_")[-1]
+    else:
+        reminder_id = data["reminder_edit_id"]
+
     async def reset_mode_state():
         new_mode = ['edit']
-        await state.update_data(modes=new_mode)
+        await state.update_data(
+            {
+                "action": "reminder_edit",
+                "modes": new_mode,
+                "reminder_edit_id": reminder_id
+            }
+        )
         return new_mode
 
     mode = await reset_mode_state()
-
-    reminder_id = call.model_dump()['data'].split("_")[-1]
-    await state.update_data(reminder_edit_id=reminder_id)  # set reminder_id in state data
 
     reminder = await client().reminder_get(access_token=access_token, reminder_id=reminder_id)
 
     text = message_text_tools.get_reminder(reminder)
     keyboard = inline_kbs.edit_reminder(reminder, modes=mode)
 
-    await call.message.edit_text(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")
-    await bot.answer_callback_query(call.id)
+    if type(message) == CallbackQuery:
+        await message.message.edit_text(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")
+        await bot.answer_callback_query(message.id)
+    else:
+        await message.answer(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")

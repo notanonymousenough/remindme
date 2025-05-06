@@ -13,7 +13,7 @@ from backend.bot.keyboards import reply_kbs, inline_kbs
 from backend.bot.routers import start
 from backend.bot.utils import States, date_formatting
 from backend.bot.utils.depends import Depends
-from backend.bot.utils.date_formatting import parse_relative_date
+from backend.bot.utils.date_formatting import _get_correct_date, get_correct_date
 from backend.bot.utils.parse_markdown_text import parse_for_markdown
 from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaRequest
 
@@ -86,7 +86,7 @@ async def new_reminder_manual_process_1(message: Message, state: FSMContext):
 
 async def new_reminder_manual_process_2(message: Message,
                                         state: FSMContext):
-    date = parse_relative_date(date=message.text)
+    date = get_correct_date(date=message.text)
 
     if date:
         await state.update_data(action="new_reminder_manual_process_3")
@@ -108,6 +108,7 @@ async def new_reminder_manual_process_3(message: Message,
     add_reminder_manual_date = data["add_reminder_manual_date"]
     time = message.text
 
+    text = "Ошибка отправки на сервер.. возврат"
     try:
         add_reminder_manual_time = date_formatting.get_correct_time(time)
         request = {
@@ -117,13 +118,11 @@ async def new_reminder_manual_process_3(message: Message,
         }
         request = ReminderAddSchemaRequest.model_validate(request)
 
-        if await client().reminder_post(access_token=access_token, request=request):
-            text = "Напоминание успешно добавлено!"
-        else:
-            text = "Ошибка отправки на сервер.. возврат"
+        await client().reminder_post(access_token=access_token, request=request)
+        text = "Напоминание успешно добавлено!"
     except Exception as ex:
         print(ex)
         text = "Ошибка формата напоминания.. возврат"
-
-    await message.reply(text=parse_for_markdown(text), parse_mode="MarkdownV2")
-    await start.reminders(message=message, state=state)
+    finally:
+        await message.reply(text=parse_for_markdown(text), parse_mode="MarkdownV2")
+        await start.reminders(message=message, state=state)

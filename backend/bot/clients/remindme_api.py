@@ -8,6 +8,7 @@ import aiohttp
 from backend.bot.clients.http_client import AsyncHttpClient, REQUEST_METHODS
 from backend.control_plane.config import get_settings
 from backend.control_plane.db.models import ReminderStatus
+from backend.control_plane.schemas import ReminderSchema
 from backend.control_plane.schemas.habit import HabitSchemaResponse
 from backend.control_plane.schemas.requests.habit import HabitSchemaPostRequest, HabitProgressSchemaPostRequest
 from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaRequest, ReminderToEditTimeRequestSchema, \
@@ -59,7 +60,7 @@ class RemindMeApiClient(AsyncHttpClient):
         return False
 
     @staticmethod
-    async def reminder_get(access_token: str, reminder_id: UUID) -> Any:
+    async def reminder_get(access_token: str, reminder_id: UUID) -> ReminderSchema:
         """endpoint = get_settings().GET_REMINDER_ENDPOINT.format(id=reminder_id)
         response = await self.create_request(
             endpoint,
@@ -71,7 +72,7 @@ class RemindMeApiClient(AsyncHttpClient):
         reminder = await reminder_service.reminder_get(reminder_id)
 
         reminder_tags = await get_tag_service().get_tags_info_from_reminder_id(reminder_id=reminder.id)
-        reminder.tags = reminder_tags  # TAG SCHEMA
+        reminder.tags = reminder_tags  # TAG SCHEMA # TODO fix or delete
 
         return reminder
 

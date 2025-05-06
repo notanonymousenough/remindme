@@ -7,10 +7,11 @@ def normalize_date_string(date_string) -> str:
 
 
 # дата вручную без Y_GPT
-def parse_relative_date(date: str) -> Union[datetime, None]:
+def _get_correct_date(date: str) -> Union[datetime, None]:
     """
     Пытается распознать относительную дату в строке и вернуть дату в формате ДД.ММ.ГГГГ.
     """
+    # TODO perf
     date_string_normalized = normalize_date_string(date)
     words = date_string_normalized.split()
     today = datetime.datetime.now()
@@ -22,6 +23,7 @@ def parse_relative_date(date: str) -> Union[datetime, None]:
     }
 
     time_units_keywords = {
+        "дн": datetime.timedelta(days=1),
         "недел": datetime.timedelta(weeks=1),  # "недел" чтобы покрыть "неделю" и "недели"
         "месяц": datetime.timedelta(days=30),  # Приближение, можно уточнить для разных месяцев
         "год": datetime.timedelta(days=365),  # Приближение, можно учитывать високосные годы
@@ -50,6 +52,16 @@ def get_correct_time(text: str):
     # TODO yandex gpt
     time = datetime.time(*map(int, text.split(":")), second=0)  # сейчас только так
     return time
+
+
+def get_correct_date(date: str):
+    # TODO yandex gpt
+
+    gpt_answer = None
+    if gpt_answer:
+        return gpt_answer
+
+    return _get_correct_date(date)
 
 
 def get_russian_date(datetime_object: datetime):
