@@ -1,9 +1,9 @@
 from backend.control_plane.schemas.reminder import ReminderSchema
-from backend.control_plane.schemas.requests.reminder import ReminderToEditRequestSchema, \
-    ReminderToEditTimeRequestSchema
+from backend.control_plane.schemas.requests.reminder import ReminderEditRequest, \
+    ReminderEditTimeRequest
 
 __all__ = [
-    "ReminderToEditTimeRequestSchema",
-    "ReminderToEditRequestSchema",
+    "ReminderEditTimeRequest",
+    "ReminderEditRequest",
     "ReminderSchema"
 ]

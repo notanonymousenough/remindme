@@ -15,17 +15,12 @@ class ReminderRepository(BaseRepository[Reminder]):
 
     async def reminder_update(self,
                               request: dict) -> ReminderSchema:
-        tag_ids = request.pop("tags")
         reminder_id = request.pop("id")
 
         async with await get_async_session() as session:
             response = await self.update_model(model_id=reminder_id, session=session, **request)
             if not response:
                 raise HTTPException(404, "Wrong entity for reminder_update")
-
-            if tag_ids:
-                tag_repo = get_tag_repo()
-                await tag_repo.add_tags_to_reminder(tag_ids=tag_ids, session=session, reminder_id=response.id)
 
             await session.refresh(response)
 

@@ -37,19 +37,6 @@ class UserSchema(BaseModel):
         from_attributes = True
 
 
-class UserAddShema(BaseModel):
-    id: Optional[UUID] = Field(None, description="Уникальный идентификатор пользователя в системе.")
-    username: str = Field(..., description="Имя пользователя (логин) для идентификации.")
-    telegram_id: str = Field(None, description="Телеграм айди")
-    timezone: str = Field("UTC", description="Часовой пояс пользователя для локализации времени.")
-    level: int = Field(1, description="level user")
-    experience: int = Field(0, description="exp user")
-    streak: int = Field(0, description="streak user")
-
-    class Config:
-        from_attributes = True
-
-
 class UserTelegramDataSchema(BaseModel):
     id: str = Field(None, description="Телеграм айди")  # telegram id
     first_name: Optional[str] = Field(None, description="first name")

@@ -15,7 +15,7 @@ class ReminderSchema(BaseModel):
     text: str = Field(..., description="Текст напоминания")
     time: datetime = Field(..., description="Время напоминания")
     tags: Optional[List[TagSchema]] = Field(..., description="Список тегов")
-    status: Optional[str] = Field(ReminderStatus.ACTIVE, description="Статус напоминания")
+    status: Optional[ReminderStatus] = Field(ReminderStatus.ACTIVE, description="Статус напоминания")
     removed: Optional[bool] = Field(None, description="Признак удаления напоминания")
     created_at: Optional[datetime] = Field(datetime.now(), description="Время создания")
     updated_at: Optional[datetime] = Field(datetime.now(), description="Время последнего обновления")

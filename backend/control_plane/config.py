@@ -50,6 +50,10 @@ class DefaultSettings(BaseSettings):
     PUT_HABIT_ENDPOINT: str = "habit/{id}/"
     POST_HABIT_PROGRESS_ENDPOINT: str = "habit/{id}/progress/"
 
+    # USER ENDPOINTS
+    USER_UPDATE_ENDPOINT: str = "user/"
+    GET_USER: str = "user/"
+
     # POSTGRES INFO
     POSTGRES_USER: str = environ.get("POSTGRES_USER", 'postgres')
     POSTGRES_PASSWORD: str = environ.get("POSTGRES_PASSWORD", 'postgres')

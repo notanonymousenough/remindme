@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import HTTPException
 
 from backend.control_plane.db.repositories.user import UserRepository
+from backend.control_plane.schemas.requests.user import UserUpdateRequest
 from backend.control_plane.schemas.user import UserTelegramDataSchema, UserSchema
 
 
@@ -14,9 +15,9 @@ class UserService:
         response = await self.repo.get_by_model_id(user_id)
         return UserSchema.model_validate(response)
 
-    async def update_user(self, request: UserSchema) -> UserSchema:
+    async def update_user(self, request: UserUpdateRequest) -> UserSchema:
         # TODO model dump in repo
-        user = request.model_dump(exclude_unset=True)
+        user = request.model_dump(exclude_none=True, exclude_unset=True)
         user_id = user.pop('id')
         return await self.repo.update_user(user_id=user_id, user=user)
 
@@ -40,7 +41,7 @@ class UserService:
 
     async def update_user_from_telegram_data(self, user_to_update: UserSchema) -> UserSchema:
         # TODO model dump in repo
-        user = user_to_update.model_dump(exclude_unset=True)
+        user = user_to_update.model_dump(exclude_none=True, exclude_unset=True)
         user_id = user.pop('id')
         return UserSchema.model_validate(await self.repo.update_user(user_id, user))
 
