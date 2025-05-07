@@ -12,7 +12,7 @@ from backend.bot.keyboards import inline_kbs, reply_kbs
 from backend.bot.routers.reminder_state_actions import add_reminder_process_1, add_reminder_process_2, \
     new_reminder_manual_process_1, new_reminder_manual_process_2, new_reminder_manual_process_3
 from backend.bot.routers.reminder_state_actions.edit_reminder import reminder_edit_datetime_time_check, \
-    reminder_edit_datetime_date_check, reminder_edit, _reminder_edit
+    reminder_edit_datetime_date_check, reminder_edit_name_check
 from backend.bot.routers.tag_state_actions import new_tag_process_1, new_tag_process_2, tag_edit_process_2
 from backend.bot.routers.tag_state_actions.edit_tag import tags_edit
 from backend.bot.utils import message_text_tools
@@ -28,6 +28,8 @@ async def route_reminder_message(message: Message, state: FSMContext):
     Общий обработчик для States.reminder_menu (не только для этого роутера)
     """
     state_data = await state.get_data()
+    await state.update_data(action=None)
+
     action_type = state_data.get("action")
     message_answer = message.text
 
@@ -41,6 +43,9 @@ async def route_reminder_message(message: Message, state: FSMContext):
             return
         case "reminder_edit_date":
             await reminder_edit_datetime_date_check(message, state)
+            return
+        case "reminder_edit_name":
+            await reminder_edit_name_check(message, state)
             return
         case "new_tag_process_1":
             await new_tag_process_1(message=message, state=state)
@@ -66,13 +71,10 @@ async def route_reminder_message(message: Message, state: FSMContext):
 
     match message_answer:
         case "Назад":
-            await state.update_data(action=None)
             await return_to_menu(message=message, state=state)
         case "Редактировать тэги":
-            await state.update_data(action=None)
             await tags_edit(message=message, state=state)
         case "Добавить напоминание":
-            await state.update_data(action=None)
             await add_reminder_process_1(message=message, state=state)
         case _:
             await message.answer("Не понимаю, что вы хотите сделать. Пожалуйста, выберите действие из меню.")

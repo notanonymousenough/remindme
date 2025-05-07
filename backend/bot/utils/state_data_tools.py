@@ -3,11 +3,12 @@ from aiogram.fsm.context import FSMContext
 from backend.bot.clients import get_client_async
 
 
-async def state_data_reset(state: FSMContext, telegram_id: int, access_token: str):
+async def state_data_reset(state: FSMContext, telegram_id: int, access_token: str, timezone):
     """
     Reset data in state
     """
     await state.set_data({
+        "timezone": timezone,
         "day": "today",
         "user_id": telegram_id,
         "day_filter": "today",

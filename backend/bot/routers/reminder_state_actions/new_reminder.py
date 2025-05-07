@@ -15,7 +15,7 @@ from backend.bot.utils import States, date_formatting
 from backend.bot.utils.depends import Depends
 from backend.bot.utils.date_formatting import _get_correct_date, get_correct_date
 from backend.bot.utils.parse_markdown_text import parse_for_markdown
-from backend.control_plane.schemas.requests.reminder import ReminderAddSchemaRequest
+from backend.control_plane.schemas.requests.reminder import ReminderPostRequest
 
 new_reminder_router = Router(name="add_reminder")
 
@@ -116,7 +116,7 @@ async def new_reminder_manual_process_3(message: Message,
             "time": datetime.datetime.combine(add_reminder_manual_date, add_reminder_manual_time),
             "tags": []
         }
-        request = ReminderAddSchemaRequest.model_validate(request)
+        request = ReminderPostRequest.model_validate(request)
 
         await client().reminder_post(access_token=access_token, request=request)
         text = "Напоминание успешно добавлено!"

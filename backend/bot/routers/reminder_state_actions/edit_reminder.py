@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 from typing import Annotated, Union
 from uuid import UUID
@@ -15,7 +14,8 @@ from backend.bot.keyboards import inline_kbs
 from backend.bot.utils import States, message_text_tools, date_formatting
 from backend.bot.utils.depends import Depends
 from backend.bot.utils.parse_markdown_text import parse_for_markdown
-from backend.control_plane.schemas.requests.reminder import ReminderToEditTimeRequestSchema, ReminderChangeTagsRequest
+from backend.control_plane.schemas.requests.reminder import ReminderEditTimeRequest, \
+    ReminderEditNameRequest
 
 edit_reminder_router = Router(name="edit_reminder_router")
 
@@ -49,6 +49,42 @@ async def reminder_edit_complete(call: CallbackQuery,
 
     await call.message.edit_text(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
+
+
+@edit_reminder_router.callback_query(StateFilter(States.reminder_menu),
+                                     F.data.startswith("reminder_edit_rename_"))
+async def reminder_edit_name(call: CallbackQuery,
+                             state: FSMContext,
+                             client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+    await state.update_data(action="reminder_edit_name")
+
+    text = "Какое будет имя у напоминания?"
+
+    await call.message.edit_text(text=parse_for_markdown(text), parse_mode="MarkdownV2")
+    await bot.answer_callback_query(call.id)
+
+
+@edit_reminder_router.message(StateFilter(States.reminder_menu))
+async def reminder_edit_name_check(message: Message,
+                                   state: FSMContext,
+                                   client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+    data = await state.get_data()
+    access_token = data["access_token"]
+    reminder_id = data["reminder_edit_id"]
+    reminder_name = message.text
+
+    request = ReminderEditNameRequest.model_validate(
+        {
+            "id":  reminder_id,
+            "text": reminder_name
+        }
+    )
+
+    if await client().reminder_put(access_token=access_token, request=request):
+        await _reminder_edit(message, state)
+    else:
+        await message.answer(text="Ошибка отправки на сервер..")
+        await _reminder_edit(message, state)
 
 
 @edit_reminder_router.callback_query(StateFilter(States.reminder_menu),
@@ -93,7 +129,7 @@ async def reminder_edit_datetime_time_check(message: Message,
         new_time = date_formatting.get_correct_time(message.text)
         new_datetime = datetime.combine(date=old_datetime.date(), time=new_time)
 
-        request = ReminderToEditTimeRequestSchema.model_validate(
+        request = ReminderEditTimeRequest.model_validate(
             {
                 "id": reminder_id,
                 "time": new_datetime,
@@ -124,7 +160,7 @@ async def reminder_edit_datetime_date_check(message: Message,
         new_date = date_formatting.get_correct_date(message.text)
         new_datetime = datetime.combine(date=new_date, time=reminder_old_datetime.time())
 
-        request = ReminderToEditTimeRequestSchema.model_validate(
+        request = ReminderEditTimeRequest.model_validate(
             {
                 "id": reminder_id,
                 "time": new_datetime,
