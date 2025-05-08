@@ -3,7 +3,7 @@ from sqlalchemy.future import select
 from sqlalchemy import and_, or_
 from typing import List, Optional
 from uuid import UUID
-from ..models.neuro_image import NeuroImage, ImageStatus
+from ..models.neuro_image import NeuroImage
 from .base import BaseRepository
 
 

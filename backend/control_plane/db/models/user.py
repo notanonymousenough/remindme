@@ -14,8 +14,7 @@ class User(BaseModel):
     last_name = Column(String(255))
     birth_date = Column(Date)
     telegram_id = Column(String(255), unique=True)
-    calendar_integration_key = Column(String(255))
-    timezone = Column(String(100), default="UTC")
+    timezone_offset = Column(Integer, default=180)
     level = Column(Integer, default=1)
     experience = Column(Integer, default=0)
     streak = Column(Integer, default=0)
@@ -27,7 +26,9 @@ class User(BaseModel):
     habits = relationship("Habit", back_populates="user", cascade="all, delete-orphan")
     achievements = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")
     neuro_images = relationship("NeuroImage", back_populates="user")
-    statistics = relationship("UserStatistics", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    roles = relationship("UserRole", back_populates="user")
+    quota_usages = relationship("QuotaUsage", back_populates="user")
+    calendar_integrations = relationship("CalendarIntegration", back_populates="user")
 
     def __repr__(self):
         return f"<User {self.username} ({self.id})>"

@@ -8,10 +8,10 @@ const cors = require('cors');
 const app = express();
 require('dotenv').config();
 const PORT = process.env.PORT || 80;
-const BACKEND_URL = process.env.BACKEND_URL ||'http://localhost:8000'; // URL вашего бэкенда
+const BACKEND_URL = process.env.BACKEND_URL ||'http://127.0.0.1:8000'; // URL вашего бэкенда
 
 app.use(cors({
-  origin: 'http://localhost', // Укажите домен вашего фронтенда
+  origin: 'http://127.0.0.1', // Укажите домен вашего фронтенда
   credentials: true
 }));
 app.use(cookieParser());
@@ -25,7 +25,7 @@ app.use(session({
 
 app.get('/api/auth/telegram', async (req, res) => {
   try {
-    const response = await axios.post(`${BACKEND_URL}/v1/auth/telegram`, req.body);
+    const response = await axios.post(`${BACKEND_URL}/v1/auth/telegram`, req.query);
     req.session.token = response.data; 
     res.redirect('/reminders');
   } catch (error) {
@@ -93,5 +93,5 @@ app.use('/api/*', async (req, res) => {
 app.use(express.static('public'));
 
 app.listen(PORT, () => {
-  console.log(`Node.js proxy server running on http://localhost:${PORT}`);
+  console.log(`Node.js proxy server running on http://127.0.0.1:${PORT}`);
 });

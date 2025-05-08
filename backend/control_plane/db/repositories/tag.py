@@ -15,7 +15,7 @@ class TagRepository(BaseRepository[Tag]):
         super().__init__(Tag)
 
     async def add_tag_to_reminder(self, tag_id: UUID, reminder_id: UUID) -> bool:  # in reminder_tags table
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             stmt = insert(reminder_tags).values(
                 tag_id=tag_id,
                 reminder_id=reminder_id
@@ -53,7 +53,7 @@ class TagRepository(BaseRepository[Tag]):
         return True
 
     async def delete_tag_from_reminder(self, tag_id: UUID, reminder_id: UUID) -> bool:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             stmt = delete(reminder_tags).where(
                 and_(
                     getattr(reminder_tags, "reminder_id") == reminder_id,
@@ -70,7 +70,7 @@ class TagRepository(BaseRepository[Tag]):
                 return False
 
     async def get_links_tags_id_from_reminder_id(self, reminder_id: UUID) -> Sequence[UUID]:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             stmt = select(reminder_tags.c.tag_id).where(
                 and_(
                     reminder_tags.c.reminder_id == reminder_id
@@ -80,7 +80,7 @@ class TagRepository(BaseRepository[Tag]):
             return result.scalars().all()
 
     async def get_links_reminders_id_from_tag_id(self, tag_id: UUID) -> Sequence[UUID]:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             stmt = select(reminder_tags.c.reminder_id).where(
                 and_(
                     reminder_tags.c.tag_id == tag_id
