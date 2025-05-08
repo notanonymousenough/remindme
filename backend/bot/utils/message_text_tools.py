@@ -95,7 +95,7 @@ def get_habits(habits: List[HabitSchemaResponse]):
         text += f"{index + 1}. {habit.text}: ({get_completed_record_sum(habit=habit)} раз за {HABIT_PERIOD_NAMES[habit.interval]})\n"
 
     text += "\nВыберите привычку:"
-    return parse_for_markdown(text)
+    return text
 
 
 def get_habit(habit: HabitSchemaResponse):

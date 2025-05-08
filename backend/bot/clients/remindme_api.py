@@ -277,7 +277,7 @@ class RemindMeApiClient(AsyncHttpClient):
         return HabitSchemaResponse.model_validate(response)
 
     async def habit_progress_post(self, access_token: str, habit_id: UUID) -> bool:
-        endpoint = get_settings().POST_HABIT_PROGRESS_ENDPOINT.format(habit_id)
+        endpoint = get_settings().POST_HABIT_PROGRESS_ENDPOINT.format(id=habit_id)
         if await self.create_request(
                 endpoint=endpoint,
                 method=REQUEST_METHODS.POST,

@@ -22,6 +22,7 @@ def timezones_keyboard():
 
     return keyboard.as_markup()
 
+
 def reminder_datetime(reminder):
     keyboard = InlineKeyboardBuilder()
     keyboard.add(InlineKeyboardButton(text="Поменять дату", callback_data="reminder_edit_datetime_date_"))
@@ -54,9 +55,11 @@ def edit_reminder(reminder, modes: List[str], tags: Sequence[TagSchema] = None):
         for tag in tags:
 
             if tag.emoji in reminder_tags_emoji:
-                keyboard.add(InlineKeyboardButton(text=f"|{tag.emoji}|", callback_data=f"reminder_edit_tag_change_{tag.id}"))
+                keyboard.add(
+                    InlineKeyboardButton(text=f"|{tag.emoji}|", callback_data=f"reminder_edit_tag_change_{tag.id}"))
             else:
-                keyboard.add(InlineKeyboardButton(text=f"{tag.emoji}", callback_data=f"reminder_edit_tag_change_{tag.id}"))
+                keyboard.add(
+                    InlineKeyboardButton(text=f"{tag.emoji}", callback_data=f"reminder_edit_tag_change_{tag.id}"))
     else:
         keyboard.row(InlineKeyboardButton(text="Изменить тэг", callback_data=f"reminder_edit_tag_{reminder.id}"))
     keyboard.row(InlineKeyboardButton(text="Переименовать", callback_data=f"reminder_edit_rename_{reminder.id}"))
@@ -72,7 +75,17 @@ def get_habit_edit_buttons(habit: HabitSchemaResponse):
     else:
         keyboard.row(InlineKeyboardButton(text="Выполнить", callback_data=f"habit_complete_True_{habit.id}"))
     keyboard.row(InlineKeyboardButton(text="Переименовать", callback_data=f"habit_edit_name_{habit.id}"))
-    keyboard.row(InlineKeyboardButton(text="Удалить", callback_data=f"habit_delete_{habit.id}"))
+    keyboard.row(InlineKeyboardButton(text="<–", callback_data=f"habit_edit_return_"))
+    keyboard.add(InlineKeyboardButton(text="Удалить", callback_data=f"habit_delete_{habit.id}"))
+
+    return keyboard.as_markup()
+
+
+def habit_delete_check(habit_id):
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.row(InlineKeyboardButton(text="Да, удаляем", callback_data=f"habit_delete_true_{habit_id}"))
+    keyboard.add(InlineKeyboardButton(text="Оставь да", callback_data=f"habit_delete_false_"))
 
     return keyboard.as_markup()
 

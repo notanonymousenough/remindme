@@ -38,6 +38,14 @@ async def route_habit_message(message: Message, state: FSMContext):
         await habits_get(message, state)
 
 
+@habits_router.callback_query(StateFilter(States.habits_menu),
+                              F.data.startswith("habit_edit_return_"))
+async def habit_edit(call: CallbackQuery,
+                     state: FSMContext,
+                     client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+    await habits_get(call.message, state, need_reply=False, edit_call=True)
+
+
 @habits_router.message(StateFilter(States.habits_menu),
                        F.text == "Назад")
 async def return_to_menu(message: Message, state: FSMContext):
@@ -55,14 +63,15 @@ async def return_to_menu(message: Message, state: FSMContext):
 async def habit_edit(call: CallbackQuery,
                      state: FSMContext,
                      client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+
     data = await state.get_data()
     habit_id = call.dict()["data"].split("_")[-1]
     habit = await client().habit_get(habit_id=habit_id)
-    text = message_text_tools.get_habit(habit)
 
+    text = message_text_tools.get_habit(habit)
     keyboard = inline_kbs.get_habit_edit_buttons(habit)
 
-    await call.message.answer(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")
+    await call.message.edit_text(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
 
@@ -84,14 +93,26 @@ async def habit_change_status(call: CallbackQuery,
 
 async def habits_get(message: Message,
                      state: FSMContext,
-                     client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
+                     client=Annotated[RemindMeApiClient, Depends(get_client_async)],
+                     need_reply: bool = False,
+                     text: str = "",
+                     edit_call: bool = False):
     data = await state.get_data()
 
     next_coef = data["next_coef"]
     habits = sorted((await client().habits_get(state_data=data)), key=lambda x: x.updated_at)
-    text = message_text_tools.get_habits(habits=habits)
 
-    await message.answer(text="Вывожу список привычек..", reply_markup=reply_kbs.habits_menu())
-    await message.answer(text=parse_for_markdown(text),
-                         reply_markup=inline_kbs.get_habits_buttons(habits=habits, next_coef=next_coef),
-                         parse_mode="MarkdownV2")
+    text += message_text_tools.get_habits(habits=habits)
+
+    if need_reply:
+        text_reply = "Вывожу список привычек.."
+        await message.answer(text=parse_for_markdown(text_reply), reply_markup=reply_kbs.habits_menu())
+
+    if edit_call:
+        await message.edit_text(text=parse_for_markdown(text),
+                                reply_markup=inline_kbs.get_habits_buttons(habits=habits, next_coef=next_coef),
+                                parse_mode="MarkdownV2")
+    else:
+        await message.answer(text=parse_for_markdown(text),
+                             reply_markup=inline_kbs.get_habits_buttons(habits=habits, next_coef=next_coef),
+                             parse_mode="MarkdownV2")

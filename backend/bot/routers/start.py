@@ -95,7 +95,7 @@ async def habits(message: Message,
     text = message_text_tools.get_habits(habits=habits)
 
     await message.answer(text="Вывожу список привычек..", reply_markup=reply_kbs.habits_menu())
-    await message.answer(text=text,
+    await message.answer(text=parse_for_markdown(text),
                          reply_markup=inline_kbs.get_habits_buttons(habits=habits, next_coef=next_coef),
                          parse_mode="MarkdownV2")
 
