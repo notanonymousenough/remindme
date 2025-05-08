@@ -1,10 +1,11 @@
 from typing import TypeVar, Generic, Type, Optional, Sequence
+from uuid import UUID
 
 from fastapi import HTTPException
+from sqlalchemy import update, delete, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import update, delete, func, and_
-from uuid import UUID
+
 from ..engine import get_async_session
 from ..models import BaseModel
 
@@ -44,21 +45,27 @@ class BaseRepository(Generic[T]):
             result = await session.execute(stmt)
             return result.scalars().one_or_none()
 
-    async def get_models(self, user_id: UUID, **kwargs) -> Sequence[T]:
-        async with await get_async_session() as session:
-            stmt = select(self.model).where(
+    async def get_models(self, user_id: UUID, session=None, **kwargs) -> Sequence[T]:
+        if not session:
+            async with await get_async_session() as session:
+                return await self._get_models(user_id, session, **kwargs)
+        else:
+            return await self._get_models(user_id, session, **kwargs)
+
+    async def _get_models(self, user_id: UUID, session, **kwargs) -> Sequence[T]:
+        stmt = select(self.model).where(
+            and_(
+                getattr(self.model, "user_id") == user_id
+            )
+        )
+        for key, value in kwargs.items():
+            stmt = stmt.where(
                 and_(
-                    getattr(self.model, "user_id") == user_id
+                    getattr(self.model, key) == value
                 )
             )
-            for key, value in kwargs.items():
-                stmt = stmt.where(
-                    and_(
-                        getattr(self.model, key) == value
-                    )
-                )
-            result = await session.execute(stmt)
-            return result.scalars().all()
+        result = await session.execute(stmt)
+        return result.scalars().all()
 
     async def update_model(self, model_id: UUID, session=None, **kwargs) -> Optional[T]:
         if not session:

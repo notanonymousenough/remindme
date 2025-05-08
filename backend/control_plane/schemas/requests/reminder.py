@@ -8,6 +8,11 @@ from pydantic import BaseModel, Field
 from backend.control_plane.db.models import ReminderStatus
 
 
+class ReminderEditStatusRequest(BaseModel):
+    id: UUID = Path(..., description="reminder ID")
+    status: ReminderStatus = Field(..., description="NEW STATUS")
+
+
 class ReminderEditRequest(BaseModel):
     id: UUID = Path(..., description="reminder ID")
     text: str = Field(None, description="Новый текст напоминания")
