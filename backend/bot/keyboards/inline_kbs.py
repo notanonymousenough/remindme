@@ -109,6 +109,7 @@ def get_habits_buttons(habits: List[HabitSchemaResponse], next_coef: int):
     if end_index < count_of_habits:
         keyboard.add(InlineKeyboardButton(text="->", callback_data=f"habit_next_{next_coef + 1}"))
 
+    keyboard.row(InlineKeyboardButton(text="Назад", callback_data="habits_return_"))
     return keyboard.as_markup()
 
 
