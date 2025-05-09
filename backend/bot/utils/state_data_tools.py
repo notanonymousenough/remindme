@@ -23,5 +23,6 @@ async def state_data_reset(state: FSMContext, telegram_id: int, access_token: st
         "new_tag_review": False,  # new_tag
         "new_tag_emoji": None,
         "reminder_id": None,  # edit_reminder
-        'mode': []
+        'mode': [],
+        "habit_name": None,  # edit habit
     })

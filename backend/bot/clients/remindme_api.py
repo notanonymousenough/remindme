@@ -270,6 +270,18 @@ class RemindMeApiClient(AsyncHttpClient):
         await self._close_session()
         return True if response.status == 200 else False
 
+    async def habit_delete(self, access_token: str, habit_id: UUID) -> bool:
+        await self._create_session()
+        endpoint = get_settings().DELETE_HABIT_ENDPOINT.format(id=habit_id)
+
+        if await self.create_request(
+                endpoint=endpoint,
+                method=REQUEST_METHODS.DELETE,
+                access_token=access_token,
+        ):
+            return True
+        return False
+
     @staticmethod
     async def habit_get(habit_id: UUID) -> HabitSchemaResponse:
         habit_service = get_habit_service()
@@ -294,11 +306,12 @@ class RemindMeApiClient(AsyncHttpClient):
     async def user_get(self, access_token: str):
         endpoint = get_settings().GET_USER
         response = await self.create_request(
-                endpoint=endpoint,
-                method=REQUEST_METHODS.GET,
-                access_token=access_token
+            endpoint=endpoint,
+            method=REQUEST_METHODS.GET,
+            access_token=access_token
         )
         return UserSchema.model_validate(response)
+
 
 _client = None
 

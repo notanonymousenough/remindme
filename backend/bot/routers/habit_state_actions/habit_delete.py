@@ -29,13 +29,15 @@ async def habit_delete_check(call: CallbackQuery,
 async def habit_delete_check(call: CallbackQuery,
                              state: FSMContext,
                              client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
-    pass
     data = await state.get_data()
+    access_token = data["access_token"]
+    habit_name = data["habit_name"]
+
     habit_id = call.dict()["data"].split("_")[-1]
 
-    await client().habit
+    await client().habit_delete(access_token=access_token, habit_id=habit_id)
 
-    text = f"*Привычка {habit.name} удалена!*\n\n"
+    text = f"*Привычка {habit_name} удалена!*\n\n"
     await habits_get(call.message, state, text=text, need_reply=False)
 
 
