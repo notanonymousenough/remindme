@@ -76,14 +76,18 @@ async def reminder_edit(
     responses={
         204: {
             "description": "Напоминание успешно удалено"
+        },
+        404: {
+            "description": "Напоминание не удалено"
         }
-    }
+    },
+    response_model=None
 )
 async def reminder_delete(
         reminder_service: Annotated[RemindersService, Depends(get_reminder_service)],
         reminder_id: UUID,
         user: UserSchema = Depends(get_authorized_user)
-):
+) -> Response:
     if await reminder_service.reminder_remove(user_id=user.id, reminder_id=reminder_id):
         return Response(status=204, text=f"Успешно удалено {reminder_id}")
     return Response(status=404, text="Напоминание не удалено")

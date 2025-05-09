@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
 
 from pydantic import Field, BaseModel
@@ -8,8 +8,8 @@ from backend.control_plane.schemas.habit import HabitSchemaResponse
 
 
 class RemovedEntities(BaseModel):
-    reminder: Optional[ReminderSchema] = Field(None)
-    habit: Optional[HabitSchemaResponse] = Field(None)
+    reminders: Optional[Sequence[ReminderSchema]] = Field(None)
+    habits: Optional[Sequence[HabitSchemaResponse]] = Field(None)
 
 
 class RemovedEntitiesIDs(BaseModel):

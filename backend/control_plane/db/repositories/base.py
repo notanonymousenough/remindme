@@ -74,7 +74,7 @@ class BaseRepository(Generic[T]):
         else:
             return await self.__update_model(model_id, session, **kwargs)
 
-    async def __update_model(self, model_id: UUID, session, **kwargs):
+    async def __update_model(self, model_id: UUID, session, **kwargs) -> Optional[T]:
         stmt = update(self.model).where(
             and_(
                 getattr(self.model, "id") == model_id

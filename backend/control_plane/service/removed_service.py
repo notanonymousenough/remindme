@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from backend.control_plane.db.engine import get_async_session
@@ -32,12 +33,22 @@ class RemovedService:
             }
         )
 
-    async def restore_removed(self, reminder_id: UUID,
-                              habit_id: UUID):
+    async def restore_removed(self, reminder_id: UUID = None,
+                              habit_id: UUID = None):
         async with await get_async_session() as session:
-            await self.reminders_repo.update_model(reminder_id, session=session, **{"status": ReminderStatus.ACTIVE})
-            await self.habits_repo.update_model(habit_id, session=session, **{"removed": False})
-        pass
+            if reminder_id:
+                restored_reminder = await self.reminders_repo.update_model(reminder_id, session=session,
+                                                                           **{"status": ReminderStatus.ACTIVE})
+            if habit_id:
+                restored_habit = await self.habits_repo.update_model(habit_id, session=session, **{"removed": False})
+        if restored_reminder or restored_habit:
+            return RemovedEntities.model_validate(
+                {
+                    "habit": restored_reminder,
+                    "reminder": restored_habit
+                }
+            )
+        return False
 
 
 _removed_service = RemovedService()

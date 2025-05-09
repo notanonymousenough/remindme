@@ -1,9 +1,11 @@
-from typing import Annotated
+from typing import Annotated, Sequence
 from uuid import UUID
 
+from aiohttp.web_response import Response
 from fastapi import APIRouter, Depends
 from fastapi.params import Body
 
+from backend.control_plane.schemas.habit import HabitSchemaResponse
 from backend.control_plane.schemas.requests.habit import HabitSchemaPostRequest, HabitSchemaPutRequest, \
     HabitProgressSchemaPostRequest
 from backend.control_plane.schemas.user import UserSchema
@@ -22,7 +24,7 @@ habit_router = APIRouter(
 async def habits_get(
         habit_service: Annotated[HabitService, Depends(get_habit_service)],
         user: UserSchema = Depends(get_authorized_user)
-):
+) -> Sequence[HabitSchemaResponse]:
     return await habit_service.find_habits_by_user_id(user_id=user.id)
 
 
@@ -33,7 +35,7 @@ async def habits_post(
         habit_service: Annotated[HabitService, Depends(get_habit_service)],
         request: HabitSchemaPostRequest = Body(...),
         user: UserSchema = Depends(get_authorized_user)
-):
+) -> HabitSchemaResponse:
     return await habit_service.create_habit(user_id=user.id, request=request)
 
 
@@ -44,7 +46,7 @@ async def habit_put(
         habit_service: Annotated[HabitService, Depends(get_habit_service)],
         request: HabitSchemaPutRequest = Body(...),
         user: UserSchema = Depends(get_authorized_user)
-):
+) -> HabitSchemaResponse:
     return await habit_service.habit_update(request=request)
 
 
@@ -53,15 +55,22 @@ async def habit_put(
     responses={
         200: {
             "description": "Привычка удалена"
+        },
+        404: {
+            "description": "Привычка не удалена"
         }
-    }
+    },
+    response_model=None
 )
 async def habit_delete(
         habit_service: Annotated[HabitService, Depends(get_habit_service)],
         habit_id: UUID,
         user: UserSchema = Depends(get_authorized_user)
-):
-    return await habit_service.remove_habit(user_id=user.id, model_id=habit_id)
+) -> Response:
+    # TODO (Arsen): менять только флажок
+    if await habit_service.remove_habit(user_id=user.id, model_id=habit_id):
+        return Response(status=200, text="Привычка удалена")
+    return Response(status=404)
 
 
 @habit_router.post(
@@ -72,5 +81,5 @@ async def habit_progress_post(
         request: HabitProgressSchemaPostRequest = Body(...),
         user: UserSchema = Depends(get_authorized_user)
 ):
+    # TODO types
     return await habit_service.add_habit_progress(request=request)
-
