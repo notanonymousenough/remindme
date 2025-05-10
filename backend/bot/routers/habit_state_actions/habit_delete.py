@@ -5,6 +5,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
+import backend.bot.keyboards.habits_inline_kbs
 from backend.bot.clients.remindme_api import RemindMeApiClient, get_client_async
 from backend.bot.keyboards import inline_kbs
 from backend.bot.routers.habits import habits_get
@@ -35,9 +36,10 @@ async def habit_delete_check(call: CallbackQuery,
 
     habit_id = call.dict()["data"].split("_")[-1]
 
-    await client().habit_delete(access_token=access_token, habit_id=habit_id)
-
-    text = f"*Привычка {habit_name} удалена!*\n\n"
+    if await client().habit_delete(access_token=access_token, habit_id=habit_id):
+        text = f"*Привычка {habit_name} удалена!*\n\n"
+    else:
+        text = "*ОШИБКА ОТПРАВКИ НА СЕРВЕР*"
     await habits_get(call.message, state, text=text, need_reply=False)
 
 
@@ -49,6 +51,6 @@ async def habit_delete_check(call: CallbackQuery,
     habit_id = call.dict()['data'].split("_")[-1]
 
     text = "Вы точно хотите удалить эту привычку?"
-    keyboard = inline_kbs.habit_delete_check(habit_id)
+    keyboard = backend.bot.keyboards.habits_inline_kbs.habit_delete_check(habit_id)
 
     await call.message.edit_text(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from backend.bot.utils import date_formatting
 from backend.bot.utils.habit_tools import HABIT_PERIOD_NAMES, get_completed_record_sum, \
@@ -88,7 +88,10 @@ def get_tags(tags, new_tag: bool = False):
     return text
 
 
-def get_habits(habits: List[HabitSchemaResponse]):
+def get_habits(habits: List[HabitSchemaResponse] = None) -> str:
+    if not habits:
+        return "У вас нет привычек. Создайте свою привычку прямо сейчас!"
+
     text = "🎯 Ваши привычки:\n\n"
 
     for index, habit in enumerate(habits):

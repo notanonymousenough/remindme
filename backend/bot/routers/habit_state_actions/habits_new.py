@@ -3,19 +3,25 @@ from typing import Annotated
 from aiogram import Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
 from backend.bot.keyboards import reply_kbs
 from backend.bot.keyboards.reply_kbs import HABITS_ADD_PROCESS, HABITS_ADD_PROCESS_INTERVALS
-from backend.bot.routers import start
+from backend.bot.routers.habit_state_actions.habits_get import habits_get
 from backend.bot.utils.depends import Depends
 from backend.bot.utils.parse_markdown_text import parse_for_markdown
 from backend.bot.utils.states import States
-from backend.control_plane.schemas.requests.habit import HabitSchemaPostRequest
+from backend.control_plane.schemas.requests.habit import HabitPostRequest
 
 new_habit_router = Router()
+
+
+@new_habit_router.callback_query(StateFilter(States.habits_menu),
+                                 F.data.startswith("habits_add"))
+async def _habit_add_callback(call: CallbackQuery, state: FSMContext):
+    await habit_add_process_start(call.message, state)
 
 
 @new_habit_router.message(StateFilter(States.habits_menu),
@@ -49,7 +55,7 @@ async def habit_add_process_end(message: Message,
                                 state: FSMContext,
                                 client=Annotated[RemindMeApiClient, Depends(get_client_async)]):
     data = await state.get_data()
-    habit_request = HabitSchemaPostRequest.model_validate(
+    habit_request = HabitPostRequest.model_validate(
         {
             "text": data["add_habit_name"],
             "interval": HABITS_ADD_PROCESS_INTERVALS[message.text],
@@ -64,4 +70,4 @@ async def habit_add_process_end(message: Message,
     await message.answer(text=parse_for_markdown(text),
                          reply_markup=reply_kbs.habits_menu(),
                          parse_mode="MarkdownV2")
-    await start.habits(message, state)
+    await habits_get(message, state)

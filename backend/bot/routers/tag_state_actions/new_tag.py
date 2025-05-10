@@ -5,6 +5,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+import backend.bot.keyboards.tags_inline_kbs
 from backend.bot import bot
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
@@ -82,7 +83,7 @@ async def new_tag_process_2(message: Message,
     await state.update_data(new_tag_name=message.text)
     text = f"{data["new_tag_emoji"]} – {message.text}. \n\nВсе верно?"
 
-    await message.reply(text=text, reply_markup=inline_kbs.get_tag_review_buttons())
+    await message.reply(text=text, reply_markup=backend.bot.keyboards.tags_inline_kbs.get_tag_review_buttons())
 
 
 @new_tag_router.callback_query(StateFilter(States.reminder_menu),

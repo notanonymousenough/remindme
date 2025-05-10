@@ -5,6 +5,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+import backend.bot.keyboards.tags_inline_kbs
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
 from backend.bot.keyboards import inline_kbs
@@ -25,7 +26,7 @@ async def tags_edit(message: Message,
     tags = await client().tags_get(access_token=access_token)
 
     text = message_text_tools.get_tags(tags=tags)
-    markup = inline_kbs.tag_menu_get_tags(tags=tags)
+    markup = backend.bot.keyboards.tags_inline_kbs.tag_menu_get_tags(tags=tags)
 
     await message.reply(text=text, reply_markup=markup)
 
@@ -48,7 +49,7 @@ async def tag_edit_process_0(call: CallbackQuery,
         tag = await client().tag_get(tag_id=tag_id)
         text = f"Эмодзи тэга: {tag.emoji}\nИмя тэга: {tag.name}\n\nЧто вы хотите поменять?"
 
-        keyboard = inline_kbs.tag_edit_menu_get_actions()
+        keyboard = backend.bot.keyboards.tags_inline_kbs.tag_edit_menu_get_actions()
         await state.update_data(tag_edit_process_name=tag.name)
         await state.update_data(tag_edit_process_emoji=tag.emoji)
 

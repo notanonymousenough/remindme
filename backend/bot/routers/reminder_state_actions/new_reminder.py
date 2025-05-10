@@ -6,6 +6,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+import backend.bot.keyboards.reminders_inline_kbs
 from backend.bot import bot
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
@@ -46,7 +47,7 @@ async def add_reminder_process_2(message: Message, state: FSMContext):
     text = reminder_text + str(time_text) + str(tag_text)  # example for text constructor
 
     await message.answer(text=f"{reminder_text}\n\nЗдесь всё верно?",
-                         reply_markup=inline_kbs.add_reminder_check(),
+                         reply_markup=backend.bot.keyboards.reminders_inline_kbs.add_reminder_check(),
                          parse_mode="MarkdownV2")
 
 

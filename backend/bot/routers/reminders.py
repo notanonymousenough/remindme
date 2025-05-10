@@ -5,6 +5,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+import backend.bot.keyboards.reminders_inline_kbs
 from backend.bot import bot
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
@@ -110,11 +111,11 @@ async def reminders_next(call: CallbackQuery,
     )
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
-                                                                           next_coef=data['next_coef'],
-                                                                           day_filter=data["day"],
-                                                                           tag_filter_is_click=data["tag_filter_click"],
-                                                                           tags=tags),
+                                 reply_markup=backend.bot.keyboards.reminders_inline_kbs.reminders_buttons(reminders=reminders,
+                                                                                                           next_coef=data['next_coef'],
+                                                                                                           day_filter=data["day"],
+                                                                                                           tag_filter_is_click=data["tag_filter_click"],
+                                                                                                           tags=tags),
                                  parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
@@ -141,11 +142,11 @@ async def reminders_previous(call: CallbackQuery,
     )
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
-                                                                           next_coef=data['next_coef'],
-                                                                           day_filter=data["day"],
-                                                                           tag_filter_is_click=data["tag_filter_click"],
-                                                                           tags=tags),
+                                 reply_markup=backend.bot.keyboards.reminders_inline_kbs.reminders_buttons(reminders=reminders,
+                                                                                                           next_coef=data['next_coef'],
+                                                                                                           day_filter=data["day"],
+                                                                                                           tag_filter_is_click=data["tag_filter_click"],
+                                                                                                           tags=tags),
                                  parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
@@ -174,11 +175,11 @@ async def reminders_day_filter(call: CallbackQuery,
     )
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
-                                                                           next_coef=data['next_coef'],
-                                                                           day_filter=data["day"],
-                                                                           tag_filter_is_click=data["tag_filter_click"],
-                                                                           tags=tags),
+                                 reply_markup=backend.bot.keyboards.reminders_inline_kbs.reminders_buttons(reminders=reminders,
+                                                                                                           next_coef=data['next_coef'],
+                                                                                                           day_filter=data["day"],
+                                                                                                           tag_filter_is_click=data["tag_filter_click"],
+                                                                                                           tags=tags),
                                  parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
@@ -206,11 +207,11 @@ async def reminder_tag_filter(call: CallbackQuery,
     )
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
-                                                                           next_coef=data['next_coef'],
-                                                                           day_filter=data["day"],
-                                                                           tag_filter_is_click=data["tag_filter_click"],
-                                                                           tags=tags),
+                                 reply_markup=backend.bot.keyboards.reminders_inline_kbs.reminders_buttons(reminders=reminders,
+                                                                                                           next_coef=data['next_coef'],
+                                                                                                           day_filter=data["day"],
+                                                                                                           tag_filter_is_click=data["tag_filter_click"],
+                                                                                                           tags=tags),
                                  parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
@@ -241,11 +242,11 @@ async def reminder_tags_select(call: CallbackQuery,
     )
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
-                                                                           next_coef=data['next_coef'],
-                                                                           day_filter=data["day"],
-                                                                           tag_filter_is_click=data["tag_filter_click"],
-                                                                           tags=tags),
+                                 reply_markup=backend.bot.keyboards.reminders_inline_kbs.reminders_buttons(reminders=reminders,
+                                                                                                           next_coef=data['next_coef'],
+                                                                                                           day_filter=data["day"],
+                                                                                                           tag_filter_is_click=data["tag_filter_click"],
+                                                                                                           tags=tags),
                                  parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
 
@@ -274,10 +275,10 @@ async def reminder_tags_filter_select(call: CallbackQuery,
     )
 
     await call.message.edit_text(text=text,
-                                 reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
-                                                                           next_coef=data['next_coef'],
-                                                                           day_filter=data["day"],
-                                                                           tag_filter_is_click=data["tag_filter_click"],
-                                                                           tags=tags),
+                                 reply_markup=backend.bot.keyboards.reminders_inline_kbs.reminders_buttons(reminders=reminders,
+                                                                                                           next_coef=data['next_coef'],
+                                                                                                           day_filter=data["day"],
+                                                                                                           tag_filter_is_click=data["tag_filter_click"],
+                                                                                                           tags=tags),
                                  parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)

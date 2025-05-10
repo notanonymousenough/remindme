@@ -6,6 +6,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
+import backend.bot.keyboards.reminders_inline_kbs
 from backend.bot import bot
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
@@ -43,7 +44,7 @@ async def reminder_edit_complete(call: CallbackQuery,
     reminder = await client().reminder_get(access_token=access_token, reminder_id=reminder_id)
 
     text = message_text_tools.get_reminder(reminder)
-    keyboard = inline_kbs.edit_reminder(reminder, modes=modes, tags=tags)
+    keyboard = backend.bot.keyboards.reminders_inline_kbs.edit_reminder(reminder, modes=modes, tags=tags)
 
     await call.message.edit_text(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
@@ -126,7 +127,7 @@ async def reminder_edit_tag(call: CallbackQuery,
 
     tags = await client().tags_get(access_token)
 
-    keyboard = inline_kbs.edit_reminder(reminder=reminder, tags=tags, modes=mode)
+    keyboard = backend.bot.keyboards.reminders_inline_kbs.edit_reminder(reminder=reminder, tags=tags, modes=mode)
 
     await call.message.edit_text(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
@@ -150,7 +151,7 @@ async def reminder_edit_tag(call: CallbackQuery,
 
     tags = await client().tags_get(access_token=access_token)
 
-    keyboard = inline_kbs.edit_reminder(reminder, mode, tags)
+    keyboard = backend.bot.keyboards.reminders_inline_kbs.edit_reminder(reminder, mode, tags)
 
     await call.message.edit_reply_markup(reply_markup=keyboard, parse_mode="MarkdownV2")
     await bot.answer_callback_query(call.id)
@@ -193,7 +194,7 @@ async def _reminder_edit(message: Union[Message, CallbackQuery],
 
     text = f"*{text}*" + message_text_tools.get_reminder(reminder)
 
-    keyboard = inline_kbs.edit_reminder(reminder, modes=mode)
+    keyboard = backend.bot.keyboards.reminders_inline_kbs.edit_reminder(reminder, modes=mode)
 
     if type(message) == CallbackQuery:
         await message.message.edit_text(text=parse_for_markdown(text), reply_markup=keyboard, parse_mode="MarkdownV2")

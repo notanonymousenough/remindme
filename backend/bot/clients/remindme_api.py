@@ -10,7 +10,8 @@ from backend.control_plane.config import get_settings
 from backend.control_plane.db.models import ReminderStatus
 from backend.control_plane.schemas import ReminderSchema
 from backend.control_plane.schemas.habit import HabitSchemaResponse
-from backend.control_plane.schemas.requests.habit import HabitSchemaPostRequest, HabitProgressSchemaPostRequest
+from backend.control_plane.schemas.requests.habit import HabitPostRequest, HabitProgressRequest, \
+    HabitPutRequest
 from backend.control_plane.schemas.requests.reminder import ReminderPostRequest, ReminderEditTimeRequest, \
     ReminderCompleteRequest, ReminderEditNameRequest
 from backend.control_plane.schemas.requests.tag import TagRequestSchema
@@ -219,32 +220,31 @@ class RemindMeApiClient(AsyncHttpClient):
         tag_schema = [TagSchema.model_validate(tag) for tag in response]
         return tag_schema
 
-    async def habits_get(self, state_data: dict):
+    async def habits_get(self, access_token: str):
         await self._create_session()
         endpoint = get_settings().GET_HABITS_ENDPOINT
 
-        headers = {
-            "Authorization": f"Bearer {state_data["access_token"]}"
-        }
-
-        response = await self._session.get(
-            url=endpoint,
-            headers=headers
+        response = await self.create_request(
+            endpoint=endpoint,
+            method=REQUEST_METHODS.GET,
+            access_token=access_token
         )
 
-        try:
-            response.raise_for_status()
-            response_json = (await response.json())
-        except aiohttp.ClientError as e:
-            await self._close_session()
-            print(f"Ошибка при получении привычек: {e}")
-            return {}
-
-        await self._close_session()
-        habits = [HabitSchemaResponse.model_validate(model) for model in response_json]
+        habits = [HabitSchemaResponse.model_validate(model) for model in response]
         return habits
 
-    async def habit_post(self, state_data: dict, habit_request: HabitSchemaPostRequest) -> bool:
+    async def habit_put(self, access_token: str, habit_id: UUID, request: HabitPutRequest) -> bool:
+        endpoint = get_settings().PUT_HABIT_ENDPOINT.format(id=habit_id)
+        if await self.create_request(
+            endpoint=endpoint,
+            method=REQUEST_METHODS.PUT,
+            access_token=access_token,
+            request_body=request
+        ):
+            return True
+        return False
+
+    async def habit_post(self, state_data: dict, habit_request: HabitPostRequest) -> bool:
         await self._create_session()
         endpoint = get_settings().POST_HABIT_ENDPOINT
 
@@ -294,7 +294,7 @@ class RemindMeApiClient(AsyncHttpClient):
                 endpoint=endpoint,
                 method=REQUEST_METHODS.POST,
                 access_token=access_token,
-                request_body=HabitProgressSchemaPostRequest.model_validate({'habit_id': habit_id})
+                request_body=HabitProgressRequest.model_validate({'habit_id': habit_id})
         ):
             return True
         return False

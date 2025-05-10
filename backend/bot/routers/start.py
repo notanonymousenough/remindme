@@ -5,9 +5,11 @@ from aiogram.filters import CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+import backend.bot.keyboards.reminders_inline_kbs
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
-from backend.bot.keyboards import reply_kbs, inline_kbs
+from backend.bot.keyboards import reply_kbs
+from backend.bot.routers.habits import habits_get
 from backend.bot.utils import States, message_text_tools
 from backend.bot.utils.depends import Depends
 from backend.bot.utils.parse_markdown_text import parse_for_markdown
@@ -27,12 +29,12 @@ async def start_menu(message: Message, state: FSMContext, client=Annotated[Remin
     user = await client().user_get(access_token)
     if user.timezone:
         await state.update_data(timezone=user.timezone)
-        text = "Привет!\n\nУправление ботом через клавиатуру снизу :)"
+        text = "Привет!\n\nУправление ботом через клавиатуру снизу."
     else:
         text = "Привет! Необходимо выбрать свой часовой пояс:"
         # keyboard = inline_kbs....... stalo lenb pisat kod na etom meste
 
-    await message.answer(text=parse_for_markdown(text),
+    await message.answer(text=text,
                          reply_markup=reply_kbs.main_menu())
 
 
@@ -65,11 +67,11 @@ async def reminders(message: Message,
 
     await message.answer(text="Вывожу список напоминаний..", reply_markup=reply_kbs.reminders_menu())
     await message.answer(text=text,
-                         reply_markup=inline_kbs.reminders_buttons(reminders=reminders,
-                                                                   next_coef=data['next_coef'],
-                                                                   day_filter=data["day"],
-                                                                   tag_filter_is_click=data["tag_filter_click"],
-                                                                   tags=tags),
+                         reply_markup=backend.bot.keyboards.reminders_inline_kbs.reminders_buttons(reminders=reminders,
+                                                                                                   next_coef=data['next_coef'],
+                                                                                                   day_filter=data["day"],
+                                                                                                   tag_filter_is_click=data["tag_filter_click"],
+                                                                                                   tags=tags),
                          parse_mode="MarkdownV2")
 
 
@@ -87,17 +89,7 @@ async def habits(message: Message,
         "next_coef": 0,
         "timezone": data['timezone']
     })
-
-    data = await state.get_data()
-
-    next_coef = data["next_coef"]
-    habits = sorted((await client().habits_get(state_data=data)), key=lambda x: x.updated_at)
-    text = message_text_tools.get_habits(habits=habits)
-
-    await message.answer(text="Вывожу список привычек..", reply_markup=reply_kbs.habits_menu())
-    await message.answer(text=parse_for_markdown(text),
-                         reply_markup=inline_kbs.get_habits_buttons(habits=habits, next_coef=next_coef),
-                         parse_mode="MarkdownV2")
+    await habits_get(message, state, need_reply=True)
 
 
 @start_router.message(F.text == "Прогресс")

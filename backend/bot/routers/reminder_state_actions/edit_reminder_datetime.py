@@ -6,6 +6,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
+import backend.bot.keyboards.reminders_inline_kbs
 from backend.bot import bot
 from backend.bot.clients.remindme_api import RemindMeApiClient, get_client_async
 from backend.bot.keyboards import inline_kbs
@@ -116,6 +117,6 @@ async def reminder_edit_datetime_(call: CallbackQuery,
 
     reminder = await client().reminder_get(access_token=access_token, reminder_id=reminder_id)
 
-    keyboard = inline_kbs.edit_reminder(reminder, ["datetime"])  # one mode only
+    keyboard = backend.bot.keyboards.reminders_inline_kbs.edit_reminder(reminder, ["datetime"])  # one mode only
     await call.message.edit_reply_markup(reply_markup=keyboard)
     await bot.answer_callback_query(call.id)
