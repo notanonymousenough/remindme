@@ -6,7 +6,7 @@ from aiogram.types import TelegramObject
 from typing import Callable, Dict, Any, Awaitable
 
 from backend.bot.clients.remindme_api import RemindMeApiClient
-from backend.control_plane.schemas.user import UserTelegramDataSchema
+from backend.control_plane.schemas.auth import UserTelegramDataSchema
 from backend.control_plane.utils import auth
 
 

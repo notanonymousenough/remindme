@@ -7,7 +7,6 @@ from aiogram.types import CallbackQuery
 
 import backend.bot.keyboards.habits_inline_kbs
 from backend.bot.clients.remindme_api import RemindMeApiClient, get_client_async
-from backend.bot.keyboards import inline_kbs
 from backend.bot.routers.habits import habits_get
 from backend.bot.utils import States
 from backend.bot.utils.depends import Depends
@@ -36,11 +35,14 @@ async def habit_delete_check(call: CallbackQuery,
 
     habit_id = call.dict()["data"].split("_")[-1]
 
-    if await client().habit_delete(access_token=access_token, habit_id=habit_id):
+    text = ""
+    try:
+        await client().habit_delete(access_token=access_token, habit_id=habit_id)
         text = f"*Привычка {habit_name} удалена!*\n\n"
-    else:
-        text = "*ОШИБКА ОТПРАВКИ НА СЕРВЕР*"
-    await habits_get(call.message, state, text=text, need_reply=False)
+    except:
+        text = "*ОШИБКА ОТПРАВКИ НА СЕРВЕР*\n\n"
+    finally:
+        await habits_get(call.message, state, text=text, need_reply=False)
 
 
 @habit_delete_router.callback_query(StateFilter(States.habits_menu),

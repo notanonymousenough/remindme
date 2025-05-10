@@ -18,7 +18,7 @@ class AsyncHttpClient:
         self._session = aiohttp.ClientSession(base_url=get_settings().FULL_ADDRESS)
 
     async def create_request(self, endpoint: str, method: REQUEST_METHODS, access_token: str=None, request_body=None) -> \
-            Union[dict, None]:
+            Union[dict, bool, None]:
         await self._create_session()
 
         SESSION_REQUEST_METHODS = {

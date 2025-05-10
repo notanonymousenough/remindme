@@ -33,14 +33,3 @@ class HabitPutRequest(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-# Habit Progress
-class HabitProgressRequest(BaseModel):
-    habit_id: UUID = Path(...)
-
-    record_date: date = Field(datetime.now().date(), description="Дата отметки")
-    completed: bool = Field(True, description="Выполнена или нет")
-
-    class Config:
-        from_attributes = True

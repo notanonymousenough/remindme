@@ -23,6 +23,8 @@ def tag_edit_menu_get_actions():
 
     keyboard.add(InlineKeyboardButton(text="Имя", callback_data=f"tag_edit_action_NAME"))
     keyboard.add(InlineKeyboardButton(text='Эмодзи', callback_data=f"tag_edit_action_EMOJI"))
+    keyboard.add(InlineKeyboardButton(text="Удалить", callback_data="tag_delete"))
+    keyboard.row(InlineKeyboardButton(text="<-", callback_data="tag_edit_return"))
 
     return keyboard.as_markup()
 

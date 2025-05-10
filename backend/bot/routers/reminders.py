@@ -16,7 +16,7 @@ from backend.bot.routers.reminder_state_actions.edit_reminder import reminder_ed
 from backend.bot.routers.reminder_state_actions.edit_reminder_datetime import reminder_edit_datetime_time_check, \
     reminder_edit_datetime_date_check
 from backend.bot.routers.tag_state_actions import new_tag_process_1, new_tag_process_2, tag_edit_process_2
-from backend.bot.routers.tag_state_actions.edit_tag import tags_edit
+from backend.bot.routers.tag_state_actions.get_tags import tags_get
 from backend.bot.utils import message_text_tools
 from backend.bot.utils.depends import Depends
 from backend.bot.utils.states import States
@@ -75,7 +75,7 @@ async def route_reminder_message(message: Message, state: FSMContext):
         case "Назад":
             await return_to_menu(message=message, state=state)
         case "Редактировать тэги":
-            await tags_edit(message=message, state=state)
+            await tags_get(message=message, state=state)
         case "Добавить напоминание":
             await add_reminder_process_1(message=message, state=state)
         case _:

@@ -45,9 +45,9 @@ async def habit_edit_name_end(message: Message,
         }
     )
     if await client().habit_put(access_token=access_token, habit_id=habit_id, request=request):
-        text = "*Привычка переименована!*"
+        text = "*Привычка переименована!*\n\n"
     else:
-        text = "*ОШИБКА ОТПРАВКИ НА СЕРВЕР*"
+        text = "*ОШИБКА ОТПРАВКИ НА СЕРВЕР*\n\n"
 
     await habits_get(message, state, need_reply=False, text=text, edit_call=False)
 

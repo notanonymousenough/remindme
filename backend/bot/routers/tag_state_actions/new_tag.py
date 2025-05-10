@@ -10,7 +10,7 @@ from backend.bot import bot
 from backend.bot.clients import get_client_async
 from backend.bot.clients.remindme_api import RemindMeApiClient
 from backend.bot.keyboards import inline_kbs
-from backend.bot.routers.tag_state_actions.edit_tag import tags_edit
+from backend.bot.routers.tag_state_actions.get_tags import tags_get
 from backend.bot.utils.depends import Depends
 from backend.bot.utils.message_checkers import emoji_check
 from backend.bot.utils.state_data_tools import state_data_reset
@@ -115,4 +115,4 @@ async def new_tag_process_3_call(call: CallbackQuery,
     await state_data_reset(state=state, telegram_id=call.from_user.id, access_token=data['access_token'])
     await call.message.edit_text(text=text)
 
-    await tags_edit(message=call.message, state=state)
+    await tags_get(message=call.message, state=state, text=f"*{text}*")

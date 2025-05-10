@@ -10,13 +10,14 @@ from backend.control_plane.config import get_settings
 from backend.control_plane.db.models import ReminderStatus
 from backend.control_plane.schemas import ReminderSchema
 from backend.control_plane.schemas.habit import HabitSchemaResponse
-from backend.control_plane.schemas.requests.habit import HabitPostRequest, HabitProgressRequest, \
-    HabitPutRequest
+from backend.control_plane.schemas.requests.habit import HabitPostRequest, HabitPutRequest
+from backend.control_plane.schemas.requests.habit_progress import HabitProgressRequest
 from backend.control_plane.schemas.requests.reminder import ReminderPostRequest, ReminderEditTimeRequest, \
     ReminderCompleteRequest, ReminderEditNameRequest
 from backend.control_plane.schemas.requests.tag import TagRequestSchema
 from backend.control_plane.schemas.tag import TagSchema
-from backend.control_plane.schemas.user import UserTelegramDataSchema, UserSchema
+from backend.control_plane.schemas.user import UserSchema
+from backend.control_plane.schemas.auth import UserTelegramDataSchema
 from backend.control_plane.service.habit_service import get_habit_service
 from backend.control_plane.service.reminder_service import get_reminder_service
 from backend.control_plane.service.tag_service import get_tag_service
@@ -143,11 +144,21 @@ class RemindMeApiClient(AsyncHttpClient):
     @staticmethod
     async def tag_get(tag_id: str) -> Union[TagSchema, bool]:
         try:
-            tag = await get_tag_service().tag_get(UUID(tag_id))
+            tag = await get_tag_service().get_tag(UUID(tag_id))
             return tag
         except Exception as ex:
             print(f"Ошибка: {ex}")
             return False
+
+    async def tag_delete(self, access_token: str, tag_id: UUID):
+        endpoint = get_settings().DELETE_TAG_ENDPOINT.format(id=tag_id)
+        if await self.create_request(
+            endpoint=endpoint,
+            method=REQUEST_METHODS.DELETE,
+            access_token=access_token
+        ):
+            return True
+        return False
 
     async def tag_post(self, access_token: str, request: TagRequestSchema) -> bool:
         await self._create_session()
@@ -229,7 +240,6 @@ class RemindMeApiClient(AsyncHttpClient):
             method=REQUEST_METHODS.GET,
             access_token=access_token
         )
-
         habits = [HabitSchemaResponse.model_validate(model) for model in response]
         return habits
 
