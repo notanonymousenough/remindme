@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -18,21 +18,21 @@ class ReminderRepository(BaseRepository[Reminder]):
     def __init__(self):
         super().__init__(Reminder)
 
-    async def get_removed(self, user_id: UUID, reminder_statuses: List[ReminderStatus], session=None):
+    async def get_removed(self, user_id: UUID, reminder_statuses: List[ReminderStatus], session=None) -> Sequence[ReminderSchema]:
         if session:
             return await self._get_removed(user_id, reminder_statuses, session)
         else:
             async with await get_async_session() as session:
                 return await self._get_removed(user_id, reminder_statuses, session)
 
-    async def _get_removed(self, user_id: UUID, reminder_statuses: List[ReminderStatus], session):
+    async def _get_removed(self, user_id: UUID, reminder_statuses: List[ReminderStatus], session) -> Sequence[ReminderSchema]:
         stmt = select(self.model).where(
             and_(
                 getattr(self.model, "user_id") == user_id,
                 getattr(self.model, "status") in reminder_statuses
             ))
         response = await session.execute(stmt)
-        return response.scalars().all
+        return response.scalars().all()
 
     async def reminder_update(self,
                               reminder: Union[ReminderEditRequest, ReminderEditStatusRequest],

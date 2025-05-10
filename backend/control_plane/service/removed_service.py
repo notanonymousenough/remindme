@@ -35,6 +35,7 @@ class RemovedService:
 
     async def restore_removed(self, reminder_id: UUID = None,
                               habit_id: UUID = None):
+        restored_reminder, restored_habit = None, None
         async with await get_async_session() as session:
             if reminder_id:
                 restored_reminder = await self.reminders_repo.update_model(reminder_id, session=session,

@@ -8,7 +8,7 @@ from .base import BaseRepository
 from ..engine import get_async_session
 from ..models.habit import Habit, HabitProgress
 from ...schemas.habit import HabitSchemaResponse
-from ...schemas.requests.habit import HabitProgressSchemaPostRequest
+from ...schemas.requests.habit import HabitProgressRequest
 
 
 class HabitRepository(BaseRepository[Habit]):
@@ -19,7 +19,8 @@ class HabitRepository(BaseRepository[Habit]):
         async with await get_async_session() as session:
             stmt = select(self.model).where(
                 and_(
-                    getattr(self.model, "user_id") == user_id
+                    getattr(self.model, "user_id") == user_id,
+                    getattr(self.model, "removed") == False
                 )
             ).options(selectinload(self.model.progress_records))  # Добавляем eager load
             result = await session.execute(stmt)
@@ -39,14 +40,14 @@ class HabitRepository(BaseRepository[Habit]):
 
     # habit_progress table
     @staticmethod
-    async def add_habit_progress(request: dict) -> HabitProgressSchemaPostRequest:
+    async def add_habit_progress(request: dict) -> HabitProgressRequest:
         async with await get_async_session() as session:
             obj = HabitProgress(**request)
             session.add(obj)
 
             await session.flush()
             await session.commit()
-            return HabitProgressSchemaPostRequest.model_validate(obj)
+            return HabitProgressRequest.model_validate(obj)
 
     @staticmethod
     async def habit_progress_delete_last_record(habit_id: UUID) -> bool:

@@ -1,10 +1,13 @@
 from typing import Sequence
 from uuid import UUID
 
+from sqlalchemy import and_, update
+
+from backend.control_plane.db.engine import get_async_session
 from backend.control_plane.db.repositories.habit import HabitRepository
 from backend.control_plane.schemas.habit import HabitSchemaResponse
-from backend.control_plane.schemas.requests.habit import HabitSchemaPostRequest, HabitSchemaPutRequest, \
-    HabitProgressSchemaPostRequest
+from backend.control_plane.schemas.requests.habit import HabitPostRequest, HabitPutRequest, \
+    HabitProgressRequest
 
 
 class HabitService:
@@ -14,25 +17,25 @@ class HabitService:
     async def find_habits_by_user_id(self, user_id: UUID) -> Sequence[HabitSchemaResponse]:
         return await self.repo.find_habits_by_user_id(user_id=user_id)
 
-    async def create_habit(self, user_id: UUID, request: HabitSchemaPostRequest) -> HabitSchemaResponse:
+    async def create_habit(self, user_id: UUID, request: HabitPostRequest) -> HabitSchemaResponse:
         return await self.repo.create_habit(user_id=user_id, request=request.model_dump())
 
-    async def habit_update(self, request: HabitSchemaPutRequest) -> HabitSchemaResponse:
+    async def habit_update(self, request: HabitPutRequest) -> HabitSchemaResponse:
         # TODO model dump in repo
-        request = request.model_dump()
+        request = request.model_dump(exclude_none=True, exclude_unset=True)
         model_id = request.pop("habit_id")
         response = await self.repo.update_model(model_id=model_id, **request)
         return HabitSchemaResponse.model_validate(response)
 
-    async def remove_habit(self, user_id: UUID, model_id: UUID) -> bool:
-        return await self.repo.delete_model(user_id=user_id, model_id=model_id)
-
+    async def remove_habit(self, model_id: UUID) -> bool:
+        r = bool(await self.repo.update_model(model_id=model_id, session=None, **{"removed": True}))
+        return r
     async def habit_get(self, model_id: UUID) -> HabitSchemaResponse:
         response = await self.repo.get_by_model_id(model_id=model_id)
         return HabitSchemaResponse.model_validate(response)
 
     # habit progress table
-    async def add_habit_progress(self, request: HabitProgressSchemaPostRequest) -> HabitProgressSchemaPostRequest:
+    async def add_habit_progress(self, request: HabitProgressRequest) -> HabitProgressRequest:
         return await self.repo.add_habit_progress(request=request.model_dump())
 
     async def habit_progress_delete_last_record(self, habit_id: UUID) -> bool:
