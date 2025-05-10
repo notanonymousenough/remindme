@@ -1,13 +1,10 @@
 from typing import Sequence
 from uuid import UUID
 
-from sqlalchemy import and_, update
-
-from backend.control_plane.db.engine import get_async_session
 from backend.control_plane.db.repositories.habit import HabitRepository
 from backend.control_plane.schemas.habit import HabitSchemaResponse
-from backend.control_plane.schemas.requests.habit import HabitPostRequest, HabitPutRequest, \
-    HabitProgressRequest
+from backend.control_plane.schemas.requests.habit import HabitPostRequest, HabitPutRequest
+from backend.control_plane.schemas.requests.habit_progress import HabitProgressRequest
 
 
 class HabitService:
@@ -30,6 +27,7 @@ class HabitService:
     async def remove_habit(self, model_id: UUID) -> bool:
         r = bool(await self.repo.update_model(model_id=model_id, session=None, **{"removed": True}))
         return r
+
     async def habit_get(self, model_id: UUID) -> HabitSchemaResponse:
         response = await self.repo.get_by_model_id(model_id=model_id)
         return HabitSchemaResponse.model_validate(response)

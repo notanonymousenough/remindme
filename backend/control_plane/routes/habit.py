@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends
 from fastapi.params import Body
 
 from backend.control_plane.schemas.habit import HabitSchemaResponse
-from backend.control_plane.schemas.requests.habit import HabitPostRequest, HabitPutRequest, \
-    HabitProgressRequest
+from backend.control_plane.schemas.requests.habit import HabitPostRequest, HabitPutRequest
+from backend.control_plane.schemas.requests.habit_progress import HabitProgressRequest
 from backend.control_plane.schemas.user import UserSchema
 from backend.control_plane.service.habit_service import HabitService, get_habit_service
 from backend.control_plane.utils.auth import get_authorized_user

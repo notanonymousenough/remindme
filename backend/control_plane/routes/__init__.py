@@ -1,3 +1,4 @@
+from backend.control_plane.routes.achievement import achievement_router
 from backend.control_plane.routes.auth import auth_router
 from backend.control_plane.routes.habit import habit_router
 from backend.control_plane.routes.reminder import reminder_router
@@ -11,7 +12,8 @@ list_of_routes = [
     user_router,
     tag_router,
     habit_router,
-    removed_router
+    removed_router,
+    achievement_router
 ]
 
 

@@ -13,7 +13,7 @@ from backend.control_plane.app import get_app
 from backend.control_plane.config import get_settings
 from backend.control_plane.db.engine import get_async_session
 from backend.control_plane.schemas import ReminderSchema
-from backend.control_plane.schemas.user import UserTelegramDataSchema
+from backend.control_plane.schemas.auth import UserTelegramDataSchema
 
 
 @pytest.fixture(name="sqlite")

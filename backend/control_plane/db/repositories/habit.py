@@ -8,7 +8,7 @@ from .base import BaseRepository
 from ..engine import get_async_session
 from ..models.habit import Habit, HabitProgress
 from ...schemas.habit import HabitSchemaResponse
-from ...schemas.requests.habit import HabitProgressRequest
+from ...schemas.requests.habit_progress import HabitProgressRequest
 
 
 class HabitRepository(BaseRepository[Habit]):

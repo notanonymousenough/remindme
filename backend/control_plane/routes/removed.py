@@ -1,11 +1,8 @@
-from typing import Annotated, Sequence, Union
+from typing import Annotated, Union
 
-from cfgv import remove_defaults
 from fastapi import APIRouter, Body
 from fastapi.params import Depends
-from fastapi import FastAPI, Query, HTTPException, Response, status
-from backend.control_plane.schemas import ReminderSchema
-from backend.control_plane.schemas.habit import HabitSchemaResponse
+
 from backend.control_plane.schemas.requests.removed import RemovedEntitiesIDs, RemovedEntities
 from backend.control_plane.schemas.user import UserSchema
 from backend.control_plane.service.removed_service import RemovedService, get_removed_service

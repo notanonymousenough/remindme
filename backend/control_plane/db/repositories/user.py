@@ -7,7 +7,8 @@ from sqlalchemy.future import select
 from ..engine import get_async_session
 from ..models.user import User
 from .base import BaseRepository
-from ...schemas.user import UserSchema, UserTelegramDataSchema
+from ...schemas.user import UserSchema
+from ...schemas.auth import UserTelegramDataSchema
 
 
 class UserRepository(BaseRepository[User]):

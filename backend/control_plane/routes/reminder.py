@@ -21,7 +21,7 @@ reminder_router = APIRouter(
     path="/",
     responses={
         200: {
-            "description": "Напоминание успешно создано"
+            "description": "Напоминание успешно создано!"
         }
     }
 )

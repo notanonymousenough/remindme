@@ -4,7 +4,8 @@ from fastapi import HTTPException
 
 from backend.control_plane.db.repositories.user import UserRepository
 from backend.control_plane.schemas.requests.user import UserUpdateRequest
-from backend.control_plane.schemas.user import UserTelegramDataSchema, UserSchema
+from backend.control_plane.schemas.user import UserSchema
+from backend.control_plane.schemas.auth import UserTelegramDataSchema
 
 
 class UserService:

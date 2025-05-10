@@ -1,6 +1,6 @@
 from fastapi.openapi.utils import get_openapi
 
-from backend.control_plane.schemas.user import UserTelegramDataSchema
+from backend.control_plane.schemas.auth import UserTelegramDataSchema
 
 
 def custom_openapi(app):

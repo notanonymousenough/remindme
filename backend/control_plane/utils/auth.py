@@ -6,7 +6,8 @@ from fastapi.params import Depends
 import jwt
 
 from backend.control_plane.config import get_settings
-from backend.control_plane.schemas.user import UserSchema, UserTelegramDataSchema
+from backend.control_plane.schemas.user import UserSchema
+from backend.control_plane.schemas.auth import UserTelegramDataSchema
 from backend.control_plane.service.user_service import get_user_service, UserService
 
 settings = get_settings()

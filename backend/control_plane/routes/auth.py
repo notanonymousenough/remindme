@@ -6,7 +6,7 @@ import jwt
 from fastapi import APIRouter, HTTPException, Depends, Body
 
 from backend.control_plane.config import get_settings
-from backend.control_plane.schemas.user import UserTelegramDataSchema
+from backend.control_plane.schemas.auth import UserTelegramDataSchema
 from backend.control_plane.service.user_service import get_user_service, UserService
 from backend.control_plane.utils.auth import has_correct_hash
 
