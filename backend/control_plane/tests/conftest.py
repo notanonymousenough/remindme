@@ -9,8 +9,11 @@ from starlette import status
 
 from backend.control_plane.app import get_app
 from backend.control_plane.db.engine import get_async_session
+from backend.control_plane.db.models import HabitPeriod
 from backend.control_plane.schemas import ReminderSchema
 from backend.control_plane.schemas.auth import UserTelegramDataSchema
+from backend.control_plane.schemas.habit import HabitSchemaResponse
+from backend.control_plane.schemas.requests.habit import HabitPostRequest
 
 
 @pytest.fixture(scope="class")
@@ -92,10 +95,29 @@ async def TestReminder(client, auth_user):
             "tags": [],
             "user_id": user.json()["id"]
         }
-        # TODO сделать проверку:
-        #  1) сделать синглтон айди для напоминания
-        #  2) обращение в БД: если такое напоминание есть, возвр
-        #  3) если нет – создать
         response = await client.post("/v1/reminder/", headers=auth_user, json=reminder_json)
         reminder = ReminderSchema.model_validate(response.json())
         yield reminder
+
+@pytest.fixture(name="TestHabit", scope="function")
+async def TestHabit(client, auth_user):
+    """
+    ПОЛУЧЕНИЕ СЛУЧАЙНОЙ ПРИВЫЧКИ КОТОРОЕ ЕСТЬ В БД
+    ЕСЛИ НЕТ, СОЗДАЕТ И ВОЗВРАЩАЕТ
+    """
+    user = await client.get("/v1/user/", headers=auth_user)
+
+    habit_response = await client.get("/v1/habit/", headers=auth_user)
+    if habit_response.json():
+        habit = HabitSchemaResponse.model_validate(habit_response.json()[0])
+        yield habit
+    else:
+        habit_request = {
+            "text": "habitTest0",
+            "interval": HabitPeriod.WEEKLY
+        }
+        habit = HabitPostRequest.model_validate(habit_request)
+        response = await client.post("/v1/habit/", headers=auth_user, data=habit.model_dump_json())
+
+        habit = HabitSchemaResponse.model_validate(response.json())
+        yield habit
