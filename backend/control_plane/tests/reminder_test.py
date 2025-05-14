@@ -1,184 +1,193 @@
-import pytest
-import httpx
-from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, timedelta
 
+import httpx
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from backend.control_plane.db.models import Reminder
+from backend.control_plane.schemas import ReminderSchema
+from backend.control_plane.schemas.requests.reminder import ReminderCompleteRequest, ReminderEditTimeRequest
 
 
-# Импортируем модели и схемы, которые будем проверять/использовать
+@pytest.mark.usefixtures("TestReminder")
+class TestReminderAPI:
+    @pytest.mark.asyncio
+    async def test_reminder_post(
+            self,
+            session: AsyncSession,
+            auth_user: dict,
+            client: httpx.AsyncClient
+    ):
+        reminder_text = "Напоминание тестовое 1"
+        request_body = {
+            "text": reminder_text,
+            "time": str((datetime.now() + timedelta(hours=10)).isoformat()),
+            "tags": []
+        }
 
-# Импортируй схемы запросов и ответов, если они у тебя есть
-# from app.schemas.reminder import ReminderToEditRequestSchema, ReminderSchema, ...
+        response = await client.post(
+            f"/v1/reminder/",
+            json=request_body,
+            headers=auth_user
+        )
 
-# Тесты будут автоматически использовать фикстуры из conftest.py
-# Например, client, db_session, test_user, test_reminder
+        assert response.status_code == 200
 
-@pytest.mark.asyncio
-async def test_reminder_edit(
-    client: httpx.AsyncClient, # Получаем клиента из фикстуры
-    database: AsyncSession,   # Получаем сессию БД из фикстуры
-    test_reminder: Reminder,  # Получаем тестовое напоминание из фикстуры
-    auth_user: dict,
-):
-    """Тест ручки редактирования напоминания (POST /reminder/{reminder_id}/edit)."""
-    reminder_id = str(test_reminder.id) # Убедись, что ID в URL - строка
-    updated_text = "Текст напоминания обновлен по-братски"
+        data = response.json()
+        assert data["text"] == reminder_text
+        assert data["updated_at"] is not None  # Проверяем, что поле обновилось
 
-    # Подготавливаем тело запроса согласно ReminderToEditRequestSchema
-    # Предполагаем, что схема ожидает только 'text' в теле, а ID берется из URL
-    request_body = {"text": updated_text}
-    # Если схема ожидает ID и в теле, используй:
-    # request_body = {"id": reminder_id, "text": updated_text} # Проверь свою схему!
-    response = await client.post(
-        f"/v1/reminder/{reminder_id}",
-        json=request_body,
-        headers=auth_user
-    )
+        async with await session as session:
+            assert ReminderSchema.model_validate(await session.get(Reminder, data["id"]))
+            print("\nINFO: ВАЛИДАЦИЯ СХЕМЫ ReminderSchema МОДЕЛИ Reminder ИЗ БД")
 
-    print(f"Response status: {response.status_code}")
-    print(f"Response body: {response.json()}")
+            session.close()
 
-    assert response.status_code == 200
+    @pytest.mark.asyncio
+    async def test_reminder_edit(self,
+                                 session: AsyncSession,  # Получаем сессию БД из фикстуры
+                                 auth_user: dict,
+                                 client: httpx.AsyncClient,  # Получаем клиента из фикстуры
+                                 TestReminder: ReminderSchema  # случайное напоминание из БД
+                                 ):
+        reminder_id = str(TestReminder.id)
+        updated_text = "Текст напоминания обновлен по-братски"
 
-    # Проверяем данные в ответе API
-    data = response.json()
-    assert data["id"] == reminder_id
-    assert data["text"] == updated_text
-    # Можешь добавить проверки других полей, например updated_at
-    assert data["updated_at"] is not None # Проверяем, что поле обновилось
-    # assert datetime.fromisoformat(data["updated_at"].replace('Z', '+00:00')) > test_reminder.updated_at # Более точная проверка времени, если часовые пояса ровно обрабатываются
+        request_body = {
+            "id": reminder_id,
+            "text": updated_text
+        }
+        response = await client.put(
+            f"/v1/reminder/{reminder_id}",
+            json=request_body,
+            headers=auth_user
+        )
 
-    # Проверяем, что данные действительно обновились в базе
-    updated_reminder_in_db = await database.get(Reminder, test_reminder.id)
-    assert updated_reminder_in_db is not None
-    assert updated_reminder_in_db.text == updated_text
-    assert updated_reminder_in_db.updated_at > test_reminder.updated_at
+        print(f"Response status: {response.status_code}")
+        print(f"Response body: {response.json()}")
 
+        assert response.status_code == 200
 
-@pytest.mark.asyncio
-async def test_reminder_delete(
-    client: httpx.AsyncClient,
-    database: AsyncSession,
-    test_reminder: Reminder
-):
-    """Тест ручки удаления напоминания (DELETE /reminder/{reminder_id})."""
-    reminder_id = str(test_reminder.id)
+        data = response.json()
+        assert data["id"] == reminder_id
+        assert data["text"] == updated_text
+        assert data["updated_at"] is not None  # Проверяем, что поле обновилось
+        # assert datetime.fromisoformat(data["updated_at"].replace('Z',
+        #                                                         '+00:00')) > test_reminder.updated_at  # Более точная проверка времени, если часовые пояса ровно обрабатываются
 
-    # Для DELETE обычно тело запроса не нужно, ID берется из URL
-    response = await client.delete(f"/reminder/{reminder_id}")
+        # Проверяем, что данные действительно обновились в базе
+        async with await session as session:
+            updated_reminder_in_db = await session.get(Reminder, TestReminder.id)
+            assert updated_reminder_in_db is not None
+            assert updated_reminder_in_db.text == updated_text
+            assert updated_reminder_in_db.updated_at > TestReminder.updated_at
 
-    print(f"Response status: {response.status_code}")
-    # print(f"Response body: {response.text}") # 204 No Content обычно без тела
+    @pytest.mark.asyncio
+    async def test_reminder_delete(self,
+                                   client: httpx.AsyncClient,
+                                   auth_user: dict,
+                                   session: AsyncSession,
+                                   TestReminder: Reminder
+                                   ):
+        response = await client.delete(f"/v1/reminder/{TestReminder.id}", headers=auth_user)
 
-    assert response.status_code == 204  # 204 No Content - стандарт для успешного удаления без возврата данных
+        assert response.status_code == 200
 
-    # Проверяем, что напоминание удалено из базы
-    deleted_reminder_in_db = await database.get(Reminder, test_reminder.id)
-    assert deleted_reminder_in_db is None  # Напоминание должно быть удалено
+        async with await session as session:
+            deleted_reminder_in_db = await session.get(Reminder, TestReminder.id)
+            assert deleted_reminder_in_db is None
 
+    @pytest.mark.asyncio
+    async def test_reminder_to_complete(self,
+                                        client: httpx.AsyncClient,
+                                        session: AsyncSession,
+                                        TestReminder: ReminderSchema,
+                                        auth_user: dict
+                                        ):
+        request = ReminderCompleteRequest.model_validate({"id": TestReminder.id}).model_dump_json()
 
-@pytest.mark.asyncio
-async def test_reminder_to_complete(
-        client: httpx.AsyncClient,
-        database: AsyncSession,
-        test_reminder: Reminder
-):
-    """Тест ручки отметки напоминания как выполненного (POST /reminder/{reminder_id}/complete)."""
-    reminder_id = str(test_reminder.id)
+        response = await client.put(
+            url=f"/v1/reminder/{TestReminder.id}/complete",
+            headers=auth_user,
+            data=request
+        )
 
-    # Для complete тоже, вероятно, тело запроса не нужно, ID берется из URL
-    response = await client.post(f"/reminder/{reminder_id}/complete")
+        assert response.status_code == 200
 
-    print(f"Response status: {response.status_code}")
-    print(f"Response body: {response.json()}")
+        data = response.json()
+        print("INFO: СВЕРЯЕМ RESPONSE")
+        assert data["id"] == str(TestReminder.id)
+        assert data["status"] == "completed"
+        assert data["updated_at"] is not None  # Поле обновления должно измениться
 
-    assert response.status_code == 200
+        # Проверяем, что статус действительно обновился в базе
+        async with await session as session:
+            print("INFO: ПОЛУЧАЕМ ИЗ БД")
+            completed_reminder_in_db = await session.get(Reminder, TestReminder.id)
 
-    # Проверяем данные в ответе API
-    data = response.json()
-    assert data["id"] == reminder_id
-    assert data["is_completed"] is True
-    assert data["updated_at"] is not None  # Поле обновления должно измениться
+        assert completed_reminder_in_db is not None
+        assert completed_reminder_in_db.status.value == "completed"
+        assert completed_reminder_in_db.updated_at - TestReminder.updated_at
 
-    # Проверяем, что статус действительно обновился в базе
-    completed_reminder_in_db = await database.get(Reminder, test_reminder.id)
-    assert completed_reminder_in_db is not None
-    assert completed_reminder_in_db.is_completed is True
-    assert completed_reminder_in_db.updated_at > test_reminder.updated_at
+    @pytest.mark.asyncio
+    async def test_reminder_postpone(self,
+                                     client: httpx.AsyncClient,
+                                     session: AsyncSession,
+                                     TestReminder: ReminderSchema,
+                                     auth_user: dict
+                                     ):
+        expect_changed_time = TestReminder.time + timedelta(hours=1)  # Отложить на 1 час
 
+        request_body = ReminderEditTimeRequest.model_validate(
+            {
+                "id": TestReminder.id,
+                "time": expect_changed_time
+            }
+        )
 
-@pytest.mark.asyncio
-async def test_reminder_postpone(
-        client: httpx.AsyncClient,
-        db_session: AsyncSession,
-        test_reminder: Reminder
-):
-    """Тест ручки откладывания напоминания (POST /reminder/{reminder_id}/postpone)."""
-    reminder_id = str(test_reminder.id)
-    time_delta_seconds = 3600  # Отложить на 1 час
+        response = await client.put(
+            f"/v1/reminder/{TestReminder.id}/postpone",
+            data=request_body.model_dump_json(),
+            headers=auth_user,
+        )
 
-    # Подготавливаем тело запроса согласно ReminderToEditTimeRequestSchema
-    # Предполагаем, что схема ожидает 'time_delta' (в секундах) в теле
-    request_body = {"time_delta": time_delta_seconds}
-    # Если схема ожидает ID и в теле, используй:
-    # request_body = {"id": reminder_id, "time_delta": time_delta_seconds} # Проверь свою схему!
+        assert response.status_code == 200
 
-    # Сохраняем оригинальное время планирования для проверки
-    original_scheduled_at = test_reminder.scheduled_at
+        # Проверяем данные в ответе API
+        data = response.json()
+        assert data["id"] == str(TestReminder.id)
+        assert data["updated_at"] is not None  # Поле обновления должно измениться
 
-    response = await client.post(
-        f"/reminder/{reminder_id}/postpone",
-        json=request_body
-    )
+        assert expect_changed_time == datetime.fromisoformat(data["time"])
 
-    print(f"Response status: {response.status_code}")
-    print(f"Response body: {response.json()}")
+        # Проверяем, что данные действительно обновились в базе
+        async with await session as session:
+            postponed_reminder_in_db = await session.get(Reminder, TestReminder.id)
 
-    assert response.status_code == 200
+        assert postponed_reminder_in_db is not None
+        assert postponed_reminder_in_db.time == datetime.fromisoformat(data["time"])
+        assert postponed_reminder_in_db.updated_at - TestReminder.updated_at
 
-    # Проверяем данные в ответе API
-    data = response.json()
-    assert data["id"] == reminder_id
-    assert data["updated_at"] is not None  # Поле обновления должно измениться
+    # Добавь тесты для случаев ошибок, например, напоминание не найдено (404)
+    @pytest.mark.asyncio
+    async def test_reminder_not_found(self,
+                                      client: httpx.AsyncClient):
+        """Тест на случай, когда напоминание не найдено (например, при редактировании)."""
+        non_existent_id = "non_existent_reminder_id"
+        response = await client.post(
+            f"/reminder/{non_existent_id}/",
+            json={"text": "Trying to update non-existent"}
+        )
+        assert response.status_code == 404  # Или какой у тебя код для Not Found
 
-    # Проверяем, что scheduled_at обновилось и примерно на time_delta
-    # Преобразуем строку времени из JSON в объект datetime
-    updated_scheduled_at_from_api = datetime.fromisoformat(
-        data["scheduled_at"].replace('Z', '+00:00'))  # Учитываем возможный 'Z' в конце ISO формата
+        response = await client.delete(f"/reminder/{non_existent_id}")
+        assert response.status_code == 404
 
-    # Проверяем, что новое время примерно равно старому + дельта
-    expected_scheduled_at = original_scheduled_at + timedelta(seconds=time_delta_seconds)
-    # Используем небольшую дельту для сравнения времени, т.к. могут быть миллисекунды или точность float
-    time_tolerance = timedelta(seconds=1)  # Допустимое отклонение в 1 секунду
-    assert expected_scheduled_at - time_tolerance <= updated_scheduled_at_from_api <= expected_scheduled_at + time_tolerance
+        response = await client.post(f"/reminder/{non_existent_id}/complete")
+        assert response.status_code == 404
 
-    # Проверяем, что данные действительно обновились в базе
-    postponed_reminder_in_db = await db_session.get(Reminder, test_reminder.id)
-    assert postponed_reminder_in_db is not None
-    assert postponed_reminder_in_db.scheduled_at == updated_scheduled_at_from_api  # Сравниваем с тем, что вернул API, или напрямую с ожидаемым значением
-    assert postponed_reminder_in_db.updated_at > test_reminder.updated_at
-
-
-# Добавь тесты для случаев ошибок, например, напоминание не найдено (404)
-@pytest.mark.asyncio
-async def test_reminder_not_found(client: httpx.AsyncClient):
-    """Тест на случай, когда напоминание не найдено (например, при редактировании)."""
-    non_existent_id = "non_existent_reminder_id"
-    response = await client.post(
-        f"/reminder/{non_existent_id}/",
-        json={"text": "Trying to update non-existent"}
-    )
-    assert response.status_code == 404  # Или какой у тебя код для Not Found
-
-    response = await client.delete(f"/reminder/{non_existent_id}")
-    assert response.status_code == 404
-
-    response = await client.post(f"/reminder/{non_existent_id}/complete")
-    assert response.status_code == 404
-
-    response = await client.post(
-        f"/reminder/{non_existent_id}/postpone",
-        json={"time_delta": 3600}
-    )
-    assert response.status_code == 404
+        response = await client.post(
+            f"/reminder/{non_existent_id}/postpone",
+            json={"time_delta": 3600}
+        )
+        assert response.status_code == 404
