@@ -1,6 +1,7 @@
 import hmac
 from http.client import HTTPException
 from typing import Annotated
+from uuid import UUID
 
 from fastapi.params import Depends
 import jwt
@@ -29,7 +30,7 @@ async def get_authorized_user(
     except jwt.InvalidTokenError:
         raise HTTPException(401, "Invalid JWT Token")
 
-    user_id = payload.get("user_id")
+    user_id = UUID(payload.get("user_id"))
     if not user_id:
         raise HTTPException(401, "Can't get user_id from payload")
 

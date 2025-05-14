@@ -4,11 +4,11 @@ from fastapi import HTTPException
 from sqlalchemy import and_
 from sqlalchemy.future import select
 
+from .base import BaseRepository
 from ..engine import get_async_session
 from ..models.user import User
-from .base import BaseRepository
-from ...schemas.user import UserSchema
 from ...schemas.auth import UserTelegramDataSchema
+from ...schemas.user import UserSchema
 
 
 class UserRepository(BaseRepository[User]):
@@ -34,11 +34,7 @@ class UserRepository(BaseRepository[User]):
                 "username": user.username,
                 "last_active": user.auth_date,
             }
-            user = {
-                key if key != "id" else "telegram_id": item
-                for key, item in new_user_from_telegram.items()
-                }
-            obj = User(**user)  # convert user to db model(obj)
+            obj = User(**new_user_from_telegram)  # convert user to db model(obj)
             session.add(obj)
             await session.commit()
             return UserSchema.model_validate(obj)  # convert db model(obj) to user
@@ -54,3 +50,14 @@ class UserRepository(BaseRepository[User]):
             await session.commit()
             await session.refresh(db_user)
             return UserSchema.model_validate(db_user)
+
+    async def delete_user(self, user_id: UUID) -> bool:
+        async with await get_async_session() as session:
+            try:
+                user = await session.get(User, user_id)
+                await session.delete(user)
+                await session.commit()
+                return True
+            except:
+                await session.rollback()
+                return False

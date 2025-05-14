@@ -16,6 +16,9 @@ class UserService:
         response = await self.repo.get_by_model_id(user_id)
         return UserSchema.model_validate(response)
 
+    async def delete_user(self, user_id: UUID) -> bool:
+        return await self.repo.delete_user(user_id=user_id)
+
     async def update_user(self, request: UserUpdateRequest) -> UserSchema:
         # TODO model dump in repo
         user = request.model_dump(exclude_none=True, exclude_unset=True)

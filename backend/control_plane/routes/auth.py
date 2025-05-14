@@ -25,7 +25,7 @@ async def auth_telegram(
 ):
     # id = telegram_id
 
-    if not get_settings().DEBUG and not has_correct_hash(request):  # если ДЕБАГ режим – не проверяем хэш.
+    if not get_settings().TEST_MODE and not has_correct_hash(request):  # если ДЕБАГ режим – не проверяем хэш.
         raise HTTPException(401, detail="Invalid Telegram hash")
 
     # создаем или обновляем информацию пользователя, если он существует

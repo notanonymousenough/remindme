@@ -1,11 +1,5 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy import and_, join
-from datetime import datetime
-from typing import List, Optional
-from uuid import UUID
-from ..models.achievement import AchievementTemplate, UserAchievement, AchievementCategory
 from .base import BaseRepository
+from ..models.achievement import AchievementTemplate, UserAchievement
 
 
 class AchievementTemplateRepository(BaseRepository[AchievementTemplate]):

@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.INFO)
 
-    if settings.DEBUG:
+    if settings.TEST_MODE:
         start_debug_logging(app)
 
     uvicorn.run(

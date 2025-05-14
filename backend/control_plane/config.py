@@ -2,11 +2,11 @@ import hashlib
 from datetime import timedelta, datetime
 from os import environ
 
+from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import computed_field, ConfigDict
 from pydantic_settings import BaseSettings
-from dotenv import load_dotenv
 
 load_dotenv()  # Загружает переменные окружения из файла .env в os.environ
 
@@ -62,7 +62,7 @@ class DefaultSettings(BaseSettings):
     POSTGRES_DB: str = environ.get("POSTGRES_DB", 'RemindMe')
 
     # DEBUG MODE
-    DEBUG: bool = True
+    TEST_MODE: bool = True
 
     # JWT ENCODE SETTINGS
     SECRET_KEY: str = environ.get("SECRET_KEY", "")
@@ -89,12 +89,16 @@ class DefaultSettings(BaseSettings):
 
     @property
     def DATABASE_URI(self) -> str:
-        return (f"postgresql+asyncpg://"
+        driver = "postgresql+asyncpg"
+        return (f"{driver}://"
                 f"{self.POSTGRES_USER}:"
                 f"{self.POSTGRES_PASSWORD}@"
                 f"{self.POSTGRES_ADDRESS}/"
                 f"{self.POSTGRES_DB}")
 
 
+_settings = DefaultSettings()
+
+
 def get_settings():
-    return DefaultSettings()
+    return _settings
