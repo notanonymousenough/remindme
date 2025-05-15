@@ -52,4 +52,3 @@ async def delete_tag(
     user: UserSchema = Depends(get_authorized_user)
 ):
     return await tag_service.delete_tag(user_id=user.id, tag_id=tag_id)
-
