@@ -105,8 +105,6 @@ async def TestHabit(client, auth_user):
     ПОЛУЧЕНИЕ СЛУЧАЙНОЙ ПРИВЫЧКИ КОТОРОЕ ЕСТЬ В БД
     ЕСЛИ НЕТ, СОЗДАЕТ И ВОЗВРАЩАЕТ
     """
-    user = await client.get("/v1/user/", headers=auth_user)
-
     habit_response = await client.get("/v1/habit/", headers=auth_user)
     if habit_response.json():
         habit = HabitSchemaResponse.model_validate(habit_response.json()[0])

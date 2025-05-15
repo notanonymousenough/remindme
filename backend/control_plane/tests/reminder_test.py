@@ -44,6 +44,16 @@ class TestReminderAPI:
             session.close()
 
     @pytest.mark.asyncio
+    async def test_get_active_reminders(self,
+                                        session: AsyncSession,
+                                        auth_user: dict,
+                                        client: httpx.AsyncClient):
+        response = await client.get("/v1/reminder/", headers=auth_user)
+        assert response.status_code == 200
+        reminders = [ReminderSchema.model_validate(reminder_model) for reminder_model in response.json()]
+        assert reminders
+
+    @pytest.mark.asyncio
     async def test_reminder_edit(self,
                                  session: AsyncSession,  # Получаем сессию БД из фикстуры
                                  auth_user: dict,

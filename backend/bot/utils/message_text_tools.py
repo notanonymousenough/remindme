@@ -1,7 +1,7 @@
-from typing import List, Union
+from typing import List
 
 from backend.bot.utils import date_formatting
-from backend.bot.utils.habit_tools import HABIT_PERIOD_NAMES, get_completed_record_sum, \
+from backend.utils.habit_tools import HABIT_PERIOD_NAMES, get_completed_record_sum, \
     get_last_record_status, HABIT_PERIOD_NAMES_INTERVAL
 from backend.bot.utils.parse_markdown_text import parse_for_markdown
 from backend.control_plane.db.models import ReminderStatus

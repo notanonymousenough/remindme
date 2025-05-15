@@ -79,6 +79,6 @@ async def habit_progress_post(
         habit_service: Annotated[HabitService, Depends(get_habit_service)],
         request: HabitProgressRequest = Body(...),
         user: UserSchema = Depends(get_authorized_user)
-):
+) -> HabitProgressRequest:
     # TODO types
     return await habit_service.add_habit_progress(request=request)

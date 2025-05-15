@@ -3,7 +3,7 @@ from typing import List
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from backend.bot.utils.habit_tools import get_last_record_status_bool
+from backend.utils.habit_tools import get_last_record_status_bool
 from backend.control_plane.schemas.habit import HabitSchemaResponse
 
 
