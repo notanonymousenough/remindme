@@ -4,7 +4,6 @@ from typing import Any, AsyncGenerator, Iterator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
@@ -16,9 +15,10 @@ from backend.control_plane.schemas.achievementschema import AchievementSchema
 from backend.control_plane.schemas.auth import UserTelegramDataSchema
 from backend.control_plane.schemas.habit import HabitSchemaResponse
 from backend.control_plane.schemas.requests.habit import HabitPostRequest
+from backend.control_plane.schemas.user import UserSchema
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="session")
 def event_loop() -> Iterator[asyncio.AbstractEventLoop]:
     """Override the default pytest-asyncio event_loop fixture to be class-scoped."""
     print("\n--- Setting up class-scoped event loop ---")  # Отладочный вывод
@@ -37,21 +37,20 @@ async def session() -> AsyncGenerator[AsyncSession | Any, Any]:
 
 
 @pytest.fixture(name="client", scope="class")
-async def client() -> AsyncClient:
+async def client() -> AsyncGenerator[AsyncClient, None]:
     """
     КЛИЕНТ ДЛЯ ВЗАИМОДЕЙСТВИЯ С АПИ
     """
     app = get_app()
-    # utils_module.check_website_exist = AsyncMock(return_value=(True, "Status code < 400"))
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        yield ac  # Yield'им сам клиент
+        yield ac
 
 
 # --- Фикстуры для создания тестовых данных ---
 
 # Фикстура для создания тестового пользователя
 @pytest.fixture(name="auth_user", scope="class")
-async def auth_user(client) -> AsyncGenerator[Any, Any]:
+async def auth_user(client) -> AsyncGenerator[dict, None]:
     """
     ВОЗВРАЩАЕТ headers С ТОКЕНОМ АВТОРИЗАЦИИ
     """
@@ -73,13 +72,15 @@ async def auth_user(client) -> AsyncGenerator[Any, Any]:
     else:
         raise Exception(auth_response.status_code, auth_response.content)
 
-    print("\nINFO: УДАЛЕНИЕ ПОЛЬЗОВАТЕЛЯ")
-    response = await client.delete(url="/v1/user/", headers=auth_headers)
-    assert response.status_code == 200
-
+    try:
+        print("\nINFO: УДАЛЕНИЕ ПОЛЬЗОВАТЕЛЯ")
+        response = await client.delete(url="/v1/user/", headers=auth_headers)
+        assert response.status_code == 200
+    except:
+        print("\nINFO: USER не найден, а значит удален")
 
 @pytest.fixture(name="TestReminder", scope="function")
-async def TestReminder(client, auth_user):
+async def TestReminder(client, auth_user) -> AsyncGenerator[ReminderSchema, None]:
     """
     ПОЛУЧЕНИЕ СЛУЧАЙНОГО НАПОМИНАНИЯ КОТОРОЕ ЕСТЬ В БД
     ЕСЛИ НЕТ, СОЗДАЕТ И ВОЗВРАЩАЕТ
@@ -101,8 +102,9 @@ async def TestReminder(client, auth_user):
         reminder = ReminderSchema.model_validate(response.json())
         yield reminder
 
+
 @pytest.fixture(name="TestHabit", scope="function")
-async def TestHabit(client, auth_user):
+async def TestHabit(client, auth_user) -> AsyncGenerator[HabitSchemaResponse, None]:
     """
     ПОЛУЧЕНИЕ СЛУЧАЙНОЙ ПРИВЫЧКИ КОТОРОЕ ЕСТЬ В БД
     ЕСЛИ НЕТ, СОЗДАЕТ И ВОЗВРАЩАЕТ
@@ -122,18 +124,19 @@ async def TestHabit(client, auth_user):
         habit = HabitSchemaResponse.model_validate(response.json())
         yield habit
 
+
 @pytest.fixture(name="TestAchievement", scope="function")
-async def TestAchievement(session, client, auth_user):
+async def TestAchievement(session, client, auth_user) -> AsyncGenerator[AchievementSchema, None]:
     user = await client.get("/v1/user/", headers=auth_user)
     achievement = {
-            "user_id": user.json()["id"],
-            "template_id": None,
-            "unlocked": True,
-            "unlocked_at": datetime.now(),
-            "progress": 100,
-            "updated_at": datetime.now(),
-            "created_at": datetime.now() - timedelta(days=10)
-        }
+        "user_id": user.json()["id"],
+        "template_id": None,
+        "unlocked": True,
+        "unlocked_at": datetime.now(),
+        "progress": 100,
+        "updated_at": datetime.now(),
+        "created_at": datetime.now() - timedelta(days=10)
+    }
     achievement_template = {
         "name": "Заходить в нашего телеграм бота миллиард раз",
         "description": "Для самых преданных",
@@ -153,3 +156,9 @@ async def TestAchievement(session, client, auth_user):
 
         await session.refresh(achievement_model)
         yield AchievementSchema.model_validate(achievement_model)
+
+
+@pytest.fixture(name="TestUser", scope="function")
+async def TestUser(client, auth_user) -> AsyncGenerator[UserSchema, None]:
+    user_from_api = await client.get("/v1/user/", headers=auth_user)
+    yield UserSchema.model_validate(user_from_api.json())

@@ -27,6 +27,10 @@ class UserUpdateRequest(BaseModel):
     class Config:
         from_attributes = True
 
+
 class UserUpdateTimezoneRequest:
     id: Optional[UUID] = Field(None, description="ID")
     timezone: Optional[str] = Field(..., description="Timezone")
+
+    class Config:
+        from_attributes = True

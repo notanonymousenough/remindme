@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from falcon import HTTP_404
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
 from starlette.status import HTTP_200_OK
 
 from backend.control_plane.schemas.requests.user import UserUpdateRequest
@@ -15,18 +15,18 @@ user_router = APIRouter(
 )
 
 
-@user_router.post("/")
+@user_router.put("/")
 async def update_user(
         user_service: Annotated[UserService, Depends(get_user_service)],
-        user: UserUpdateRequest = Depends(get_authorized_user)
-):
-    return user_service.update_user(request=user)
+        request: UserUpdateRequest = Body(...)
+) -> UserSchema:
+    return await user_service.update_user(request=request)
 
 
 @user_router.get("/")
 async def get_user(
         user: UserSchema = Depends(get_authorized_user)
-):
+) -> UserSchema:
     return user
 
 
