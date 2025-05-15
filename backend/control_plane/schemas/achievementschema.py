@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 # user achievement
 class AchievementSchema(BaseModel):
-    id: UUID = Field(...)
+    id: UUID = Field(..., description='ID')
     user_id: Optional[UUID] = Field(...,)
     template_id: Optional[UUID] = Field(..., )
     unlocked: Optional[bool] = Field(...,)

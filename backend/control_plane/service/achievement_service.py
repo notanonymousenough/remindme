@@ -11,7 +11,8 @@ class AchievementService:
 
     async def get_unlocked_achievement(self, user_id: UUID) -> Sequence[AchievementSchema]:
         response = await self.repo.get_models(user_id=user_id)  # **{"progress": 100}
-        return [AchievementSchema.model_validate(achievement_response) for achievement_response in response]
+        achievements = [AchievementSchema.model_validate(achievement_response) for achievement_response in response]
+        return achievements
 
 
 _achievement_service = AchievementService()

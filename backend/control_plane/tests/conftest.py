@@ -4,13 +4,15 @@ from typing import Any, AsyncGenerator, Iterator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from backend.control_plane.app import get_app
 from backend.control_plane.db.engine import get_async_session
-from backend.control_plane.db.models import HabitPeriod
+from backend.control_plane.db.models import HabitPeriod, UserAchievement, AchievementCategory, AchievementTemplate
 from backend.control_plane.schemas import ReminderSchema
+from backend.control_plane.schemas.achievementschema import AchievementSchema
 from backend.control_plane.schemas.auth import UserTelegramDataSchema
 from backend.control_plane.schemas.habit import HabitSchemaResponse
 from backend.control_plane.schemas.requests.habit import HabitPostRequest
@@ -119,3 +121,35 @@ async def TestHabit(client, auth_user):
 
         habit = HabitSchemaResponse.model_validate(response.json())
         yield habit
+
+@pytest.fixture(name="TestAchievement", scope="function")
+async def TestAchievement(session, client, auth_user):
+    user = await client.get("/v1/user/", headers=auth_user)
+    achievement = {
+            "user_id": user.json()["id"],
+            "template_id": None,
+            "unlocked": True,
+            "unlocked_at": datetime.now(),
+            "progress": 100,
+            "updated_at": datetime.now(),
+            "created_at": datetime.now() - timedelta(days=10)
+        }
+    achievement_template = {
+        "name": "Заходить в нашего телеграм бота миллиард раз",
+        "description": "Для самых преданных",
+        "condition": "active",
+        "category": AchievementCategory.SYSTEM
+    }
+    async with await session as session:
+        achievement_template_model = AchievementTemplate(**achievement_template)
+        session.add(achievement_template_model)
+        await session.commit()
+        await session.refresh(achievement_template_model)
+
+        achievement["template_id"] = achievement_template_model.id
+        achievement_model = UserAchievement(**achievement)
+        session.add(achievement_model)
+        await session.commit()
+
+        await session.refresh(achievement_model)
+        yield AchievementSchema.model_validate(achievement_model)
