@@ -1,7 +1,7 @@
 import uuid
 from typing import List
 
-from sqlalchemy import Column, Text, DateTime, Boolean, ForeignKey, Enum, Table
+from sqlalchemy import Column, Text, DateTime, Boolean, ForeignKey, Enum, Table, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.util import hybridproperty
@@ -28,11 +28,14 @@ class Reminder(BaseModel):
     removed = Column(Boolean, default=False)
     completed_at = Column(DateTime(timezone=True))
     notification_sent = Column(Boolean, default=False)
+    calendar_event_id = Column(String(255), nullable=True)
+    calendar_integration_id = Column(UUID(as_uuid=True), ForeignKey("calendar_integrations.id", ondelete="SET NULL"), nullable=True)
 
     # Отношения
     user = relationship("User", back_populates="reminders")
     _tags = relationship("Tag", secondary=reminder_tags, back_populates="reminders", lazy="selectin")
     neuro_images = relationship("NeuroImage", back_populates="reminder")
+    calendar_integration = relationship("CalendarIntegration", back_populates="reminders")
 
     def __repr__(self):
         return f"<Reminder {self.text[:20]}... ({self.id})>"

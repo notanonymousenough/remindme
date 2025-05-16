@@ -22,5 +22,11 @@ class ReminderSchema(BaseModel):
     completed_at: Optional[datetime] = Field(None, description="Время выполнения")
     notification_sent: Optional[bool] = Field(None, description="Признак отправки уведомления")
 
+    def with_user_time(self):
+        ...
+
+    def with_utc_time(self):
+        ...
+
     class Config:
         from_attributes = True

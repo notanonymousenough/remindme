@@ -5,14 +5,14 @@ from uuid import UUID
 from fastapi.params import Path
 from pydantic import Field, BaseModel
 
-from backend.control_plane.db.models import HabitPeriod
+from backend.control_plane.db.models import HabitInterval
 
 
 class HabitSchemaPostRequest(BaseModel):
     text: str = Field(..., description="Текст привычки")
 
     # привычку можно выполнить раз в *interval*
-    interval: HabitPeriod = Field(HabitPeriod.DAILY, description="Периодичность привычки")
+    interval: HabitInterval = Field(HabitInterval.DAILY, description="Периодичность привычки")
     custom_interval: Optional[str] = Field(None, description="Пользовательский период (для period=custom)")
 
     current_streak: int = Field(0, description="Текущая серия")
@@ -28,7 +28,7 @@ class HabitSchemaPutRequest(BaseModel):  # EDIT Schema
     habit_id: UUID = Path(...)
     text: Optional[str] = Field(..., description="Текст привычки")
 
-    interval: Optional[HabitPeriod] = Field(..., description="Периодичность привычки")
+    interval: Optional[HabitInterval] = Field(..., description="Периодичность привычки")
     custom_interval: Optional[str] = Field(..., description="Пользовательский период (для period=custom)")
 
     end_date: Optional[date] = Field(..., description="Когда привычка станет неактивной")

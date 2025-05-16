@@ -2,7 +2,6 @@ import hashlib
 from datetime import timedelta, datetime
 from os import environ
 
-from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import computed_field, ConfigDict
 from pydantic_settings import BaseSettings
@@ -54,10 +53,15 @@ class DefaultSettings(BaseSettings):
     POSTGRES_PASSWORD: str = environ.get("POSTGRES_PASSWORD", 'postgres')
     POSTGRES_ADDRESS: str = environ.get("POSTGRES_ADDRESS", '127.0.0.1')
     POSTGRES_PORT: int = int(environ.get("POSTGRES_PORT", '5432'))
-    POSTGRES_DB: str = environ.get("POSTGRES_DB", 'RemindMe')
+    POSTGRES_DB: str = environ.get("POSTGRES_DB", 'remind_me')
 
-    # DEBUG MODE
-    DEBUG: bool = True
+    SQL_ECHO: bool = environ.get("SQL_ECHO", "False").lower() in ("true", "1", "t")
+    SQL_POOL_SIZE: int = environ.get("SQL_POOL_SIZE", "5")
+    SQL_MAX_OVERFLOW: int = environ.get("SQL_MAX_OVERFLOW", "10")
+    SQL_POOL_TIMEOUT: int = environ.get("SQL_POOL_TIMEOUT", "30")
+    SQL_POOL_RECYCLE: int = environ.get("SQL_POOL_RECYCLE", "1800")
+
+    DEBUG: bool = environ.get("DEBUG", "false").lower() in ("true", "1", "t")
 
     # JWT ENCODE SETTINGS
     SECRET_KEY: str = environ.get("SECRET_KEY", "")
@@ -67,15 +71,36 @@ class DefaultSettings(BaseSettings):
     BOT_TOKEN: str = environ.get("BOT_TOKEN", "")
 
     # OAUTH2 SETTINGS
-    JWT_TOKEN_LIFETIME: datetime = datetime.now() + timedelta(days=1)
+    JWT_TOKEN_LIFETIME: timedelta = timedelta(days=1)
     PWD_CONTEXT: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    OAUTH2_SCHEME: OAuth2PasswordBearer = OAuth2PasswordBearer(
-        scheme_name="TelegramAccessToken",
-        tokenUrl=GET_ACCESS_TOKEN_ENDPOINT
-    )
 
     # CONSTANTS
     TAGS_MAX_LENGTH: int = 7  # for bot inline keyboard
+
+    # Настройки Temporal
+    TEMPORAL_HOST: str = environ.get("TEMPORAL_HOST", "localhost:7233")
+    TEMPORAL_NAMESPACE: str = environ.get("TEMPORAL_NAMESPACE", "remindme")
+    TEMPORAL_TASK_QUEUE: str = environ.get("TEMPORAL_TASK_QUEUE", "remindme-tasks")
+    ACTIVE_REMINDERS_LIMIT: int = environ.get("ACTIVE_REMINDERS_LIMIT", 1000)
+    CLEANUP_DAYS_THRESHOLD: int = environ.get("CLEANUP_DAYS_THRESHOLD", 10)
+    HABIT_IMAGE_CHARACTER: str = environ.get("HABIT_IMAGE_CHARACTER", "кот")
+
+    # Настройки Telegram
+    TELEGRAM_BOT_TOKEN: str = environ.get("BOT_TOKEN", "")
+    TELEGRAM_API_URL: str = "https://api.telegram.org/bot"
+
+    # Настройки Yandex GPT
+    YANDEX_GPT_MODEL_NAME: str = environ.get("YANDEX_GPT_MODEL_NAME", "yandexgpt-lite")
+    YANDEX_GPT_MODEL_COST: float = environ.get("YANDEX_GPT_MODEL_COST", 0.2)
+    YANDEX_CLOUD_AI_SECRET: str = environ.get("YANDEX_CLOUD_AI_SECRET", "")
+    YANDEX_CLOUD_S3_BUCKET_NAME: str = environ.get("YANDEX_CLOUD_S3_BUCKET_NAME", "remindme-images-bucket")
+    YANDEX_CLOUD_S3_KEY_ID: str = environ.get("YANDEX_CLOUD_S3_KEY_ID", "")
+    YANDEX_CLOUD_S3_SECRET: str = environ.get("YANDEX_CLOUD_S3_SECRET", "")
+    YANDEX_CLOUD_FOLDER: str = environ.get("YANDEX_CLOUD_FOLDER", "")
+    YANDEX_ART_MODEL_COST: float = 2.2
+
+    # Настройки логирования
+    LOG_LEVEL: str = environ.get("LOG_LEVEL", "INFO")
 
     @computed_field  # type: ignore
     @property
@@ -89,6 +114,14 @@ class DefaultSettings(BaseSettings):
                 f"{self.POSTGRES_PASSWORD}@"
                 f"{self.POSTGRES_ADDRESS}/"
                 f"{self.POSTGRES_DB}")
+
+    @property
+    def OAUTH2_SCHEME(self):
+        from fastapi.security import OAuth2PasswordBearer
+        return OAuth2PasswordBearer(
+            scheme_name="TelegramAccessToken",
+            tokenUrl=self.GET_ACCESS_TOKEN_ENDPOINT
+        )
 
 
 def get_settings():

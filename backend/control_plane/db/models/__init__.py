@@ -2,7 +2,8 @@ from .base import (
     BaseModel,
     SexType,
     ReminderStatus,
-    HabitPeriod,
+    HabitInterval,
+    ImageRate,
     AchievementCategory,
     ImageStatus
 )
@@ -12,15 +13,18 @@ from .reminder import Reminder, reminder_tags
 from .habit import Habit, HabitProgress
 from .achievement import AchievementTemplate, UserAchievement
 from .neuro_image import NeuroImage
-from .statistics import UserStatistics
+from .quota import Quota, QuotaUsage, ResourceType
+from .role import Role, UserRole
+from .calendar import CalendarIntegration
 
 __all__ = [
     'BaseModel',
     'SexType',
     'ReminderStatus',
-    'HabitPeriod',
+    'HabitInterval',
     'AchievementCategory',
     'ImageStatus',
+    'ImageRate',
     'User',
     'Tag',
     'Reminder',
@@ -30,5 +34,10 @@ __all__ = [
     'AchievementTemplate',
     'UserAchievement',
     'NeuroImage',
-    'UserStatistics',
+    'Quota',
+    'QuotaUsage',
+    'ResourceType',
+    'Role',
+    'UserRole',
+    'CalendarIntegration',
 ]
