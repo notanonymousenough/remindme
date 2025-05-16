@@ -91,6 +91,17 @@ const habits=[
     "updatedAt": "2023-10-01T12:00:00Z"
   }
 ];
+
+const neuroimage = [
+    {
+        "id": "grrgrg",
+        "userId": "2",
+        "habitId": "1",
+        "imageUrl": "5464",
+        "status": ["good"],
+        "generatedAt": "2023-12-03T19:45:00Z"
+    }
+]
 const reminders = [
     {
         "id": "r0k1l2m3n4",
@@ -121,6 +132,21 @@ const achievement = [
         "unlockedAt": "2023-12-03T19:45:00Z"
     }
 ];
+const trash=[
+    {
+        "id": "r0k1l2m3n8",
+        "userId": "usr_67890",
+        "text": "Купить хлеб",
+        "time": "2023-12-03T19:45:00Z",
+        "tags": ["Дом"],
+        "status": "active",
+        "removed": false,
+        "createdAt": "2023-11-29T21:30:00Z",
+        "updatedAt": "2023-11-29T21:30:00Z",
+        "completedAt": null,
+        "notificationSent": false
+    },
+]
 
 
 
@@ -138,8 +164,14 @@ app.post('/v1/tags', (req, res) => {
     res.json({});
 });
 
+app.get('/v1/image', (req, res) => {
+    res.json(neuroimage);
+});
 app.get('/v1/tags', (req, res) => {
     res.json(tags);
+});
+app.get('/v1/trash', (req, res) => {
+    res.json(trash);
 });
 
 app.get('/v1/reminders', (req, res) => {

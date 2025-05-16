@@ -169,6 +169,14 @@
       document.getElementById('tableBody').innerHTML = tableBodyHtml;
       const currentStreak = habit.currentStreak;
       document.getElementById('streakDiv').innerHTML = `${currentStreak} дня подряд <p>Молодец!!! &#128077</p>`;
+      fetch('/api/image')
+        .then(response => response.json())
+        .then(neuroimage => {
+          document.getElementById('picture').innerHTML = `<img src="${neuroimage.imageUrl}" alt="image" />`;
+        })
+        .catch(error => {
+          console.error('Ошибка при загрузке изображения:', error);
+        });
       const buttonClass = getButtonClass(habit.status);
       const buttonText = getButtonText(habit.status);
       const habitDetailsHtml = `
