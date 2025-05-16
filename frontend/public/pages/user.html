@@ -131,7 +131,7 @@
                    </svg>
                 </div>
                 <a class="col-12 col-sm-8 btn-calend" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                  <button type="button"  class="btn btn-primary  btn-calend">Синхронизация с календарём</button>
+                  <button type="button"  id="calendarSyncBtn" class="btn btn-primary  btn-calend">Синхронизация с календарём</button>
                 </a>
               </div>
               <div class="row">
@@ -156,6 +156,7 @@
           <li class="list-group-item bg-success text-light" aria-current="true">Достижения</li>
           <div id="achievement-list"></div>
       </ul>
+    </div>
   </div>
   <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -169,54 +170,109 @@
             <div class="row">
               <div class="col-3">Токен</div>
               <div class="col-7">
-                <input class="form-control " type="text" placeholder="Токен">
+                <input id="tokenInput" class="form-control " type="text" placeholder="Токен">
               </div>
               <p></p>
-              <div class="col-3">URL</div>
+              <div class="col-3">Логин</div>
               <div class="col-7">
-                <input class="form-control " type="text" placeholder="URL">
+                <input id="loginInput" class="form-control " type="text" placeholder="Логин">
+              </div>
+              <p></p>
+              <div class="col-3">Пароль</div>
+              <div class="col-7">
+                <input id="passwordInput" class="form-control " type="text" placeholder="Пароль">
               </div>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-            <button type="button" class="btn btn-primary">Синхронизация</button>
+            <button type="button" id="syncBtn" class="btn btn-primary">Синхронизация</button>
           </div>
         </div>
       </form>
     </div>
   </div>
-
+  
 
   <script>
-    // Функция для получения ачивок
     async function fetchAchievements() {
-        try {
-            const response = await fetch('/api/achievement');
-            if (!response.ok) {
-                throw new Error('Ошибка сети');
-            }
-            const achievements = await response.json();
-            const listElement = document.getElementById('achievement-list');
-
-            // Очищаем предыдущие элементы
-            listElement.innerHTML = '';
-
-            // Добавляем достижения в список
-            achievements.forEach(achievement => {
-                const listItem = document.createElement('li');
-                listItem.classList.add('list-group-item');
-                listItem.innerHTML = achievement.description; // Используем описание достижения
-                listElement.appendChild(listItem);
-            });
-        } catch (error) {
-            console.error('Ошибка при получении достижений:', error);
+      try {
+        const response = await fetch('/api/achievement');
+        if (!response.ok) {
+          throw new Error('Ошибка сети');
         }
+        const achievements = await response.json();
+        const listElement = document.getElementById('achievement-list');
+        listElement.innerHTML = '';
+        
+        achievements.forEach(achievement => {
+          const listItem = document.createElement('li');
+          listItem.classList.add('list-group-item');
+          listItem.innerHTML = achievement.description; 
+          listElement.appendChild(listItem);
+        });
+      } catch (error) {
+        console.error('Ошибка при получении достижений:', error);
+      }
     }
-
-    // Вызываем функцию при загрузке страницы
     window.onload = fetchAchievements;
-</script>
+  </script>
+  <script>
+    document.getElementById('syncBtn').addEventListener('click', () => {
+      const token = document.getElementById('tokenInput').value.trim();
+      const login = document.getElementById('loginInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
+  
+      if (!token || !login || !password) {
+        alert('Пожалуйста, заполните три поля: Токен, логин и пароль');
+        return;
+      }
+  
+      const calendarBtn = document.getElementById('calendarSyncBtn');
+      calendarBtn.disabled = true;
+      calendarBtn.textContent = 'Синхронизация запущена';
+  
+      syncReminders(token, login, password)
+        .then(() => {
+          alert('Синхронизация успешно завершена');
+        })
+        .catch(err => {
+          console.error('Ошибка при синхронизации:', err);
+          alert('Ошибка при синхронизации. Проверьте консоль для деталей');
+        })
+        .finally(() => {
+          calendarBtn.disabled = false;
+          calendarBtn.textContent = 'Синхронизация с календарём';
+        });
+    });
+  
+    async function syncReminders(token, login, password) {
+      const reminders = await getReminders();
+  
+      const response = await fetch('/api/syncReminders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ login, password, reminders })
+      });
+  
+      if (!response.ok) {
+        throw new Error('Сервер вернул ошибку: ' + response.status);
+      }
+  
+      return response.json();
+    }
+  
+    async function getReminders() {
+      const response = await fetch('/api/reminders');
+      if (!response.ok) {
+        throw new Error('Ошибка получения напоминаний: ' + response.status);
+      }
+      return response.json();
+    }
+  </script>
   <script src="../js/lib/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>

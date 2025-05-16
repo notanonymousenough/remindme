@@ -77,25 +77,24 @@
   <script>
     fetch('/api/token')
     .then(response => {
-        if (!response.ok) {
-            throw new Error('Unauthorized');
-        }
-        return response.json();
+      if (!response.ok) {
+        throw new Error('Unauthorized');
+      }
+      return response.json();
     })
     .then(data => {
-        const token = data.token;
-        const protectedElements = document.querySelectorAll('.protected');
-
-        if (token) {
-            protectedElements.forEach(element => element.style.display = 'block');
-        } else {
-            protectedElements.forEach(element => element.style.display = 'none');
-        }
+      const token = data.token;
+      const protectedElements = document.querySelectorAll('.protected');
+      if (token) {
+        protectedElements.forEach(element => element.style.display = 'block');
+      } else {
+        protectedElements.forEach(element => element.style.display = 'none');
+      }
     })
     .catch(error => {
-        console.error('Error:', error);
+      console.error('Error:', error);
     });
-</script>
+  </script>
 
 </body>  
 </html>

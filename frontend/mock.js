@@ -13,6 +13,21 @@ app.post('/v1/auth/telegram', async (req, res) => {
     res.json("{'access_token': '...'}")
 });
 
+const tags=[
+    {
+        "tagId": "12345",
+        "name": "Дом"
+    },
+    {
+        "tagId": "12346",
+        "name": "Учеба"
+    },
+    {
+        "tagId": "12347",
+        "name": "Работа"
+    },
+]
+
 const habits=[
     {
     "id": "habit_12345",
@@ -36,10 +51,15 @@ const habits=[
         ["2025-04-11", true ],
         ["2025-04-12", true ],
         ["2025-04-13", false ],
+        ["2025-04-14", true ],
+        ["2025-04-15", true ],
+        ["2025-04-16", true ],
+        ["2025-04-17", true ],
+        ["2025-04-18", false ],
     ],
     "bestStreak": 3,
     "startDate": "2025-03-31",
-    "endDate": "2025-04-13",
+    "endDate": "2025-04-18",
     "removed": false,
     "createdAt": "2023-09-01T12:00:00Z",
     "updatedAt": "2023-10-01T12:00:00Z"
@@ -71,6 +91,17 @@ const habits=[
     "updatedAt": "2023-10-01T12:00:00Z"
   }
 ];
+
+const neuroimage = [
+    {
+        "id": "grrgrg",
+        "userId": "2",
+        "habitId": "1",
+        "imageUrl": "5464",
+        "status": ["good"],
+        "generatedAt": "2023-12-03T19:45:00Z"
+    }
+]
 const reminders = [
     {
         "id": "r0k1l2m3n4",
@@ -101,55 +132,60 @@ const achievement = [
         "unlockedAt": "2023-12-03T19:45:00Z"
     }
 ];
-
-const statistics=[
+const trash=[
     {
+        "id": "r0k1l2m3n8",
         "userId": "usr_67890",
-        "remindersCompleted": 0,
-        "remindersForgotten": 0,
-        "lastReset": 0
-    }
-];
+        "text": "Купить хлеб",
+        "time": "2023-12-03T19:45:00Z",
+        "tags": ["Дом"],
+        "status": "active",
+        "removed": false,
+        "createdAt": "2023-11-29T21:30:00Z",
+        "updatedAt": "2023-11-29T21:30:00Z",
+        "completedAt": null,
+        "notificationSent": false
+    },
+]
+
+
 
 app.post('/v1/reminders', (req, res) => {
-    req.body.id= (Math.random(100000000)).toString();
+    req.body.id= (Math.random(1000)).toString();
     req.body.userId='usr_67890';
     const reminderData = req.body;
     reminders.push(reminderData);
+    res.json({});
+});
+app.post('/v1/tags', (req, res) => {
+    req.body.tagId= (Math.random(1000)).toString();
+    const tagsData = req.body;
+    tags.push(tagsData);
+    res.json({});
+});
+
+app.get('/v1/image', (req, res) => {
+    res.json(neuroimage);
+});
+app.get('/v1/tags', (req, res) => {
+    res.json(tags);
+});
+app.get('/v1/trash', (req, res) => {
+    res.json(trash);
 });
 
 app.get('/v1/reminders', (req, res) => {
     const now = new Date();
     const today = now.toISOString().split('T')[0];
 
-    statistics.forEach(stat => {
-        if (stat.lastReset !== today) {
-            stat.remindersCompleted = 0; 
-            stat.remindersForgotten = 0;  
-            stat.lastReset = today; 
-        }
-    });
-
     reminders.forEach(reminder => {
         if (reminder.time && !isNaN(new Date(reminder.time))) {
             const reminderDate = new Date(reminder.time).toISOString().split('T')[0];
             if (today === reminderDate) {
-                if (reminder.status === 'completed' && !reminder.alreadyCounted) {
-                    const userStats = statistics.find(stat => stat.userId === reminder.userId);
-                    if (userStats) {
-                        userStats.remindersCompleted++;
-                        reminder.alreadyCounted = true;
-                    }
-                } 
-                else if (reminder.status !== 'completed') {
+                if (reminder.status !== 'completed') {
                     const reminderTime = new Date(reminder.time);
-                    if (reminderTime <= now && !reminder.alreadyCounted) {
+                    if (reminderTime <= now) {
                         reminder.status = 'forgotten';
-                        const userStats = statistics.find(stat => stat.userId === reminder.userId);
-                        if (userStats) {
-                            userStats.remindersForgotten++;
-                            reminder.alreadyCounted = true; 
-                        }
                     }
                 }
                 
@@ -158,10 +194,6 @@ app.get('/v1/reminders', (req, res) => {
                 const reminderTime = new Date(reminder.time);
                 if (reminderTime <= now) {
                     reminder.status = 'forgotten';
-                    const userStats = statistics.find(stat => stat.userId === reminder.userId);
-                    if (userStats) {
-                        reminder.alreadyCounted = true;
-                    }
                 }
             }
         }
@@ -185,9 +217,8 @@ app.get('/v1/habits/:habitId', (req, res) => {
 app.get('/v1/achievement', (req, res) => {
     res.json(achievement);
 });
-app.get('/v1/progress', (req, res) => {
-    res.json(statistics);
-});
+
+
 
 app.put('/v1/reminders/:reminderId/complete', (req, res) => {
     const reminderId = req.params.reminderId;
