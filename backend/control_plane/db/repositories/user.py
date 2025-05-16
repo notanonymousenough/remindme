@@ -15,7 +15,7 @@ class UserRepository(BaseRepository[User]):
         super().__init__(User)
 
     async def get_user_by_telegram_id(self, telegram_id: str) -> UserSchema | None:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             state = select(self.model).where(
                 and_(
                     getattr(self.model, "telegram_id") == telegram_id
@@ -25,7 +25,7 @@ class UserRepository(BaseRepository[User]):
             return UserSchema.model_validate(result) if result else None
 
     async def create_user_from_telegram_data(self, user: UserTelegramDataSchema) -> UserSchema:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             new_user_from_telegram = {
                 "telegram_id": user.id,
                 "first_name": user.first_name,
@@ -39,7 +39,7 @@ class UserRepository(BaseRepository[User]):
             return UserSchema.model_validate(obj)  # convert db model(obj) to user
 
     async def update_user(self, user_id: UUID, user: dict) -> UserSchema:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             if not (db_user := await session.get(User, user_id)):
                 raise HTTPException(404, "User not found")
 
