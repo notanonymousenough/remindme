@@ -93,10 +93,15 @@
       <div class="col-1 col-sm-2 col-md-2"></div>
       <div class="btn-filitr col-3 col-sm-4 col-md-3 col-lg-2 m-1">
         <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-          Фильтр
+          Сортировка
         </button>
-        <ul id="tagsList" class="list-unstyled mb-3" style="max-height: 150px; overflow-y: auto;"></ul>
+        <ul id="sortDropdown" class="dropdown-menu">
+          <li><button class="dropdown-item" data-sort="asc" type="button">По возрастанию</button></li>
+          <li><button class="dropdown-item" data-sort="desc" type="button">По убыванию</button></li>
+        </ul>
       </div>
+
+      
       <div class="col-1 col-sm-1"></div>
       <div class="btn-teg col-3 col-sm-2 col-md-2 col-lg-1 m-1">
         <form action="">
@@ -141,6 +146,52 @@
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="../js/components/navbar.js"></script>
+  <script>
+let reminders = [];
+
+async function loadReminders() {
+    try {
+        const res = await fetch('/api/reminders');
+        if (!res.ok) throw new Error('Ошибка загрузки');
+        reminders = await res.json();
+        renderReminders(reminders);
+    } catch (e) {
+        document.getElementById('remindersList').innerHTML = `<li>Ошибка: ${e.message}</li>`;
+    }
+}
+
+function renderReminders(list) {
+    const container = document.getElementById('remindersList');
+    container.innerHTML = '';
+    if (list.length === 0) {
+        container.innerHTML = '<li>Напоминания не найдены</li>';
+        return;
+    }
+    list.forEach(reminder => {
+        const li = document.createElement('li');
+        li.textContent = `${reminder.text} — ${new Date(reminder.time).toLocaleString()}`;
+        container.appendChild(li);
+    });
+}
+
+function sortReminders(order) {
+    const sorted = reminders.slice().sort((a, b) => {
+        const dateA = new Date(a.time);
+        const dateB = new Date(b.time);
+        return order === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+    renderReminders(sorted);
+}
+
+document.getElementById('sortDropdown').addEventListener('click', e => {
+    if (e.target.tagName === 'BUTTON') {
+        const order = e.target.getAttribute('data-sort');
+        sortReminders(order);
+    }
+});
+
+loadReminders();
+</script>
   <script>
       const addTegDiv = document.getElementById('add-teg');
       const addBtnDiv = document.getElementById('btn-add');
