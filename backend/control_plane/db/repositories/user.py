@@ -33,11 +33,7 @@ class UserRepository(BaseRepository[User]):
                 "username": user.username,
                 "last_active": user.auth_date,
             }
-            user = {
-                key if key != "id" else "telegram_id": item
-                for key, item in new_user_from_telegram.items()
-                }
-            obj = User(**user)  # convert user to db model(obj)
+            obj = User(**new_user_from_telegram)  # convert user to db model(obj)
             session.add(obj)
             await session.commit()
             return UserSchema.model_validate(obj)  # convert db model(obj) to user
