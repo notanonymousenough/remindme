@@ -24,6 +24,8 @@ async def auth_telegram(
         user_service: Annotated[UserService, Depends(get_user_service)],
         request: UserTelegramDataSchema = Body(...)
 ):
+    # id = telegram_id
+
     if not get_settings().DEBUG and not has_correct_hash(request):  # если ДЕБАГ режим – не проверяем хэш.
         raise HTTPException(401, detail="Invalid Telegram hash")
 

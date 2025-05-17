@@ -7,7 +7,7 @@ from sqlalchemy.future import select
 from ..engine import get_async_session
 from ..models.user import User
 from .base import BaseRepository
-from ...schemas.user import UserSchema
+from ...schemas.user import UserSchema, UserTelegramDataSchema
 
 
 class UserRepository(BaseRepository[User]):
@@ -24,9 +24,16 @@ class UserRepository(BaseRepository[User]):
             result = (await session.execute(state)).scalars().one_or_none()
             return UserSchema.model_validate(result) if result else None
 
-    async def create_user(self, user: dict) -> UserSchema:
+    async def create_user_from_telegram_data(self, user: UserTelegramDataSchema) -> UserSchema:
         async with get_async_session() as session:
-            obj = User(**user)  # convert user to db model(obj)
+            new_user_from_telegram = {
+                "telegram_id": user.id,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "username": user.username,
+                "last_active": user.auth_date,
+            }
+            obj = User(**new_user_from_telegram)  # convert user to db model(obj)
             session.add(obj)
             await session.commit()
             return UserSchema.model_validate(obj)  # convert db model(obj) to user

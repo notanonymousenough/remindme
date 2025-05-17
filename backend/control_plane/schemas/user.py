@@ -51,7 +51,7 @@ class UserAddShema(BaseModel):
 
 
 class UserTelegramDataSchema(BaseModel):
-    id: str = Field(None, description="Телеграм айди")
+    id: str = Field(None, description="Телеграм айди")  # telegram id
     first_name: Optional[str] = Field(None, description="first name")
     last_name: Optional[str] = Field(None, description="last name")
     username: str = Field(..., description="Имя пользователя (логин) для идентификации.")
