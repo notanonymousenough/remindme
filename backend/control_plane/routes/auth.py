@@ -32,7 +32,7 @@ async def auth_telegram(
     user = await user_service.check_user(request)
 
     # получаем jwt_token, учитывая лишь user_id (Telegram ID)
-    exp_date = timeutils.get_utc_now() + get_settings().JWT_TOKEN_LIFETIME
+    exp_date = get_settings().JWT_TOKEN_LIFETIME
     jwt_token = jwt.encode(
         {
             "exp": exp_date,

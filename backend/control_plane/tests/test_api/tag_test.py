@@ -21,7 +21,7 @@ class TestTag:
 
         tag_response = TagSchema.model_validate(response.json())
 
-        async with await session as session:
+        async with session as session:
             tag_from_db = await session.get(Tag, tag_response.id)
             tag_schema_from_db = TagSchema.model_validate(tag_from_db)
 

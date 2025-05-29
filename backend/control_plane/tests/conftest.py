@@ -143,7 +143,7 @@ async def TestAchievement(session, client, auth_user) -> AsyncGenerator[Achievem
         "condition": "active",
         "category": AchievementCategory.SYSTEM
     }
-    async with await session as session:
+    async with session as session:
         achievement_template_model = AchievementTemplate(**achievement_template)
         session.add(achievement_template_model)
         await session.commit()

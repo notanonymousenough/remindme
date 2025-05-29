@@ -52,7 +52,7 @@ class UserRepository(BaseRepository[User]):
             return UserSchema.model_validate(db_user)
 
     async def delete_user(self, user_id: UUID) -> bool:
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             try:
                 user = await session.get(User, user_id)
                 await session.delete(user)

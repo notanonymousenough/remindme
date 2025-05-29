@@ -19,14 +19,16 @@ class ReminderRepository(BaseRepository[Reminder]):
     def __init__(self):
         super().__init__(Reminder)
 
-    async def get_removed(self, user_id: UUID, reminder_statuses: List[ReminderStatus], session=None) -> Sequence[ReminderSchema]:
+    async def get_removed(self, user_id: UUID, reminder_statuses: List[ReminderStatus], session=None) -> Sequence[
+        ReminderSchema]:
         if session:
             return await self._get_removed(user_id, reminder_statuses, session)
         else:
             async with await get_async_session() as session:
                 return await self._get_removed(user_id, reminder_statuses, session)
 
-    async def _get_removed(self, user_id: UUID, reminder_statuses: List[ReminderStatus], session) -> Sequence[ReminderSchema]:
+    async def _get_removed(self, user_id: UUID, reminder_statuses: List[ReminderStatus], session) -> Sequence[
+        ReminderSchema]:
         stmt = select(self.model).where(
             and_(
                 getattr(self.model, "user_id") == user_id,
@@ -39,25 +41,24 @@ class ReminderRepository(BaseRepository[Reminder]):
                               reminder: Union[ReminderEditRequest, ReminderEditStatusRequest],
                               session: AsyncSession = None) -> ReminderSchema:
         if session:
-            return await self._reminder_update(reminder, session)
+            return await self.__reminder_update(reminder, session)
         else:
-            async with await get_async_session() as session:
-                return await self._reminder_update(reminder, session)
+            async with get_async_session() as session:
+                return await self.__reminder_update(reminder, session)
 
-    async def _reminder_update(self,
-                               reminder: Union[ReminderEditRequest, ReminderEditStatusRequest],
-                               session: AsyncSession = None):
+    async def __reminder_update(self,
+                                reminder: Union[ReminderEditRequest, ReminderEditStatusRequest],
+                                session: AsyncSession = None):
         request = reminder.model_dump(exclude_unset=True, exclude_none=True)
 
         reminder_id = request.pop("id")
 
-        async with await get_async_session() as session:
-            # TODO убрать нахуй эти функции и сразу base.update_model вызывать везде
-            response = await self.update_model(model_id=reminder_id, session=session, **request)
-            if not response:
-                raise HTTPException(404, "Wrong entity for reminder_update")
+        # TODO убрать нахуй эти функции и сразу base.update_model вызывать везде
+        response = await self.update_model(model_id=reminder_id, session=session, **request)
+        if not response:
+            raise HTTPException(404, "Wrong entity for reminder_update")
 
-            await session.refresh(response)
+        await session.refresh(response)
 
         return ReminderSchema.model_validate(response)
 
@@ -65,13 +66,12 @@ class ReminderRepository(BaseRepository[Reminder]):
         response = await self.get_models(user_id=user_id, status=ReminderStatus.ACTIVE, removed=False)
         return [ReminderSchema.model_validate(reminder_response) for reminder_response in response]
 
-
     async def reminder_create(self,
                               user_id: UUID,
                               reminder: dict) -> ReminderSchema:
         tag_ids = reminder.pop("tags")
 
-        async with await get_async_session() as session:
+        async with get_async_session() as session:
             response = await self.create(user_id=user_id, session=session, **reminder)
 
             if not response:

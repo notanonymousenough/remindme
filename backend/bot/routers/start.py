@@ -27,8 +27,8 @@ async def start_menu(message: Message, state: FSMContext, client=Annotated[Remin
     keyboard = None
 
     user = await client().user_get(access_token)
-    if user.timezone:
-        await state.update_data(timezone=user.timezone)
+    if user.timezone_offset:
+        await state.update_data(timezone=user.timezone_offset)
         text = "Привет!\n\nУправление ботом через клавиатуру снизу."
     else:
         text = "Привет! Необходимо выбрать свой часовой пояс:"

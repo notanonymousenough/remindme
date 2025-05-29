@@ -42,7 +42,7 @@ class TestUserAPI:
 
         assert response.status_code == 200
 
-        async with await session as session:
+        async with session as session:
             user_from_db = UserSchema.model_validate(await session.get(User, request.id))
         assert user_from_db
         assert user_from_db.id == request.id
@@ -59,6 +59,6 @@ class TestUserAPI:
         response = await client.delete(f"/v1/user/", headers=auth_user)
         assert response.status_code == 200
 
-        async with await session as session:
+        async with session as session:
             deleted_model_from_db = await session.get(User, TestUser.id)
         assert deleted_model_from_db is None

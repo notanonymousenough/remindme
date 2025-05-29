@@ -5,11 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-
-class SexType(str, PyEnum):
-    male = "male"
-    female = "female"
-    other = "other"
+from backend.control_plane.db.models import SexType
 
 
 class UserSchema(BaseModel):
@@ -26,25 +22,12 @@ class UserSchema(BaseModel):
     birth_date: Optional[date] = Field(None, description="Дата рождения пользователя.")
     telegram_id: str = Field(None, description="Телеграм айди")
     calendar_integration_key: Optional[str] = Field(None, description="Calendar integration key")
-    timezone_offset: int = Field(180, description="Часовой пояс пользователя для локализации времени.")
+    timezone_offset: Optional[int] = Field(None, description="Часовой пояс пользователя для локализации времени.")
     level: int = Field(1, description="level user")
     experience: int = Field(0, description="exp user")
     streak: int = Field(0, description="streak user")
     last_active: Optional[datetime] = Field(None,
                                             description="Временная метка последнего действия пользователя в системе.")
-
-    class Config:
-        from_attributes = True
-
-
-class UserAddShema(BaseModel):
-    id: Optional[UUID] = Field(None, description="Уникальный идентификатор пользователя в системе.")
-    username: str = Field(..., description="Имя пользователя (логин) для идентификации.")
-    telegram_id: str = Field(None, description="Телеграм айди")
-    timezone: str = Field("UTC", description="Часовой пояс пользователя для локализации времени.")
-    level: int = Field(1, description="level user")
-    experience: int = Field(0, description="exp user")
-    streak: int = Field(0, description="streak user")
 
     class Config:
         from_attributes = True

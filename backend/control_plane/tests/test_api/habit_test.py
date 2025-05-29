@@ -29,7 +29,7 @@ class TestHabitAPI:
         assert response_data.text == habit_request["text"]
         assert response_data.interval == HabitInterval.WEEKLY
 
-        async with await session as session:
+        async with session as session:
             habit_from_db = await session.get(Habit, response_data.id)
         assert HabitSchemaResponse.model_validate(habit_from_db)
 
@@ -68,7 +68,7 @@ class TestHabitAPI:
         assert new_habit_response.id == habit_to_put.habit_id
         assert new_habit_response.text == habit_to_put.text
 
-        async with await session as session:
+        async with session as session:
             model_from_db = await session.get(Habit, habit_to_put.habit_id)
         assert HabitSchemaResponse.model_validate(model_from_db)
         assert HabitSchemaResponse.model_validate(model_from_db).id == TestHabit.id
@@ -94,7 +94,7 @@ class TestHabitAPI:
         )
         assert response.status_code == 200
 
-        async with await session as session:
+        async with session as session:
             updated_model_habit = await session.get(Habit, TestHabit.id)
             updated_habit = HabitSchemaResponse.model_validate(updated_model_habit)
         assert updated_habit
@@ -114,7 +114,7 @@ class TestHabitAPI:
         )
         assert response.status_code == 200
 
-        async with await session as session:
+        async with session as session:
             habit_model_from_db = await session.get(Habit, TestHabit.id)
         removed_habit = HabitSchemaResponse.model_validate(habit_model_from_db)
         assert removed_habit

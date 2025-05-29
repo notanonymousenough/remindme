@@ -37,7 +37,7 @@ class TestReminderAPI:
         assert data["text"] == reminder_text
         assert data["updated_at"] is not None  # Проверяем, что поле обновилось
 
-        async with await session as session:
+        async with session as session:
             assert ReminderSchema.model_validate(await session.get(Reminder, data["id"]))
             print("\nINFO: ВАЛИДАЦИЯ СХЕМЫ ReminderSchema МОДЕЛИ Reminder ИЗ БД")
 
@@ -86,7 +86,7 @@ class TestReminderAPI:
         #                                                         '+00:00')) > test_reminder.updated_at  # Более точная проверка времени, если часовые пояса ровно обрабатываются
 
         # Проверяем, что данные действительно обновились в базе
-        async with await session as session:
+        async with session as session:
             updated_reminder_in_db = await session.get(Reminder, TestReminder.id)
             assert updated_reminder_in_db is not None
             assert updated_reminder_in_db.text == updated_text
@@ -103,7 +103,7 @@ class TestReminderAPI:
 
         assert response.status_code == 200
 
-        async with await session as session:
+        async with session as session:
             deleted_reminder_in_db = await session.get(Reminder, TestReminder.id)
             assert deleted_reminder_in_db is None
 
@@ -127,16 +127,16 @@ class TestReminderAPI:
         data = response.json()
         print("INFO: СВЕРЯЕМ RESPONSE")
         assert data["id"] == str(TestReminder.id)
-        assert data["status"] == "completed"
+        assert data["status"] == "COMPLETED"
         assert data["updated_at"] is not None  # Поле обновления должно измениться
 
         # Проверяем, что статус действительно обновился в базе
-        async with await session as session:
+        async with session as session:
             print("INFO: ПОЛУЧАЕМ ИЗ БД")
             completed_reminder_in_db = await session.get(Reminder, TestReminder.id)
 
         assert completed_reminder_in_db is not None
-        assert completed_reminder_in_db.status.value == "completed"
+        assert completed_reminder_in_db.status.value == "COMPLETED"
         assert completed_reminder_in_db.updated_at - TestReminder.updated_at
 
     @pytest.mark.asyncio
@@ -171,7 +171,7 @@ class TestReminderAPI:
         assert expect_changed_time == datetime.fromisoformat(data["time"])
 
         # Проверяем, что данные действительно обновились в базе
-        async with await session as session:
+        async with session as session:
             postponed_reminder_in_db = await session.get(Reminder, TestReminder.id)
 
         assert postponed_reminder_in_db is not None
