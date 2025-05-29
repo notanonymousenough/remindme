@@ -16,7 +16,6 @@ from .neuro_image import NeuroImage
 from .quota import Quota, QuotaUsage, ResourceType
 from .role import Role, UserRole
 from .calendar import CalendarIntegration
-from .statistics import UserStatistics
 
 __all__ = [
     'BaseModel',
@@ -41,5 +40,4 @@ __all__ = [
     'Role',
     'UserRole',
     'CalendarIntegration',
-    'UserStatistics',
 ]
